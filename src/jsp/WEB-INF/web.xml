@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+    <!-- precompiled servlets -->
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <servlet-mapping>
+        <servlet-name>net.i2p.zzzot.announce_jsp</servlet-name>
+        <url-pattern>/announce.php</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>net.i2p.zzzot.announce_jsp</servlet-name>
+        <url-pattern>/announce</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>net.i2p.zzzot.announce_jsp</servlet-name>
+        <url-pattern>/a</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>net.i2p.zzzot.scrape_jsp</servlet-name>
+        <url-pattern>/scrape</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>net.i2p.zzzot.scrape_jsp</servlet-name>
+        <url-pattern>/scrape.php</url-pattern>
+    </servlet-mapping>
+
+</web-app>

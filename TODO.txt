@@ -1,0 +1,19 @@
+Configuration file:
+	- interval
+	- clean time
+	- max peers in response
+	- disable full scrapes
+	- disable all scrapes
+	- disable seedless
+
+Stop the cleaner
+
+Throttles:
+	- full scrapes
+	- per-requestor
+
+Bans:
+	- refuse non-GETs
+
+Verifier:
+	- Check dest vs. b32 in header

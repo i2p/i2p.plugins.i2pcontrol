@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project basedir="." default="all" name="zzzot">
+   
+    <target name="all" depends="clean,plugin" />
+
+    <target name="war" >
+        <ant dir="src" target="build" />
+    </target>
+
+    <target name="plugin" depends="war"> 
+        <delete file="plugin/i2ptunnel.config" />
+        <!-- get version number -->
+        <buildnumber file="scripts/build.number" />
+        <property name="release.number" value="0.1" />
+
+        <!-- make the update xpi2p -->
+        <!-- this contains everything except i2ptunnel.config -->
+        <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
+        <copy file="README.txt" todir="plugin/" overwrite="true" />
+        <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
+        <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
+            <arg value="update-only=true" />
+        </exec>
+        <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
+            <arg value="version=${release.number}-b${build.number}" />
+        </exec>
+        <exec executable="pack200" failonerror="true">
+            <arg value="-g" />
+            <arg value="plugin/lib/zzzot.jar.pack" />
+            <arg value="src/build/zzzot.jar" />
+        </exec>
+        <exec executable="pack200" failonerror="true">
+            <arg value="-g" />
+            <arg value="plugin/eepsite/webapps/tracker.war.pack" />
+            <arg value="src/build/tracker.war.jar" />
+        </exec>
+        <exec executable="scripts/makeplugin.sh" failonerror="true" >
+            <arg value="plugin" />
+        </exec>
+        <move file="zzzot.xpi2p" tofile="zzzot-update.xpi2p" overwrite="true" />
+
+        <!-- make the install xpi2p -->
+        <copy file="scripts/i2ptunnel.config" todir="plugin/" overwrite="true" />
+        <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
+        <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
+            <arg value="version=${release.number}-b${build.number}" />
+        </exec>
+        <exec executable="scripts/makeplugin.sh" failonerror="true" >
+            <arg value="plugin" />
+        </exec>
+    </target>
+
+    <target name="distclean" depends="clean" />
+
+    <target name="clean" >
+        <ant dir="src" target="clean" />
+        <delete file="plugin/i2ptunnel.config" />
+        <delete file="plugin/plugin.config" />
+        <delete file="plugin/lib/zzzot.jar.pack" />
+        <delete file="plugin/eepsite/webapps/tracker.war.pack" />
+        <delete file="plugin/LICENSE.txt" />
+        <delete file="plugin/README.txt" />
+        <delete file="zzzot.xpi2p" />
+        <delete file="zzzot-update.xpi2p" />
+    </target>
+
+</project>

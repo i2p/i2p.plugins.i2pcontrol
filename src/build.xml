@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="all" name="i2psnark">
+    <property name="i2pbase" value="../../i2p.i2p"/>
+    <property name="i2plib" value="${i2pbase}/build"/>
+    <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
+    <property name="war" value="../plugin/eepsite/webapps/blog"/>
+    <property name="lib" value="${war}/WEB-INF/lib"/>
+    <path id="cp">
+        <pathelement path="${java.class.path}" />
+        <pathelement location="${i2plib}/i2p.jar" />
+        <pathelement location="${i2plib}/i2ptunnel.jar" />
+        <pathelement location="${i2plib}/i2psnark.jar" />
+        <pathelement location="${i2plib}/routerconsole.jar" />
+        <pathelement location="${jettylib}/ant.jar"/>
+        <pathelement location="${jettylib}/org.mortbay.jetty.jar"/>
+        <pathelement location="${jettylib}/jasper-compiler.jar" />
+        <pathelement location="${jettylib}/jasper-runtime.jar" />
+        <pathelement location="${jettylib}/javax.servlet.jar" />
+        <pathelement location="${jettylib}/commons-logging.jar" />
+        <pathelement location="${jettylib}/commons-el.jar" />
+    </path>
+
+    <target name="all" depends="clean, build" />
+    <target name="build" depends="jar, war" />
+    <target name="builddep">
+    </target>
+    <condition property="depend.available">
+        <typefound name="depend" />
+    </condition>
+    <target name="depend" if="depend.available">
+        <depend
+            cache="build"
+            srcdir="./src" 
+            destdir="./build/obj" >
+            <!-- Depend on classes instead of jars where available -->
+            <classpath>
+                <pathelement location="../../../core/java/build/obj" />
+                <pathelement location="../../ministreaming/java/build/obj" />
+                <pathelement location="../../jetty/jettylib/org.mortbay.jetty.jar" />
+                <pathelement location="../../jetty/jettylib/javax.servlet.jar" />
+            </classpath>
+        </depend>
+    </target>
+
+    <property name="javac.compilerargs" value="" />
+
+    <target name="compile" depends="depend">
+        <mkdir dir="./build" />
+        <mkdir dir="./build/obj" />
+        <javac 
+            srcdir="./java" 
+            debug="true" deprecation="on" source="1.5" target="1.5" 
+            destdir="./build/obj" 
+            classpath="${i2plib}/i2p.jar:${i2plib}/i2ptunnel.jar:${i2plib}/i2psnark.jar:${i2plib}/systray.jar:${i2plib}/org.mortbay.jetty.jar" >
+            <compilerarg line="${javac.compilerargs}" />
+        </javac>
+    </target>
+
+    <target name="jar" depends="builddep, compile">
+        <jar destfile="build/zzzot.jar" basedir="./build/obj" includes="**/*.class" >
+        </jar>
+    </target>    
+
+    <target name="precompilejsp" depends="compile" >
+        <mkdir dir="build" />
+        <mkdir dir="build/war/WEB-INF/classes" />
+        <path id="jspcp">
+            <path refid="cp" />
+            <pathelement location="build/obj" />
+        </path>
+        <java classname="org.apache.jasper.JspC" fork="true" classpathref="jspcp" failonerror="true">
+            <arg value="-d" />
+            <arg value="build/jspjava" />
+            <arg value="-v" />
+            <arg value="-p" />
+            <arg value="net.i2p.zzzot" />
+            <arg value="-webinc" />
+            <arg value="build/web-fragment.xml" />
+            <arg value="-webapp" />
+            <arg value="jsp/" />
+        </java>
+
+        <javac
+            debug="true"
+            deprecation="on"
+            source="1.5" target="1.5" 
+            destdir="build/war/WEB-INF/classes"
+            srcdir="./build/jspjava"
+            includes="**/*.java"
+            classpathref="jspcp"
+            failonerror="true" />
+
+        <copy file="jsp/WEB-INF/web.xml" tofile="build/web.xml" />
+        <loadfile property="jspc.web.fragment" srcfile="build/web-fragment.xml" />
+        <replace file="build/web.xml">
+            <replacefilter token="&lt;!-- precompiled servlets --&gt;" value="${jspc.web.fragment}" />
+        </replace>
+
+    </target>
+
+    <target name="war" depends="precompilejsp"> 
+        <copy file="jsp/index.html" todir="build/war" />
+        <war destfile="build/tracker.war.jar" webxml="build/web.xml">
+            <fileset dir="build/war" />
+        </war>
+    </target>
+    
+    <target name="clean">
+        <delete dir="./build" />
+    </target>
+
+    <target name="cleandep" depends="clean">
+    </target>
+    <target name="distclean" depends="clean">
+    </target>
+</project>

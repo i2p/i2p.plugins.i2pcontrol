@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd">
+
+<!-- ========================================================================= -->
+<!-- This file configures the Jetty server.                                    -->
+<!-- All changes require a restart of I2P.                                     -->
+<!--                                                                           -->
+<!-- Commonly changed settings:                                                -->
+<!--   * host: Change 127.0.0.1 to 0.0.0.0 in the addListener section          -->
+<!--           to access the server directly (bypassing i2p)                   -->
+<!--           from other computers. The included version of Jetty has         -->
+<!--           been patched to allow IPv6 addresses as well,                   -->
+<!--           enclosed in brackets e.g. [::1]                                 -->
+<!--   * port: Default 7662 in the addListener section                         -->
+<!--   * threads: Raise MaxThreads in the addListener section                  -->
+<!--           if you have a high-traffic site and get a lot of warnings.      -->
+<!--                                                                           -->
+<!-- I2P uses Jetty 5.1.15. We have no plans to upgrade to Jetty 6, due to     -->
+<!-- the significant changes in the API. If you need web server features not   -->
+<!-- found in Jetty 5, you may install and run Jetty 6 in a different JVM,     -->
+<!-- or run any other web server such as Apache. If you do run another         -->
+<!-- web server instead, be sure and disable the Jetty 5 server for your       -->
+<!-- eepsite on http://127.0.0.1/configclients.jsp .                           -->
+<!--                                                                           -->
+<!-- Jetty errors and warnings will appear in wrapper.log, check there         -->
+<!-- to diagnose problems.                                                     -->
+<!-- ========================================================================= -->
+
+<!-- =============================================================== -->
+<!-- Configure the Jetty Server                                      -->
+<!-- =============================================================== -->
+<Configure class="org.mortbay.jetty.Server">
+
+  <!-- =============================================================== -->
+  <!-- Configure the Request Listeners                                 -->
+  <!-- =============================================================== -->
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add and configure a HTTP listener to port 8080                  -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Call name="addListener">
+    <Arg>
+      <New class="org.mortbay.http.SocketListener">
+        <Arg>
+          <New class="org.mortbay.util.InetAddrPort">
+            <Set name="host">127.0.0.1</Set>
+            <Set name="port">7662</Set>
+          </New>
+        </Arg>
+        <Set name="MinThreads">3</Set>
+        <Set name="MaxThreads">10</Set>
+        <Set name="MaxIdleTimeMs">60000</Set>
+        <Set name="LowResourcePersistTimeMs">1000</Set>
+        <Set name="ConfidentialPort">8443</Set>
+        <Set name="IntegralPort">8443</Set>
+        <Set name="PoolName">main</Set>
+      </New>
+    </Arg>
+  </Call>
+
+
+  <!-- =============================================================== -->
+  <!-- Configure the Contexts                                          -->
+  <!-- =============================================================== -->
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add a all web application within the webapps directory.         -->
+  <!-- + No virtual host specified                                     -->
+  <!-- + Look in the webapps directory relative to jetty.home or .     -->
+  <!-- + Use the default webdefault.xml in jetty's install             -->
+  <!-- + Upack the war file                                            -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Set name="rootWebApp">root</Set>
+  <Call name="addWebApplications">
+    <Arg></Arg>
+    <Arg>$PLUGIN/eepsite/webapps/</Arg>
+    <Arg></Arg>
+    <Arg type="boolean">true</Arg>
+  </Call>
+
+  <Call name="addContext">
+    <Arg>
+      <New class="org.mortbay.http.HttpContext">
+        <Set name="contextPath">/</Set>
+        <Set name="resourceBase">$PLUGIN/eepsite/docroot</Set>
+        <Call name="addHandler">
+          <Arg>
+            <New class="org.mortbay.http.handler.ResourceHandler">
+              <Set name="redirectWelcome">FALSE</Set>
+	    </New>
+          </Arg>
+        </Call>
+        <!-- This custom handler is like Jetty's ForwardHandler,
+          -  but it passes CGI query parameters through.
+          -  Note that it is somewhat misnamed - it does NOT
+          -  return a 301/302, it handles the request directly.
+          -->
+        <Call name="addHandler">
+          <Arg>
+            <New class="net.i2p.zzzot.QForwardHandler">
+              <Call name="setHandleQueries">
+                <Arg type="boolean">true</Arg>
+              </Call>
+              <!-- Forward announce requests to /tracker/announce.jsp -->
+              <Call name="addForward">
+                <Arg>/a</Arg>
+                <Arg>/tracker/announce.jsp</Arg>
+              </Call>
+              <Call name="addForward">
+                <Arg>/announce</Arg>
+                <Arg>/tracker/announce.jsp</Arg>
+              </Call>
+              <Call name="addForward">
+                <Arg>/announce.jsp</Arg>
+                <Arg>/tracker/announce.jsp</Arg>
+              </Call>
+              <Call name="addForward">
+                <Arg>/announce.php</Arg>
+                <Arg>/tracker/announce.jsp</Arg>
+              </Call>
+              <!-- Forward scrape requests to /tracker/scrape.jsp -->
+              <Call name="addForward">
+                <Arg>/scrape</Arg>
+                <Arg>/tracker/scrape.jsp</Arg>
+              </Call>
+              <Call name="addForward">
+                <Arg>/scrape.jsp</Arg>
+                <Arg>/tracker/scrape.jsp</Arg>
+              </Call>
+              <Call name="addForward">
+                <Arg>/scrape.php</Arg>
+                <Arg>/tracker/scrape.jsp</Arg>
+              </Call>
+              <!-- Forward Seedless requests to /tracker/seedless.jsp -->
+              <Call name="addForward">
+                <Arg>/Seedless</Arg>
+                <Arg>/tracker/seedless.jsp</Arg>
+              </Call>
+              <Call name="addForward">
+                <Arg>/Seedless/</Arg>
+                <Arg>/tracker/seedless.jsp</Arg>
+              </Call>
+              <Call name="addForward">
+                <Arg>/Seedless/index.jsp</Arg>
+                <Arg>/tracker/seedless.jsp</Arg>
+              </Call>
+	    </New>
+          </Arg>
+        </Call>
+      </New>
+    </Arg>
+  </Call>
+  
+  <Call name="addContext">
+    <Arg>/cgi-bin/*</Arg>
+    <Set name="ResourceBase">$PLUGIN/eepsite/cgi-bin</Set>
+    <Call name="addServlet">
+      <Arg>Common Gateway Interface</Arg>
+      <Arg>/</Arg>
+      <Arg>org.mortbay.servlet.CGI</Arg>
+     <Put name="Path">/usr/local/bin:/usr/ucb:/bin:/usr/bin</Put>
+    </Call>
+  </Call>
+
+  <!-- =============================================================== -->
+  <!-- Configure the Request Log                                       -->
+  <!-- =============================================================== -->
+  <Set name="RequestLog">
+    <New class="org.mortbay.http.I2PRequestLog">
+      <Arg>$PLUGIN/eepsite/logs/yyyy_mm_dd.request.log</Arg>
+      <Set name="retainDays">30</Set>
+      <Set name="append">true</Set>
+      <Set name="extended">false</Set>
+      <Set name="buffered">false</Set>
+      <Set name="LogTimeZone">GMT</Set>
+    </New>
+  </Set>
+
+  <!-- =============================================================== -->
+  <!-- Configure the Other Server Options                              -->
+  <!-- =============================================================== -->
+  <Set name="requestsPerGC">2000</Set>
+  <Set name="statsOn">false</Set>
+
+</Configure>
