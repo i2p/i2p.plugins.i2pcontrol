@@ -145,6 +145,10 @@
                 <Arg>/Seedless/index.jsp</Arg>
                 <Arg>/tracker/seedless.jsp</Arg>
               </Call>
+              <Call name="addForward">
+                <Arg>/Seedless/seedless</Arg>
+                <Arg>/tracker/seedless.jsp</Arg>
+              </Call>
 	    </New>
           </Arg>
         </Call>

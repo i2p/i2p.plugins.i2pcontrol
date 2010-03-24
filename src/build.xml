@@ -24,27 +24,10 @@
     <target name="build" depends="jar, war" />
     <target name="builddep">
     </target>
-    <condition property="depend.available">
-        <typefound name="depend" />
-    </condition>
-    <target name="depend" if="depend.available">
-        <depend
-            cache="build"
-            srcdir="./src" 
-            destdir="./build/obj" >
-            <!-- Depend on classes instead of jars where available -->
-            <classpath>
-                <pathelement location="../../../core/java/build/obj" />
-                <pathelement location="../../ministreaming/java/build/obj" />
-                <pathelement location="../../jetty/jettylib/org.mortbay.jetty.jar" />
-                <pathelement location="../../jetty/jettylib/javax.servlet.jar" />
-            </classpath>
-        </depend>
-    </target>
 
     <property name="javac.compilerargs" value="" />
 
-    <target name="compile" depends="depend">
+    <target name="compile">
         <mkdir dir="./build" />
         <mkdir dir="./build/obj" />
         <javac 

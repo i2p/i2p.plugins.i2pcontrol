@@ -1,4 +1,4 @@
-<%@page import="net.i2p.crypto.SHA256Generator" %><%@page import="net.i2p.data.Base32" %><%@page import="net.i2p.data.Base64" %><%@page import="net.i2p.zzzot.*" %><%
+<%@page import="net.i2p.crypto.SHA256Generator" %><%@page import="net.i2p.data.Base32" %><%@page import="net.i2p.data.Base64" %><%@page import="net.i2p.data.DataHelper" %><%@page import="net.i2p.zzzot.*" %><%
 
 /*
  *  Copyright 2010 zzz (zzz@mail.i2p)
@@ -18,7 +18,13 @@
  */
 
 	String req = request.getHeader("X-Seedless");
+	// extension for ease of eepget and browser
+	if (req == null)
+		req = request.getParameter("X-Seedless");
+	// we should really put in our own b32
 	String me = request.getHeader("Host");
+	if (me == null)
+		me = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b32.i2p";
 	// unused, we don't accept announces
 	String him = request.getHeader("X-I2P-DestB32");
         String xff = request.getHeader("X-Forwarded-For");
@@ -34,13 +40,18 @@
 	        response.setStatus(403, msg);
 		out.println(msg);
 	} else if (req == null) {
-		out.println("seedless server");
-	} else if (req.startsWith("announce ")) {
-		out.println("");
-	} else if (req.startsWith("locate ") && me != null) {
+		// probe
+		out.println("tracker " + US_MINUTES);
+		out.println("eepsite " + US_MINUTES);
+		out.println("seedless " + US_MINUTES);
+	} else if (req.startsWith("announce")) {
+		out.println("thanks");
+	} else if (req.startsWith("locate")) {
 		// ignore the search string, if any, in the request
 		// us
-		out.println(Base64.encode(me + ' ' + US_MINUTES + " bt-tracker"));
+		out.println(Base64.encode(me + ' ' + US_MINUTES + " tracker"));
+		out.println(Base64.encode(me + ' ' + US_MINUTES + " seedless"));
+		out.println(Base64.encode(me + ' ' + US_MINUTES + " eepsite"));
 		// all the peers
 		Torrents torrents = ZzzOTController.getTorrents();
 		for (InfoHash ihash : torrents.keySet()) {
@@ -59,16 +70,17 @@
 					role = " bt-seed";
 				else
 					role = " bt-leech";
-				// spg wants UTF-8 but all we have is binary data, sorry
-				String ihs = new String(ihash.getData(), "ISO-8859-1");
-				String ids = new String((byte[])p.get("peer id"), "ISO-8859-1");
+				// spg wants UTF-8 but all we have is binary data, so hex it
+				String ihs = DataHelper.toHexString(ihash.getData());
+				String ids = DataHelper.toHexString((byte[])p.get("peer id"));
 				out.println(Base64.encode(b32 + PEER_MINUTES + role +
 				                          " info_hash=" + ihs +
-				                          " peer_id=" + ids));
+				                          ";peer_id=" + ids));
 			}
 		}
 	} else {
-		out.println("2");
+		// error code
+		out.println("SC_NOT_ACCEPTABLE");
 	}
 
 %>
