@@ -33,11 +33,12 @@
         response.setHeader("Pragma", "no-cache");
 	String info_hash = request.getParameter("info_hash");
         String xff = request.getHeader("X-Forwarded-For");
+        String xfs = request.getHeader("X-Forwarded-Server");
 
 	boolean fail = false;
 	String msg = "bad";
 
-	if (xff != null) {
+	if (xff != null || xfs != null) {
 		fail = true;
 		msg = "Non-I2P access denied";
 	        response.setStatus(403, msg);

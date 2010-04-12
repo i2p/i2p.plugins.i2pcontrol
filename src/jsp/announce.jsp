@@ -50,11 +50,12 @@
 	// ignored, use someday to enforce destination
         String him = request.getHeader("X-I2P-DestB32");
         String xff = request.getHeader("X-Forwarded-For");
+        String xfs = request.getHeader("X-Forwarded-Server");
 
 	boolean fail = false;
 	String msg = "bad announce";
 
-	if (xff != null) {
+	if (xff != null || xfs != null) {
 		fail = true;
 		msg = "Non-I2P access denied";
 	        response.setStatus(403, msg);

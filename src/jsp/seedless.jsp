@@ -28,6 +28,7 @@
 	// unused, we don't accept announces
 	String him = request.getHeader("X-I2P-DestB32");
         String xff = request.getHeader("X-Forwarded-For");
+        String xfs = request.getHeader("X-Forwarded-Server");
 
 	response.setContentType("text/plain");
 	response.setHeader("X-Seedless", me);
@@ -35,7 +36,7 @@
 	final int US_MINUTES = 360;
 	final int PEER_MINUTES = 60;
 
-	if (xff != null) {
+	if (xff != null || xfs != null) {
 		String msg = "Non-I2P access denied";
 	        response.setStatus(403, msg);
 		out.println(msg);
