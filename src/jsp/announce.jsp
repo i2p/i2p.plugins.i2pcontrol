@@ -28,6 +28,7 @@
 	// would be nice to make these configurable
 	final int MAX_RESPONSES = 25;
 	final int INTERVAL = 27*60;
+	final boolean ALLOW_IP_MISMATCH = false;
 
 	// so the chars will turn into bytes correctly
 	request.setCharacterEncoding("ISO-8859-1");
@@ -47,8 +48,8 @@
 	String event = request.getParameter("event");
 	String ip = request.getParameter("ip");
 	String numwant = request.getParameter("numwant");
-	// ignored, use someday to enforce destination
-        String him = request.getHeader("X-I2P-DestB32");
+	// use to enforce destination
+        String him = request.getHeader("X-I2P-DestB64");
         String xff = request.getHeader("X-Forwarded-For");
         String xfs = request.getHeader("X-Forwarded-Server");
 
@@ -135,6 +136,14 @@
 			want = 0;
 	} catch (NumberFormatException nfe) {};
 
+	// spoof check
+	// if him == null, we are not using the I2P HTTP server tunnel, or something is wrong
+	boolean matchIP = ALLOW_IP_MISMATCH || him == null || ip.equals(him);
+	if (want <= 0 && (!matchIP) && !fail) {
+		fail = true;
+		msg = "ip mismatch";
+	}
+
 	long left = 0;
 	if (!"completed".equals(event)) {
 		try {
@@ -150,7 +159,7 @@
 		m.put("failure reason", msg);		
 	} else if ("stopped".equals(event)) {
 		Peers peers = torrents.get(ih);
-		if (peers != null)
+		if (matchIP && peers != null)
 			peers.remove(pid);
 		m.put("interval", Integer.valueOf(INTERVAL));
 	} else {
@@ -166,11 +175,16 @@
 		Peer p = peers.get(pid);
 		if (p == null) {
 			p = new Peer(pid.getData(), d);
-			Peer p2 = peers.putIfAbsent(pid, p);
-			if (p2 != null)
-				p = p2;
+			// don't add if spoofed
+			if (matchIP) {
+				Peer p2 = peers.putIfAbsent(pid, p);
+				if (p2 != null)
+					p = p2;
+			}
 		}
-		p.setLeft(left);
+		// don't update if spoofed
+		if (matchIP)
+			p.setLeft(left);
 
 		m.put("interval", Integer.valueOf(INTERVAL));
 		int size = peers.size();
