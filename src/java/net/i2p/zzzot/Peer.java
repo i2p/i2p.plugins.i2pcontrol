@@ -20,7 +20,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.i2p.crypto.SHA256Generator;
+import net.i2p.data.Base64;
 import net.i2p.data.Destination;
+import net.i2p.data.Hash;
 import net.i2p.util.SimpleScheduler;
 import net.i2p.util.SimpleTimer;
 
@@ -68,6 +71,17 @@ public class Peer extends HashMap<String, Object> {
 
     public long lastSeen() {
         return lastSeen;
+    }
+
+    /** convert b64.i2p to a Hash, then to a binary string */
+    /* or should we just store it in the constructor? cache it? */
+    public String getHash() {
+        String ip = (String) get("ip");
+        byte[] b = Base64.decode(ip.substring(0, ip.length() - 4));
+        Hash h = SHA256Generator.getInstance().calculateHash(b);
+        try {
+            return new String(h.getData(), "ISO-8859-1");
+        } catch (UnsupportedEncodingException uee) { return null; }
     }
 
     private static class Cleaner implements SimpleTimer.TimedEvent {

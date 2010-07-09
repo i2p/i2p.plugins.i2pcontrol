@@ -29,6 +29,7 @@
 	final int MAX_RESPONSES = 25;
 	final int INTERVAL = 27*60;
 	final boolean ALLOW_IP_MISMATCH = false;
+	final boolean ALLOW_COMPACT_RESPONSE = true;
 
 	// so the chars will turn into bytes correctly
 	request.setCharacterEncoding("ISO-8859-1");
@@ -48,6 +49,7 @@
 	String event = request.getParameter("event");
 	String ip = request.getParameter("ip");
 	String numwant = request.getParameter("numwant");
+	boolean compact = ALLOW_COMPACT_RESPONSE && request.getParameter("compact") != null;
 	// use to enforce destination
         String him = request.getHeader("X-I2P-DestB64");
         String xff = request.getHeader("X-Forwarded-For");
@@ -138,7 +140,7 @@
 
 	// spoof check
 	// if him == null, we are not using the I2P HTTP server tunnel, or something is wrong
-	boolean matchIP = ALLOW_IP_MISMATCH || him == null || ip.equals(him);
+	boolean matchIP = ALLOW_IP_MISMATCH || him == null || ip == null || ip.equals(him);
 	if (want <= 0 && (!matchIP) && !fail) {
 		fail = true;
 		msg = "ip mismatch";
@@ -199,7 +201,14 @@
 			peerlist.remove(p);   // them
 			if (want < size - 1) {
 				Collections.shuffle(peerlist);
-				m.put("peers", peerlist.subList(0, want));
+				peerlist = peerlist.subList(0, want);
+			}
+			if (compact) {
+				List<String> peerhashes = new ArrayList(peerlist.size());
+				for (Peer pe : peerlist) {
+					peerhashes.add(pe.getHash());
+				}
+				m.put("peers", peerhashes);
 			} else {
 				m.put("peers", peerlist);
 			}
