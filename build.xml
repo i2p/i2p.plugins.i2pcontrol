@@ -11,7 +11,7 @@
         <delete file="plugin/i2ptunnel.config" />
         <!-- get version number -->
         <buildnumber file="scripts/build.number" />
-        <property name="release.number" value="0.4" />
+        <property name="release.number" value="0.5" />
 
         <!-- make the update xpi2p -->
         <!-- this contains everything except i2ptunnel.config -->

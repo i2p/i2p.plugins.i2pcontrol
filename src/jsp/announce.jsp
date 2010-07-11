@@ -204,10 +204,15 @@
 				peerlist = peerlist.subList(0, want);
 			}
 			if (compact) {
-				List<String> peerhashes = new ArrayList(peerlist.size());
-				for (Peer pe : peerlist) {
-					peerhashes.add(pe.getHash());
-				}
+				// old experimental way - list of hashes
+				//List<String> peerhashes = new ArrayList(peerlist.size());
+				//for (Peer pe : peerlist) {
+				//	peerhashes.add(pe.getHash());
+				//}
+				// new way - one big string
+				byte[] peerhashes = new byte[32 * peerlist.size()];
+				for (int i = 0; i < peerlist.size(); i++)
+					System.arraycopy(peerlist.get(i).getHash().getBytes("ISO-8859-1"), 0, peerhashes, i * 32, 32);
 				m.put("peers", peerhashes);
 			} else {
 				m.put("peers", peerlist);
