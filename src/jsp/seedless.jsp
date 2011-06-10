@@ -54,7 +54,7 @@
 		out.println(Base64.encode(me + ' ' + US_MINUTES + " seedless"));
 		out.println(Base64.encode(me + ' ' + US_MINUTES + " eepsite"));
 		// all the peers
-		Torrents torrents = ZzzOTController.getTorrents();
+		Torrents torrents = I2PControlController.getTorrents();
 		for (InfoHash ihash : torrents.keySet()) {
 			Peers peers = torrents.get(ihash);
 			if (peers == null)

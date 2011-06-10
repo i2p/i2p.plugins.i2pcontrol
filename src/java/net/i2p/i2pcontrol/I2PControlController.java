@@ -47,8 +47,8 @@ import org.mortbay.jetty.Server;
  *
  * @author zzz
  */
-public class ZzzOTController {
-    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(ZzzOTController.class);
+public class I2PControlController {
+    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
     private static Server _server;
     private static TunnelController _tunnel;
     private static ZzzOT _zzzot;

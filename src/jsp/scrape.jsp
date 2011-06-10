@@ -56,7 +56,7 @@
 		}
 	}
 
-        Torrents torrents = ZzzOTController.getTorrents();
+        Torrents torrents = I2PControlController.getTorrents();
 
 	// build 3-level dictionary
 	Map<String, Object> m = new HashMap();

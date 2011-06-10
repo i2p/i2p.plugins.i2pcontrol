@@ -155,7 +155,7 @@
 		} catch (NumberFormatException nfe) {};
 	}
 
- 	Torrents torrents = ZzzOTController.getTorrents();
+ 	Torrents torrents = I2PControlController.getTorrents();
 	Map<String, Object> m = new HashMap();
 	if (fail) {
 		m.put("failure reason", msg);		
