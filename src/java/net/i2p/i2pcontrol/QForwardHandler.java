@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package net.i2p.zzzot;
+package net.i2p.i2pcontrol;
 
 import java.io.IOException;
 import java.util.Map;

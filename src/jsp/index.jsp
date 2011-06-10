@@ -1,4 +1,4 @@
-<%@page import="net.i2p.zzzot.ZzzOTController" %>
+<%@page import="net.i2p.i2pcontrol.ZzzOTController" %>
 <html>
 <head>
 <title>I2PControl - Remote Control Server</title>

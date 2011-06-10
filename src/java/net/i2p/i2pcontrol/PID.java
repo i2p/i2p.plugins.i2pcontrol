@@ -1,4 +1,4 @@
-package net.i2p.zzzot;
+package net.i2p.i2pcontrol;
 /*
  *  Copyright 2010 zzz (zzz@mail.i2p)
  *
@@ -16,27 +16,22 @@ package net.i2p.zzzot;
  *
  */
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.UnsupportedEncodingException;
+
+import net.i2p.data.ByteArray;
 
 /**
- *  All the peers for a single torrent
+ *  A 20-byte peer ID
  */
-public class Peers extends ConcurrentHashMap<PID, Peer> {
+public class PID extends ByteArray {
 
-    public Peers() {
-        super();
+    public PID(String data) throws UnsupportedEncodingException {
+        this(data.getBytes("ISO-8859-1"));
     }
 
-    public int countSeeds() {
-        int rv = 0;
-        for (Peer p : values()) {
-             if (p.isSeed())
-                 rv++;
-        }
-        return rv;
-    }
-
-    public int countLeeches() {
-        return size() - countSeeds();
+    public PID(byte[] data) {
+        super(data);
+        if (data.length != 20)
+            throw new IllegalArgumentException("Bad peer ID length: " + data.length);
     }
 }

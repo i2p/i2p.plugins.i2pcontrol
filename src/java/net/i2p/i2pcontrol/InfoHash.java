@@ -1,4 +1,4 @@
-package net.i2p.zzzot;
+package net.i2p.i2pcontrol;
 /*
  *  Copyright 2010 zzz (zzz@mail.i2p)
  *
@@ -21,17 +21,17 @@ import java.io.UnsupportedEncodingException;
 import net.i2p.data.ByteArray;
 
 /**
- *  A 20-byte peer ID
+ *  A 20-byte SHA1 info hash
  */
-public class PID extends ByteArray {
+public class InfoHash extends ByteArray {
 
-    public PID(String data) throws UnsupportedEncodingException {
+    public InfoHash(String data) throws UnsupportedEncodingException {
         this(data.getBytes("ISO-8859-1"));
     }
 
-    public PID(byte[] data) {
+    public InfoHash(byte[] data) {
         super(data);
         if (data.length != 20)
-            throw new IllegalArgumentException("Bad peer ID length: " + data.length);
+            throw new IllegalArgumentException("Bad infohash length: " + data.length);
     }
 }

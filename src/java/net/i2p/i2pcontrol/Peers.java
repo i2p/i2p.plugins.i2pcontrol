@@ -1,4 +1,4 @@
-package net.i2p.zzzot;
+package net.i2p.i2pcontrol;
 /*
  *  Copyright 2010 zzz (zzz@mail.i2p)
  *
@@ -16,22 +16,27 @@ package net.i2p.zzzot;
  *
  */
 
-import java.io.UnsupportedEncodingException;
-
-import net.i2p.data.ByteArray;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *  A 20-byte SHA1 info hash
+ *  All the peers for a single torrent
  */
-public class InfoHash extends ByteArray {
+public class Peers extends ConcurrentHashMap<PID, Peer> {
 
-    public InfoHash(String data) throws UnsupportedEncodingException {
-        this(data.getBytes("ISO-8859-1"));
+    public Peers() {
+        super();
     }
 
-    public InfoHash(byte[] data) {
-        super(data);
-        if (data.length != 20)
-            throw new IllegalArgumentException("Bad infohash length: " + data.length);
+    public int countSeeds() {
+        int rv = 0;
+        for (Peer p : values()) {
+             if (p.isSeed())
+                 rv++;
+        }
+        return rv;
+    }
+
+    public int countLeeches() {
+        return size() - countSeeds();
     }
 }

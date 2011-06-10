@@ -1,4 +1,4 @@
-<%@page import="java.util.ArrayList" %><%@page import="java.util.List" %><%@page import="java.util.Map" %><%@page import="java.util.HashMap" %><%@page import="net.i2p.zzzot.*" %><%@page import="org.klomp.snark.bencode.BEncoder" %><%
+<%@page import="java.util.ArrayList" %><%@page import="java.util.List" %><%@page import="java.util.Map" %><%@page import="java.util.HashMap" %><%@page import="net.i2p.i2pcontrol.*" %><%@page import="org.klomp.snark.bencode.BEncoder" %><%
 
 /*
  *  Above one-liner is so there is no whitespace -> IllegalStateException

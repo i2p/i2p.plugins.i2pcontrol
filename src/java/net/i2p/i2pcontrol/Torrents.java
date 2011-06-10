@@ -1,4 +1,4 @@
-package net.i2p.zzzot;
+package net.i2p.i2pcontrol;
 /*
  *  Copyright 2010 zzz (zzz@mail.i2p)
  *
