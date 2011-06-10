@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project basedir="." default="all" name="zzzot">
+<project basedir="." default="all" name="I2PControl">
    
     <target name="all" depends="clean,plugin" />
 
@@ -11,7 +11,7 @@
         <delete file="plugin/i2ptunnel.config" />
         <!-- get version number -->
         <buildnumber file="scripts/build.number" />
-        <property name="release.number" value="0.5" />
+        <property name="release.number" value="0.0" />
 
         <!-- make the update xpi2p -->
         <!-- this contains everything except i2ptunnel.config -->
@@ -26,8 +26,8 @@
         </exec>
         <exec executable="pack200" failonerror="true">
             <arg value="-g" />
-            <arg value="plugin/lib/zzzot.jar.pack" />
-            <arg value="src/build/zzzot.jar" />
+            <arg value="plugin/lib/I2PControl.jar.pack" />
+            <arg value="src/build/I2PControl.jar" />
         </exec>
         <exec executable="pack200" failonerror="true">
             <arg value="-g" />
@@ -37,7 +37,7 @@
         <exec executable="scripts/makeplugin.sh" failonerror="true" >
             <arg value="plugin" />
         </exec>
-        <move file="zzzot.xpi2p" tofile="zzzot-update.xpi2p" overwrite="true" />
+        <move file="I2PControl.xpi2p" tofile="I2PControl-update.xpi2p" overwrite="true" />
 
         <!-- make the install xpi2p -->
         <copy file="scripts/i2ptunnel.config" todir="plugin/" overwrite="true" />
@@ -56,12 +56,12 @@
         <ant dir="src" target="clean" />
         <delete file="plugin/i2ptunnel.config" />
         <delete file="plugin/plugin.config" />
-        <delete file="plugin/lib/zzzot.jar.pack" />
+        <delete file="plugin/lib/I2PControl.jar.pack" />
         <delete file="plugin/eepsite/webapps/tracker.war.pack" />
         <delete file="plugin/LICENSE.txt" />
         <delete file="plugin/README.txt" />
-        <delete file="zzzot.xpi2p" />
-        <delete file="zzzot-update.xpi2p" />
+        <delete file="I2PControl.xpi2p" />
+        <delete file="I2PControl-update.xpi2p" />
     </target>
 
 </project>

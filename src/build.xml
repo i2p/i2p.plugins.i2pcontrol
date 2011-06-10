@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="all" name="i2psnark">
+<project basedir="." default="all" name="I2PControl">
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
     <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
@@ -39,7 +39,7 @@
     </target>
 
     <target name="jar" depends="builddep, compile">
-        <jar destfile="build/zzzot.jar" basedir="./build/obj" includes="**/*.class" >
+        <jar destfile="build/I2PControl.jar" basedir="./build/obj" includes="**/*.class" >
         </jar>
     </target>    
 
@@ -55,7 +55,7 @@
             <arg value="build/jspjava" />
             <arg value="-v" />
             <arg value="-p" />
-            <arg value="net.i2p.zzzot" />
+            <arg value="net.i2p.I2PControl" />
             <arg value="-webinc" />
             <arg value="build/web-fragment.xml" />
             <arg value="-webapp" />
