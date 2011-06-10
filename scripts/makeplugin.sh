@@ -10,7 +10,7 @@ PUBKEYDIR=$HOME/.i2p-plugin-keys
 PUBKEYFILE=$PUBKEYDIR/plugin-public-signing.key
 PRIVKEYFILE=$PUBKEYDIR/plugin-private-signing.key
 B64KEYFILE=$PUBKEYDIR/plugin-public-signing.txt
-export I2P=../i2p/pkg-temp
+export I2P=../i2p.i2p/pkg-temp
 
 PLUGINDIR=${1:-plugin}
 
