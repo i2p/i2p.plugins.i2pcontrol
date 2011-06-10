@@ -1,10 +1,10 @@
 <%@page import="net.i2p.zzzot.ZzzOTController" %>
 <html>
 <head>
-<title>ZzzOT</title>
+<title>I2PControl - Remote Control Server</title>
 </head><body style="background-color: #000; color: #c30; font-size: 400%;">
 <p>
-zzzot
+I2PControl
 <p>
 <table cellspacing="8">
 <tr><td>Torrents:<td align="right"><%=ZzzOTController.getTorrents().size()%>
