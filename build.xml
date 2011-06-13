@@ -17,6 +17,7 @@
         <!-- this contains everything except i2ptunnel.config -->
         <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
         <copy file="README.txt" todir="plugin/" overwrite="true" />
+		<copy file="scripts/webapps.config" todir="plugin/console/" overwrite="true" />
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="update-only=true" />
@@ -25,15 +26,24 @@
             <arg value="version=${release.number}-b${build.number}" />
         </exec>
         <exec executable="pack200" failonerror="true">
-            <arg value="-g" />
+            <arg value="--no-gzip"/>
+            <arg value="--effort=9"/>
             <arg value="plugin/lib/I2PControl.jar.pack" />
             <arg value="src/build/I2PControl.jar" />
         </exec>
         <exec executable="pack200" failonerror="true">
+            <arg value="--no-gzip"/>
+            <arg value="--effort=9"/>
+            <arg value="plugin/console/webapps/i2pcontrol.war.pack" />
+            <arg value="src/build/tracker.war.jar" />
+        </exec>
+        <!--
+		<exec executable="pack200" failonerror="true">
             <arg value="-g" />
             <arg value="plugin/eepsite/webapps/tracker.war.pack" />
             <arg value="src/build/tracker.war.jar" />
         </exec>
+		-->
         <exec executable="scripts/makeplugin.sh" failonerror="true" >
             <arg value="plugin" />
         </exec>
@@ -56,6 +66,7 @@
         <ant dir="src" target="clean" />
         <delete file="plugin/i2ptunnel.config" />
         <delete file="plugin/plugin.config" />
+		<delete file="plugin/console/webapp.config" />
         <delete file="plugin/lib/I2PControl.jar.pack" />
         <delete file="plugin/eepsite/webapps/tracker.war.pack" />
         <delete file="plugin/LICENSE.txt" />

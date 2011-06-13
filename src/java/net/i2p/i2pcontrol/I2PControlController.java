@@ -81,7 +81,9 @@ public class I2PControlController {
         // We create the private key file in advance, so that we can
         // create the help.html file from the templates
         // without waiting for i2ptunnel to create it AND build the tunnels before returning.
-        Destination dest = null;
+		_log.error("NOTICE: I2PControl started");		
+		/*        
+		Destination dest = null;
         File key = new File(pluginDir, "eepPriv.dat");
         if (!key.exists()) {
             PrivateKeyFile pkf = new PrivateKeyFile(new File(pluginDir, "eepPriv.dat"));
@@ -98,8 +100,9 @@ public class I2PControlController {
             _log.error("NOTICE: ZzzOT: Your base 32 address is " + b32);
             _log.error("NOTICE: ZzzOT: Your base 64 address is " + b64);
         }
-        startJetty(pluginDir, dest);
-        startI2PTunnel(pluginDir, dest);
+		*/
+        // Don't startJetty(pluginDir, dest);
+        // Don't startI2PTunnel(pluginDir, dest);
     }
 
 

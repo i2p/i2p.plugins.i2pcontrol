@@ -80,8 +80,8 @@ B64KEY=`cat $B64KEYFILE`
 echo "key=$B64KEY" >> $PCT || exit 1
 mv $PCT $PC
 
-# zip it
-zip -r $OPWD/plugin.zip * -x \*.jar || exit 1
+# zip it at compression level 9
+zip -9 -r $OPWD/plugin.zip * -x \*.jar || exit 1
 
 # get the version and use it for the sud header
 VERSION=`grep '^version=' $PC | cut -f 2 -d '='`
