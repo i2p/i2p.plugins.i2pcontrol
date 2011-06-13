@@ -8,7 +8,6 @@
         <pathelement path="${java.class.path}" />
         <pathelement location="${i2plib}/i2p.jar" />
         <pathelement location="${i2plib}/i2ptunnel.jar" />
-        <pathelement location="${i2plib}/i2psnark.jar" />
         <pathelement location="${jettylib}/ant.jar"/>
         <pathelement location="${jettylib}/org.mortbay.jetty.jar"/>
         <pathelement location="${jettylib}/jasper-compiler.jar" />
@@ -32,7 +31,7 @@
             srcdir="./java" 
             debug="true" deprecation="on" source="1.5" target="1.5" 
             destdir="./build/obj" 
-            classpath="${i2plib}/i2p.jar:${i2plib}/i2ptunnel.jar:${i2plib}/i2psnark.jar:${i2plib}/systray.jar:${i2plib}/org.mortbay.jetty.jar" >
+            classpath="${i2plib}/i2p.jar:${jettylib}/javax.servlet.jar" >
             <compilerarg line="${javac.compilerargs}" />
         </javac>
     </target>

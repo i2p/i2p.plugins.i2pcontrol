@@ -7,8 +7,8 @@
 I2PControl
 </h1>
 <table cellspacing="8">
-<tr><td>Torrents:<td align="right"><%=I2PControlController.getTorrents().size()%>
-<tr><td>Peers:<td align="right"><%=I2PControlController.getTorrents().countPeers()%>
+<tr><td>Status:<td align="right"><%=I2PControlController.getTestString()%>
+<tr><td>Status again:<td align="right"><%=I2PControlController.getTestString()%>
 </table>
 </body>
 </html>
