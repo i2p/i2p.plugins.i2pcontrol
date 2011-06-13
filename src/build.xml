@@ -3,10 +3,7 @@
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
     <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
-    <!--
-    <property name="war" value="../plugin/eepsite/webapps/blog"/>
-    <property name="lib" value="${war}/WEB-INF/lib"/>
-	-->
+
     <path id="cp">
         <pathelement path="${java.class.path}" />
         <pathelement location="${i2plib}/i2p.jar" />
