@@ -3,19 +3,8 @@
    
     <target name="all" depends="clean,plugin" />
 
-    <target name="precompilejsp">
-        <copy file="WebContent/WEB-INF/web.xml" tofile="ant_build/web.xml" />
-    </target>
-
-    <target name="war" depends="precompilejsp">
+    <target name="war">
         <ant dir="src" target="build" />
-		
-		<!--
-        <mkdir dir="ant_build" />
-        <war destfile="snowman.war.jar" webxml="ant_build/web.xml">
-            <fileset dir="WebContent" includes="index.html"/>
-        </war>
-		-->
     </target>
 
     <target name="plugin" depends="war"> 
