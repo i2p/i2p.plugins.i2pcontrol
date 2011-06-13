@@ -6,4 +6,15 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 
+    <servlet>
+        <servlet-name>index</servlet-name>
+        <servlet-class>net.i2p.i2pcontrol.index_jsp</servlet-class>
+    </servlet>
+	
+    <servlet-mapping>
+        <servlet-name>index</servlet-name>
+        <url-pattern>/test</url-pattern>
+    </servlet-mapping>
+
+
 </web-app>

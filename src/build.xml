@@ -3,8 +3,10 @@
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
     <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
+    <!--
     <property name="war" value="../plugin/eepsite/webapps/blog"/>
     <property name="lib" value="${war}/WEB-INF/lib"/>
+	-->
     <path id="cp">
         <pathelement path="${java.class.path}" />
         <pathelement location="${i2plib}/i2p.jar" />
@@ -82,7 +84,7 @@
 
     <target name="war" depends="precompilejsp"> 
         <copy file="jsp/index.html" todir="build/war" />
-        <war destfile="build/tracker.war.jar" webxml="build/web.xml">
+        <war destfile="build/I2PControl.war.jar" webxml="build/web.xml">
             <fileset dir="build/war" />
         </war>
     </target>

@@ -9,11 +9,13 @@
 
     <target name="war" depends="precompilejsp">
         <ant dir="src" target="build" />
-
+		
+		<!--
         <mkdir dir="ant_build" />
         <war destfile="snowman.war.jar" webxml="ant_build/web.xml">
             <fileset dir="WebContent" includes="index.html"/>
         </war>
+		-->
     </target>
 
     <target name="plugin" depends="war"> 
@@ -44,7 +46,7 @@
             <arg value="--no-gzip"/>
             <arg value="--effort=9"/>
             <arg value="plugin/console/webapps/I2PControl.war.pack" />
-            <arg value="snowman.war.jar" />
+            <arg value="src/build/I2PControl.war.jar" />
         </exec>
         <exec executable="scripts/makeplugin.sh" failonerror="true" >
             <arg value="plugin" />
