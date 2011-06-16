@@ -31,7 +31,7 @@
             srcdir="./java" 
             debug="true" deprecation="on" source="1.5" target="1.5" 
             destdir="./build/obj" 
-            classpath="${i2plib}/i2p.jar:${jettylib}/javax.servlet.jar" >
+            classpath="${i2plib}/i2p.jar:${jettylib}/javax.servlet.jar:${i2plib}/org.mortbay.jetty.jar" >
             <compilerarg line="${javac.compilerargs}" />
         </javac>
     </target>
