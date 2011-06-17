@@ -16,6 +16,7 @@ package net.i2p.i2pcontrol;
  *
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -68,17 +69,17 @@ public class I2PControlController{
 
 
     private static void start(String args[]) {
-        /*File pluginDir = new File(args[1]);
-        if (!pluginDir.exists())
-            throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
-        */
+        //File pluginDir = new File(args[1]);
+        //if (!pluginDir.exists())
+        //    throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
+        
         _server = new Server();
         try {
 			_server.addListener(Settings.getListenIP() +":" +Settings.getListenPort());
 	        ServletHttpContext context = (ServletHttpContext) _server.getContext("/");
-			context.addServlet("/", "net.i2p.i2pcontrol.JSONRPCServlet");
-
-			//context.setClassLoader(Thread.currentThread().getContextClassLoader());
+	        context.addServlet("/", "net.i2p.i2pcontrol.SettingsServlet");
+	        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.JSONRPCServlet");
+	        context.addServlet("/history", "net.i2p.i2pcontrol.HistoryServlet");
 			_server.start();
         } catch (IOException e) {
 			_log.error("Unable to add listener " + Settings.getListenIP()+":"+Settings.getListenPort() + " - " + e.getMessage());

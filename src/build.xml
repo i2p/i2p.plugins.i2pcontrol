@@ -42,7 +42,8 @@
     </target>    
 
     <target name="precompilejsp" depends="compile" >
-        <mkdir dir="build" />
+        <!-- disable console webapp
+		<mkdir dir="build" />
         <mkdir dir="build/war/WEB-INF/classes" />
         <path id="jspcp">
             <path refid="cp" />
@@ -73,16 +74,17 @@
         <copy file="jsp/WEB-INF/web.xml" tofile="build/web.xml" />
         <loadfile property="jspc.web.fragment" srcfile="build/web-fragment.xml" />
         <replace file="build/web.xml">
-            <replacefilter token="&lt;!-- precompiled servlets --&gt;" value="${jspc.web.fragment}" />
+            <replacefilter token="&lt;!- precompiled servlets -&gt;" value="${jspc.web.fragment}" /> //Add double dash
         </replace>
-
+		-->
     </target>
 
-    <target name="war" depends="precompilejsp"> 
-        <copy file="jsp/index.html" todir="build/war" />
+    <target name="war" depends="precompilejsp">
+		<!-- Disable console webapp
         <war destfile="build/I2PControl.war.jar" webxml="build/web.xml">
             <fileset dir="build/war" />
         </war>
+		-->
     </target>
     
     <target name="clean">

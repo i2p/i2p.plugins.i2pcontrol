@@ -43,14 +43,12 @@ import com.thetransactioncompany.jsonrpc2.server.*;
  * Provide an JSON-RPC 2.0 API for remote controlling of I2P
  */
 public class JSONRPCServlet extends HttpServlet{
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -45075606818515212L;
 	private static final int BUFFER_LENGTH = 2048;
 	private static Dispatcher disp;
 	private static char[] readBuffer;
-	private static ManagerInterface _manager;
+	private static I2PControlManager _manager;
 	private static Log _log;
 
 	
@@ -58,20 +56,23 @@ public class JSONRPCServlet extends HttpServlet{
 	public void init(){
 		_log = I2PAppContext.getGlobalContext().logManager().getLog(JSONRPCServlet.class);
 		readBuffer = new char[BUFFER_LENGTH];
-		_manager = (ManagerInterface) I2PControlManager.getInstance();
+		_manager = I2PControlManager.getInstance();
 		
 		disp = new Dispatcher();
 		disp.register(new EchoHandler());
 		disp.register(new StatHandler());
 	}
 	
+	@Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
     {
     	httpServletResponse.setContentType("text/html");
         PrintWriter out = httpServletResponse.getWriter();
         out.println("Nothing to see here");
+        out.close();
     }
 	
+	@Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
     {	
     	String req = getRequest(httpServletRequest.getInputStream());

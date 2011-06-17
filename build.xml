@@ -16,7 +16,7 @@
         <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
         <copy file="README.txt" todir="plugin/" overwrite="true" />
         <copy file="scripts/clients.config" todir="plugin/" overwrite="true" />
-		<copy file="scripts/webapps.config" todir="plugin/console/" overwrite="true" />
+		<!--<copy file="scripts/webapps.config" todir="plugin/console/" overwrite="true" /> Console WebApp disabled-->
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="update-only=true" />
@@ -30,12 +30,12 @@
             <arg value="plugin/lib/I2PControl.jar.pack" />
             <arg value="src/build/I2PControl.jar" />
         </exec>
-        <exec executable="pack200" failonerror="true">
-            <arg value="--no-gzip"/>
-            <arg value="--effort=9"/>
+        <!--<exec executable="pack200" failonerror="true">
+            <arg value="-no-gzip"/>  //Add a dash
+            <arg value="-effort=9"/> //Add a dash
             <arg value="plugin/console/webapps/I2PControl.war.pack" />
             <arg value="src/build/I2PControl.war.jar" />
-        </exec>
+        </exec> -->
         <exec executable="scripts/makeplugin.sh" failonerror="true" >
             <arg value="plugin" />
         </exec>

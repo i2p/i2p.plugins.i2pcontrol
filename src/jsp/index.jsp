@@ -10,8 +10,10 @@ I2PControl
 </h2>
 <table cellspacing="8">
 <tr><td><h3>History:</h3><td align="right"><%
-ManagerInterface _manager = I2PControlManager.getInstance();
-out.print( _manager.getHistory() );
+out.print("1ne");
+out.print("2wo");
+out.print("3hree");
+%>
 </table>
 </body>
 </html>
