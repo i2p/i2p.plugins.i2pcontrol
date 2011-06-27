@@ -22,7 +22,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -76,6 +78,8 @@ public class JSONRPCServlet extends HttpServlet{
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException
     {	
     	String req = getRequest(httpServletRequest.getInputStream());
+    	httpServletResponse.setContentType("application/json");
+    	PrintWriter out = httpServletResponse.getWriter();
     	JSONRPC2Message msg = null;
     	JSONRPC2Response jsonResp = null;
 		try {
@@ -94,9 +98,6 @@ public class JSONRPCServlet extends HttpServlet{
 	    		System.out.println("The message is a Notification");
 	    	}
 	    	
-	    	
-	        PrintWriter out = httpServletResponse.getWriter();
-	        out.println("Response:"); // Delete me
 	        out.println(jsonResp);
 	        out.close();
 		} catch (JSONRPC2ParseException e) {
@@ -128,9 +129,14 @@ public class JSONRPCServlet extends HttpServlet{
 		public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
 			if (req.getMethod().equals("echo")) {
 				// Echo first parameter
-				List params = (List)req.getParams();
-				Object input = params.get(0);
-				return new JSONRPC2Response(input, req.getID());
+				if (req.getParamsType() != JSONRPC2ParamsType.OBJECT){
+					return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
+				}		
+				Map params = (HashMap) req.getParams();
+				String input = (String) params.get("echo");
+				Map outParams = new HashMap();
+				outParams.put("result", input);
+				return new JSONRPC2Response(outParams, req.getID());
 			}
 			else {
 				// Method name not supported
@@ -148,31 +154,34 @@ public class JSONRPCServlet extends HttpServlet{
 		public JSONRPC2Response process(JSONRPC2Request req,
 				MessageContext ctx) {
 			if (req.getMethod().equals("getRate")) {
-				List params = (List)req.getParams();
 				
-				if (params.size()!=2)
-					return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
-				String input;
-				long period;
-				try {
-					input = (String) params.get(0);
-					period = Long.parseLong((String) params.get(1));
-				} catch (NumberFormatException e){
-					return new JSONRPC2Response(JSONRPC2Error.PARSE_ERROR, req.getID());
+				// Error on unnamed parameters
+				if (req.getParamsType() != JSONRPC2ParamsType.OBJECT){
+					return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
 				}
+				
+				// Error on wrong amount of parameters
+				Map params = (HashMap)req.getParams();
+				if (params.size()!=2)
+					return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
+				
+				String input = (String) params.get("stat");
+				long period = (Long) params.get("period");
 
 				RateStat rate = I2PAppContext.getGlobalContext().statManager().getRate(input);
 				
-				// If RateStat or the requested period doesn't already exist, create them.s
+				// If RateStat or the requested period doesn't already exist, create them.
 				if (rate == null || rate.getRate(period) == null){
 					long[] tempArr = new long[1];
 					tempArr[0] = period;
 					I2PAppContext.getGlobalContext().statManager().createRequiredRateStat(input, "I2PControl", "I2PControl", tempArr);
 					rate = I2PAppContext.getGlobalContext().statManager().getRate(input);
-				}	
+				}
 				if (rate.getRate(period) == null)
 					return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
-				return new JSONRPC2Response(rate.getRate(period).getAverageValue(), req.getID());
+				Map outParams = new HashMap();
+				outParams.put("result", rate.getRate(period).getAverageValue());
+				return new JSONRPC2Response(outParams, req.getID());
 			}
 			return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
 		}
