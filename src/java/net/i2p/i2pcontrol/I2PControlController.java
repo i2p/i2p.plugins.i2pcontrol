@@ -18,14 +18,19 @@ package net.i2p.i2pcontrol;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Calendar;
 
 import net.i2p.I2PAppContext;
+import net.i2p.i2pcontrol.security.KeyStoreInitializer;
+import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.util.Log;
 
+import org.mortbay.http.SslListener;
 import org.mortbay.http.handler.AbstractHttpHandler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.ServletHttpContext;
+import org.mortbay.util.InetAddrPort;
 
 /**
  * This handles the starting and stopping of an eepsite tunnel and jetty
@@ -43,7 +48,6 @@ public class I2PControlController{
     private static Object _lock = new Object();
     private static Server _server;
     private static Settings _settings;
-    private static final int SERVER_PORT = 7658;
     
     
     public static void main(String args[]) {
@@ -75,11 +79,23 @@ public class I2PControlController{
         
         _server = new Server();
         try {
-			_server.addListener(Settings.getListenIP() +":" +Settings.getListenPort());
+        	SslListener ssl = new SslListener();
+        	ssl.setProvider(SecurityManager.getSecurityProvider());
+        	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
+        	ssl.setInetAddrPort(new InetAddrPort(Settings.getListenIP(), Settings.getListenPort()));
+        	//ssl.setInetAddrPort(new InetAddrPort("127.0.0.1", 5555)); // Delete me
+        	ssl.setWantClientAuth(false); // Don't care about client authetication.
+        	ssl.setPassword(SecurityManager.getKeyStorePassword());
+        	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
+        	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
+        	ssl.setKeystore((new File(SecurityManager.getKeyStoreLocation())).getAbsolutePath());
+        	ssl.setName("SSL Listener");
+        	_server.addListener(ssl);
+        	
 	        ServletHttpContext context = (ServletHttpContext) _server.getContext("/");
-	        context.addServlet("/", "net.i2p.i2pcontrol.SettingsServlet");
-	        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.JSONRPCServlet");
-	        context.addServlet("/history", "net.i2p.i2pcontrol.HistoryServlet");
+	        context.addServlet("/", "net.i2p.i2pcontrol.servlets.SettingsServlet");
+	        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPCServlet");
+	        context.addServlet("/history", "net.i2p.i2pcontrol.servlets.HistoryServlet");
 			_server.start();
         } catch (IOException e) {
 			_log.error("Unable to add listener " + Settings.getListenIP()+":"+Settings.getListenPort() + " - " + e.getMessage());

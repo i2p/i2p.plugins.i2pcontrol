@@ -1,0 +1,22 @@
+package org.bouncycastle.jce.exception;
+
+import java.security.cert.CertificateEncodingException;
+
+public class ExtCertificateEncodingException
+    extends CertificateEncodingException
+    implements ExtException
+{
+    private Throwable cause;
+
+    public ExtCertificateEncodingException(String message, Throwable cause)
+    {
+        super(message);
+        this.cause = cause;
+    }
+
+    @Override
+	public Throwable getCause()
+    {
+        return cause;
+    }
+}
