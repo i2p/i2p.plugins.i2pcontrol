@@ -462,13 +462,13 @@ public class KeyStoreFactory {
 	
 	public static synchronized KeyStore getDefaultKeyStore(){
 		if (_keystore == null){
-			KeyStore ks = null;
+			_keystore = null;
 			try {
-				ks = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
+				_keystore = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
 				if ((new File(DEFAULT_KEYSTORE_LOCATION)).exists()){
 					InputStream is = new FileInputStream(DEFAULT_KEYSTORE_LOCATION);
-					ks.load(is, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-					return ks;
+					_keystore.load(is, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+					return _keystore;
 				} else {
 					throw new IOException("KeyStore file " + DEFAULT_KEYSTORE_LOCATION + "wasn't readable");
 				}
@@ -476,10 +476,10 @@ public class KeyStoreFactory {
 				// Ignore. Not an issue. Let's just create a new keystore instead.
 			}
 			try {
-				ks = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
-				ks.load(null, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-				ks.store(new FileOutputStream(DEFAULT_KEYSTORE_LOCATION), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-				return ks;
+				_keystore = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
+				_keystore.load(null, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+				_keystore.store(new FileOutputStream(DEFAULT_KEYSTORE_LOCATION), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+				return _keystore;
 			} catch (Exception e){
 				// Log perhaps?
 			}
