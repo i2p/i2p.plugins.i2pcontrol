@@ -78,7 +78,6 @@ public class I2PControlController{
         //    throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
         
     	
-    	System.out.println(net.i2p.i2pcontrol.security.jbcrypt.BCrypt.hashpw("itoopie","$2a$11$5aOLx2x/8i4fNaitoCSSWu"));
         _server = new Server();
         try {
         	SslListener ssl = new SslListener();
