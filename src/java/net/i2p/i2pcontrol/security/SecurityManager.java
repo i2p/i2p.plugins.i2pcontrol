@@ -97,12 +97,24 @@ public class SecurityManager {
 	 * Hash input HASH_ITERATIONS times
 	 * @return input hashed HASH_ITERATIONS times
 	 */
-	private String hashPassword(String pwd){
+	public static String getPasswdHash(String pwd){
 		SHA256Generator hashGen = new SHA256Generator(I2PAppContext.getGlobalContext());
 		byte[] bytes = pwd.getBytes();
 		for (int i = 0; i < 1000; i++){
 			bytes = hashGen.calculateHash(bytes).toByteArray();
 		}
+		return new String(bytes);
+	}
+
+	/**
+	 * Hash input one time with SHA-256.
+	 * @param string
+	 * @return
+	 */
+	public static String getHash(String string) {
+		SHA256Generator hashGen = new SHA256Generator(I2PAppContext.getGlobalContext());
+		byte[] bytes = string.getBytes();
+		bytes = hashGen.calculateHash(bytes).toByteArray();
 		return new String(bytes);
 	}
 }

@@ -23,7 +23,7 @@ public class Settings {
 
 	public static int getListenPort() {
 		// TODO Auto-generated method stub
-		return 7656;
+		return 5555;
 	}
 
 	public static String getListenIP() {

@@ -189,7 +189,7 @@ public class JSONRPCServlet extends HttpServlet{
 		}
 	}
 	
-	public static class ServerCertHandler implements RequestHandler {
+	public static class AuthenticationHandler implements RequestHandler {
 
 		// Reports the method names of the handled requests
 		public String[] handledRequests() {
