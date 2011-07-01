@@ -66,7 +66,7 @@ public class JSONRPCServlet extends HttpServlet{
 		disp = new Dispatcher();
 		disp.register(new EchoHandler());
 		disp.register(new StatHandler());
-		disp.register(new ServerCertHandler());
+		//disp.register(new ServerCertHandler());
 	}
 	
 	@Override
@@ -193,15 +193,15 @@ public class JSONRPCServlet extends HttpServlet{
 
 		// Reports the method names of the handled requests
 		public String[] handledRequests() {
-			return new String[]{"getServerCert"};
+			return new String[]{"authenticate"};
 		}
 		
 		// Processes the requests
 		public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-			if (req.getMethod().equals("getServerCert")) {
+			if (req.getMethod().equals("authenticate")) {
 				
 				Map outParams = new HashMap();
-				outParams.put("serverCert", SecurityManager.getBase64Cert());				
+				//outParams.put("token", );				
 				return new JSONRPC2Response(outParams, req.getID());
 			}
 			else {

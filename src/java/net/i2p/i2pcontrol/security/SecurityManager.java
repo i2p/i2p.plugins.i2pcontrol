@@ -29,6 +29,8 @@ import sun.misc.BASE64Encoder;
 
 import net.i2p.I2PAppContext;
 import net.i2p.crypto.SHA256Generator;
+import net.i2p.i2pcontrol.security.jbcrypt.BCrypt;
+import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.util.Log;
 
 /**
@@ -36,8 +38,8 @@ import net.i2p.util.Log;
  */
 public class SecurityManager {
 	public final static String CERT_ALIAS = "CA";
-	private final int HASH_ITERATIONS = 1000;
 	private final static String SSL_PROVIDER = "SunJSSE";
+	private final static String DEFAULT_BCRYPT_SALT = "$2a$10$DEBg.V4E4RLrQRaY5IvEKe";
 	private static String[] SSL_CIPHER_SUITES;
 	private static KeyStore _ks;
 	private static Log _log;
@@ -98,12 +100,7 @@ public class SecurityManager {
 	 * @return input hashed HASH_ITERATIONS times
 	 */
 	public static String getPasswdHash(String pwd){
-		SHA256Generator hashGen = new SHA256Generator(I2PAppContext.getGlobalContext());
-		byte[] bytes = pwd.getBytes();
-		for (int i = 0; i < 1000; i++){
-			bytes = hashGen.calculateHash(bytes).toByteArray();
-		}
-		return new String(bytes);
+		return BCrypt.hashpw(pwd, ConfigurationManager.getInstance().getConf("hashedPassword", DEFAULT_BCRYPT_SALT));
 	}
 
 	/**
