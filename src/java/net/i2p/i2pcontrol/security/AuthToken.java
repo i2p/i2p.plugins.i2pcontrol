@@ -16,10 +16,14 @@ public class AuthToken {
 		this.expiry = expiry.getTime();
 	}
 	
-	private String getId(){
+	public String getId(){
 		return id;
 	}
 	
+	/**
+	 * Checks whether the AuthToken has expired.
+	 * @return True if AuthToken hasn't expired. False in any other case.
+	 */
 	public boolean isValid(){
 		return Calendar.getInstance().before(expiry);
 	}
@@ -27,6 +31,11 @@ public class AuthToken {
 	@Override
 	public String toString(){
 		return id;
+	}
+	
+	@Override
+	public int hashCode(){
+		return id.hashCode();
 	}
 
 }

@@ -19,6 +19,8 @@ package net.i2p.i2pcontrol.security;
 import java.security.KeyStore;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -39,13 +41,16 @@ import net.i2p.util.Log;
 public class SecurityManager {
 	public final static String CERT_ALIAS = "CA";
 	private final static String SSL_PROVIDER = "SunJSSE";
-	private final static String DEFAULT_BCRYPT_SALT = "$2a$10$DEBg.V4E4RLrQRaY5IvEKe";
+	private final static String DEFAULT_AUTH_BCRYPT_SALT = "$2a$11$5aOLx2x/8i4fNaitoCSSWu";
+	private final static String DEFAULT_AUTH_PASSWORD = "$2a$11$5aOLx2x/8i4fNaitoCSSWuut2wEl3Hupuca8DCT.NXzvH9fq1pBU.";
+	private static HashMap<String,AuthToken> authTokens;
 	private static String[] SSL_CIPHER_SUITES;
 	private static KeyStore _ks;
 	private static Log _log;
 	
 	static {
 		_log = I2PAppContext.getGlobalContext().logManager().getLog(SecurityManager.class);
+		authTokens = new HashMap<String,AuthToken>();
 		SocketFactory SSLF = SSLSocketFactory.getDefault();
 		try{
 		SSL_CIPHER_SUITES =  ((SSLSocket)SSLF.createSocket()).getSupportedCipherSuites();
@@ -100,7 +105,7 @@ public class SecurityManager {
 	 * @return input hashed HASH_ITERATIONS times
 	 */
 	public static String getPasswdHash(String pwd){
-		return BCrypt.hashpw(pwd, ConfigurationManager.getInstance().getConf("hashedPassword", DEFAULT_BCRYPT_SALT));
+		return BCrypt.hashpw(pwd, ConfigurationManager.getInstance().getConf("auth.salt", DEFAULT_AUTH_BCRYPT_SALT));
 	}
 
 	/**
@@ -113,5 +118,42 @@ public class SecurityManager {
 		byte[] bytes = string.getBytes();
 		bytes = hashGen.calculateHash(bytes).toByteArray();
 		return new String(bytes);
+	}
+	
+	
+	/**
+	 * Add a Authentication Token if the provided password is valid.
+	 * The token will be valid for one day.
+	 * @return Returns AuthToken if password is valid. If password is invalid null will be returned. 
+	 */
+	public static AuthToken validatePasswd(String pwd){
+		String storedPass = ConfigurationManager.getInstance().getConf("auth.password", DEFAULT_AUTH_PASSWORD);
+		if (getPasswdHash(pwd).equals(storedPass)){
+			AuthToken token = new AuthToken(pwd);
+			authTokens.put(token.getId(), token);
+			return token;
+		} else {
+			return null;
+		}
+	}
+	
+
+	/**
+	 * Checks whether the AuthToken with the given ID exists and if it does whether is has expired.
+	 * @param tokenID - The token to validate
+	 * @throws InvalidAuthTokenException
+	 * @throws ExpiredAuthTokenException
+	 */
+	public static void verifyToken(String tokenID) throws InvalidAuthTokenException, ExpiredAuthTokenException {
+		AuthToken token = authTokens.get(tokenID);
+		if (token == null){
+			throw new InvalidAuthTokenException("AuthToken with ID: " + tokenID + " couldn't be found.");
+		} else if (!token.isValid()){
+			authTokens.remove(token.getId());
+			throw new ExpiredAuthTokenException("AuthToken with ID: " + tokenID + " has expired.");
+		} else {
+			return; // Everything is fine. :)
+		}
+		
 	}
 }

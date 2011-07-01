@@ -77,13 +77,15 @@ public class I2PControlController{
         //if (!pluginDir.exists())
         //    throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
         
+    	
+    	System.out.println(net.i2p.i2pcontrol.security.jbcrypt.BCrypt.hashpw("itoopie","$2a$11$5aOLx2x/8i4fNaitoCSSWu"));
         _server = new Server();
         try {
         	SslListener ssl = new SslListener();
         	ssl.setProvider(SecurityManager.getSecurityProvider());
         	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
+        	// FIXME: Change to use new ConrigurationManager.
         	ssl.setInetAddrPort(new InetAddrPort(Settings.getListenIP(), Settings.getListenPort()));
-        	//ssl.setInetAddrPort(new InetAddrPort("127.0.0.1", 5555)); // Delete me
         	ssl.setWantClientAuth(false); // Don't care about client authetication.
         	ssl.setPassword(SecurityManager.getKeyStorePassword());
         	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
@@ -94,7 +96,7 @@ public class I2PControlController{
         	
 	        ServletHttpContext context = (ServletHttpContext) _server.getContext("/");
 	        context.addServlet("/", "net.i2p.i2pcontrol.servlets.SettingsServlet");
-	        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPCServlet");
+	        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPC2Servlet");
 	        context.addServlet("/history", "net.i2p.i2pcontrol.servlets.HistoryServlet");
 			_server.start();
         } catch (IOException e) {

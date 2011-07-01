@@ -10,11 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.I2PControlManager;
-import net.i2p.i2pcontrol.servlets.JSONRPCServlet.EchoHandler;
-import net.i2p.i2pcontrol.servlets.JSONRPCServlet.StatHandler;
 import net.i2p.util.Log;
-
-import com.thetransactioncompany.jsonrpc2.server.Dispatcher;
 
 public class SettingsServlet extends HttpServlet {
 

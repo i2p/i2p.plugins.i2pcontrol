@@ -1,6 +1,8 @@
-package com.thetransactioncompany.jsonrpc2;
+package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
 import org.json.simple.JSONObject;
+
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
 
 /** 
@@ -54,36 +56,21 @@ import org.json.simple.JSONObject;
  * @author <a href="http://dzhuvinov.com">Vladimir Dzhuvinov</a>
  * @version 1.16 (2010-10-04)
  */
-public class JSONRPC2Error extends Exception {
+public class JSONRPC2ExtendedError extends JSONRPC2Error {	
 	
+	private static final long serialVersionUID = -6574632977222371077L;
+
+	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+	public static final JSONRPC2Error INVALID_PASSWORD = new JSONRPC2ExtendedError(-32001, "Invalid password provided");
+
+	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+	public static final JSONRPC2Error INVALID_TOKEN = new JSONRPC2ExtendedError(-32002, "Token doesn't exist");
+
+	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(-32003, "Provided token was expired, will be removed.");
 	
-	/** JSON parse error (-32700) */
-	public static final JSONRPC2Error PARSE_ERROR = new JSONRPC2Error(-32700, "JSON parse error");
-	
-	
-	/** Invalid JSON-RPC 2.0 request error (-32600) */
-	public static final JSONRPC2Error INVALID_REQUEST = new JSONRPC2Error(-32600, "Invalid request");
-	
-	
-	/** Method not found error (-32601) */
-	public static final JSONRPC2Error METHOD_NOT_FOUND = new JSONRPC2Error(-32601, "Method not found");
-	
-	
-	/** Invalid parameters error (-32602) */
-	public static final JSONRPC2Error INVALID_PARAMS = new JSONRPC2Error(-32602, "Invalid parameters");
-	
-	
-	/** Internal JSON-RPC 2.0 error (-32603) */
-	public static final JSONRPC2Error INTERNAL_ERROR = new JSONRPC2Error(-32603, "Internal error");
-	
-	
-	/** The error code */
-	protected int code;
-	
-	
-	/** The optional error data */
-	protected Object data;
-	
+	/** Code used for invalid JSON-RPC 2.0, implementation defined error. Error describes missing parameter/parameters */
+	public static final int CODE_MISSING_PARAMETER = -32004;
 	
 	/** 
 	 * Creates a new JSON-RPC 2.0 error with the specified code and 
@@ -93,10 +80,8 @@ public class JSONRPC2Error extends Exception {
 	 *                application-specific).
 	 * @param message The error message.
 	 */
-	public JSONRPC2Error(int code, String message) {
-		
-		super(message);
-		this.code = code;
+	public JSONRPC2ExtendedError(int code, String message) {		
+		super(code, message);
 	}
 	
 	
@@ -110,11 +95,8 @@ public class JSONRPC2Error extends Exception {
 	 * @param data    Optional error data, must <a href="#map">map</a>
 	 *                to a valid JSON type.
 	 */
-	public JSONRPC2Error(int code, String message, Object data) {
-		
-		super(message);
-		this.code = code;
-		this.data = data;
+	public JSONRPC2ExtendedError(int code, String message, Object data) {
+		super(code, message, data);
 	}
 	
 	
@@ -124,7 +106,6 @@ public class JSONRPC2Error extends Exception {
 	 * @return The error code.
 	 */
 	public int getCode() {
-		
 		return code;
 	}
 	
@@ -135,7 +116,6 @@ public class JSONRPC2Error extends Exception {
 	 * @return The error data, {@code null} if none was specified.
 	 */
 	public Object getData() {
-		
 		return data;	
 	}
 	
@@ -146,14 +126,12 @@ public class JSONRPC2Error extends Exception {
 	 * @return A JSON object representing this error object.
 	 */
 	public JSONObject toJSON() {
-	
 		JSONObject out = new JSONObject();
 		
 		out.put("code", code);
 		out.put("message", super.getMessage());
 		if (data != null)
 			out.put("data", data);
-				
 		return out;
 	}
 	
@@ -164,7 +142,6 @@ public class JSONRPC2Error extends Exception {
 	 * @return A JSON-encoded string representing this error object.
 	 */
 	public String toString() {
-		
 		return toJSON().toString();
 	}
 }
