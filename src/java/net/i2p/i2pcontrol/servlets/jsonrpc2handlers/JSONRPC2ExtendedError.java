@@ -76,10 +76,6 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
 	public static final int CODE_TOKEN_EXPIRED = -32004;
 	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(CODE_TOKEN_EXPIRED, "Provided authentication token was expired, will be removed.");
 	
-	/** Code used for invalid JSON-RPC 2.0, implementation defined error. Error describes missing parameter/parameters */
-	public static final int CODE_MISSING_PARAMETER = -32005;
-	public static final JSONRPC2Error MISSING_PARAMTER = new JSONRPC2ExtendedError(CODE_MISSING_PARAMETER, "Required parameter(s) is(/are) missing from the method call.");
-
 	
 	/** 
 	 * Creates a new JSON-RPC 2.0 error with the specified code and 
