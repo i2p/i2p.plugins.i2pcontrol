@@ -47,7 +47,7 @@ public class JSONRPC2Helper {
 			}
 			if (missingArgs.length() > 0){
 				missingArgs = missingArgs.substring(0, missingArgs.length()-1);
-				return new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS, "Missing parameter(s): " + missingArgs);
+				return new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), "Missing parameter(s): " + missingArgs);
 			}
 		}
 		return null;
@@ -80,7 +80,7 @@ public class JSONRPC2Helper {
 		} catch (InvalidAuthTokenException e){
 			return JSONRPC2ExtendedError.INVALID_TOKEN;
 		} catch (ExpiredAuthTokenException e){
-			JSONRPC2Error err = new JSONRPC2ExtendedError(JSONRPC2ExtendedError.CODE_TOKEN_EXPIRED,
+			JSONRPC2Error err = new JSONRPC2ExtendedError(JSONRPC2ExtendedError.TOKEN_EXPIRED.getCode(),
 					"Provided authentication token expired "+e.getExpirytime()+", will be removed.");
 			return err;
 		}
