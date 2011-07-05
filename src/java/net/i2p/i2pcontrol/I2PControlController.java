@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Calendar;
+import java.util.logging.LogManager;
 
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.security.KeyStoreInitializer;
@@ -59,24 +60,14 @@ public class I2PControlController{
             stop();
         else
             throw new IllegalArgumentException("Usage: PluginController -d $PLUGIN [start|stop]");
-    }
-    
-    public static String getTestString(){
-    	Calendar cal = Calendar.getInstance();
-    	int hour = cal.get(Calendar.HOUR_OF_DAY);
-    	int minute = cal.get(Calendar.MINUTE);
-    	int second = cal.get(Calendar.SECOND);
-    	int ms = cal.get(Calendar.MILLISECOND);
-    	return hour+":"+minute+":"+second+":"+ms;
-    }
-    
+    }  
 
 
     private static void start(String args[]) {
         //File pluginDir = new File(args[1]);
         //if (!pluginDir.exists())
         //    throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
-        
+    	I2PAppContext.getGlobalContext().logManager().setDefaultLimit(Log.STR_DEBUG);
     	
         _server = new Server();
         try {
@@ -96,7 +87,7 @@ public class I2PControlController{
 	        ServletHttpContext context = (ServletHttpContext) _server.getContext("/");
 	        context.addServlet("/", "net.i2p.i2pcontrol.servlets.SettingsServlet");
 	        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPC2Servlet");
-	        context.addServlet("/history", "net.i2p.i2pcontrol.servlets.HistoryServlet");
+	        context.addServlet("/logs", "net.i2p.i2pcontrol.servlets.LogServlet");
 			_server.start();
         } catch (IOException e) {
 			_log.error("Unable to add listener " + Settings.getListenIP()+":"+Settings.getListenPort() + " - " + e.getMessage());
@@ -109,8 +100,6 @@ public class I2PControlController{
 		} catch (Exception e) {
 			_log.error("Unable to start jetty server: " + e.getMessage());
 		}
-		
-
     }
 
     

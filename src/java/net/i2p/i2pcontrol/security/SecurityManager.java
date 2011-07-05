@@ -19,8 +19,11 @@ package net.i2p.i2pcontrol.security;
 import java.security.KeyStore;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -45,7 +48,8 @@ public class SecurityManager {
 	private final static String SSL_PROVIDER = "SunJSSE";
 	private final static String DEFAULT_AUTH_BCRYPT_SALT = "$2a$11$5aOLx2x/8i4fNaitoCSSWu";
 	private final static String DEFAULT_AUTH_PASSWORD = "$2a$11$5aOLx2x/8i4fNaitoCSSWuut2wEl3Hupuca8DCT.NXzvH9fq1pBU.";
-	private static HashMap<String,AuthToken> authTokens;
+	private final static HashMap<String,AuthToken> authTokens;
+	private final static Timer timer;
 	private static String[] SSL_CIPHER_SUITES;
 	private static KeyStore _ks;
 	private static Log _log;
@@ -53,12 +57,20 @@ public class SecurityManager {
 	static {
 		_log = I2PAppContext.getGlobalContext().logManager().getLog(SecurityManager.class);
 		authTokens = new HashMap<String,AuthToken>();
+		
+		timer = new Timer();
+		// Start running periodic task after 20 minutes, run periodically every 10th minute.
+		timer.scheduleAtFixedRate(new Sweeper(), 1000*60*20, 1000*60*10);
+
+		// Get supported SSL copher suites.
 		SocketFactory SSLF = SSLSocketFactory.getDefault();
 		try{
-		SSL_CIPHER_SUITES =  ((SSLSocket)SSLF.createSocket()).getSupportedCipherSuites();
+			SSL_CIPHER_SUITES =  ((SSLSocket)SSLF.createSocket()).getSupportedCipherSuites();
 		} catch (Exception e){
 			_log.log(Log.CRIT, "Unable to create SSLSocket used for fetching supported ssl cipher suites.", e);
 		}
+		
+		// Initialize keystore (if needed)
 		_ks = KeyStoreInitializer.getKeyStore();
 	}
 	
@@ -82,7 +94,10 @@ public class SecurityManager {
 		return KeyStoreFactory.DEFAULT_KEYSTORE_TYPE;
 	}
 	
-	
+	/**
+	 * Return the X509Certificate of the server as a Base64 encoded string.
+	 * @return base64 encode of X509Certificate
+	 */
 	public static String getBase64Cert(){
 		X509Certificate caCert = KeyStoreFactory.readCert(_ks,
 				CERT_ALIAS, 
@@ -90,6 +105,11 @@ public class SecurityManager {
 		return getBase64FromCert(caCert);
 	}
 	
+	/**
+	 * Return the X509Certificate as a base64 encoded string.
+	 * @param cert
+	 * @return base64 encode of X509Certificate
+	 */
 	private static String getBase64FromCert(X509Certificate cert){
 		BASE64Encoder encoder = new BASE64Encoder();
 		try {
@@ -103,8 +123,9 @@ public class SecurityManager {
 	
 	
 	/**
-	 * Hash input HASH_ITERATIONS times
-	 * @return input hashed HASH_ITERATIONS times
+	 * Hash pwd with using BCrypt with the default salt.
+	 * @param pwd
+	 * @return BCrypt hash of salt and input string
 	 */
 	public static String getPasswdHash(String pwd){
 		return BCrypt.hashpw(pwd, ConfigurationManager.getInstance().getConf("auth.salt", DEFAULT_AUTH_BCRYPT_SALT));
@@ -151,11 +172,36 @@ public class SecurityManager {
 		if (token == null){
 			throw new InvalidAuthTokenException("AuthToken with ID: " + tokenID + " couldn't be found.");
 		} else if (!token.isValid()){
+			System.out.println("token.isValid: " + token.isValid()); // Delete me
 			authTokens.remove(token.getId());
-			throw new ExpiredAuthTokenException("AuthToken with ID: " + tokenID + " has expired.");
+			throw new ExpiredAuthTokenException("AuthToken with ID: " + tokenID + " expired " + token.getExpiryTime(), token.getExpiryTime());
 		} else {
 			return; // Everything is fine. :)
-		}
-		
+		}	
 	}
+	
+	/**
+	 * Clean up old authorization tokens to keep the token store slim and fit.
+	 * @author hottuna
+	 *
+	 */
+	private static class Sweeper extends TimerTask{	
+		@Override
+		public void run(){
+			_log.debug("Starting cleanup job..");
+			ArrayList<String> arr = new ArrayList<String>();
+			for (Map.Entry<String,AuthToken> e : authTokens.entrySet()){
+				AuthToken token = e.getValue();
+				if (!token.isValid()){
+					arr.add(e.getKey());
+				}
+			}
+			for (String s : arr){
+				authTokens.remove(s);
+			}
+			_log.debug("Cleanup job done.");
+		}
+	}
+	
+	
 }

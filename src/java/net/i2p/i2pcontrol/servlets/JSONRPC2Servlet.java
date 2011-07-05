@@ -22,27 +22,16 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import net.i2p.I2PAppContext;
-import net.i2p.i2pcontrol.I2PControlManager;
-import net.i2p.stat.RateStat;
 import net.i2p.util.Log;
 
-import net.i2p.i2pcontrol.security.AuthToken;
-import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.AuthHandler;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.EchoHandler;
-import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.JSONRPC2ExtendedError;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.StatHandler;
 
 import com.thetransactioncompany.jsonrpc2.*;
@@ -58,15 +47,14 @@ public class JSONRPC2Servlet extends HttpServlet{
 	private static final int BUFFER_LENGTH = 2048;
 	private static Dispatcher disp;
 	private static char[] readBuffer;
-	private static I2PControlManager _manager;
 	private static Log _log;
 
 	
 	@Override
 	public void init(){
 		_log = I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class);
+		_log.setMinimumPriority(Log.INFO);
 		readBuffer = new char[BUFFER_LENGTH];
-		_manager = I2PControlManager.getInstance();
 		
 		disp = new Dispatcher();
 		disp.register(new EchoHandler());
@@ -94,12 +82,12 @@ public class JSONRPC2Servlet extends HttpServlet{
 
 	    	if (msg instanceof JSONRPC2Request) {
 	    		jsonResp = disp.dispatch((JSONRPC2Request)msg, null);
-		    	_manager.prependHistory("Request: " + msg);
-		    	_manager.prependHistory("Response: " + jsonResp);
+		    	_log.debug("Request: " + msg);
+		    	_log.debug("Response: " + jsonResp);
 	    	}
 	    	else if (msg instanceof JSONRPC2Notification) {
 	    		disp.dispatch((JSONRPC2Notification)msg, null);
-		    	_manager.prependHistory("Notification: " + msg);
+		    	_log.debug("Notification: " + msg);
 	    	}
 	    	
 	        out.println(jsonResp);
@@ -119,11 +107,4 @@ public class JSONRPC2Servlet extends HttpServlet{
     	}
     	return writer.toString();
     }
-    
-    
-
-	
-
-	
-
 }

@@ -61,16 +61,23 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
 	private static final long serialVersionUID = -6574632977222371077L;
 
 	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error INVALID_PASSWORD = new JSONRPC2ExtendedError(-32001, "Invalid password provided");
+	public static final int CODE_INVALID_PASSWORD = -32001;
+	public static final JSONRPC2Error INVALID_PASSWORD = new JSONRPC2ExtendedError(CODE_INVALID_PASSWORD, "Invalid password provided.");
 
 	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error INVALID_TOKEN = new JSONRPC2ExtendedError(-32002, "Token doesn't exist");
+	public static final int CODE_NO_TOKEN = -32002;
+	public static final JSONRPC2Error NO_TOKEN = new JSONRPC2ExtendedError(CODE_NO_TOKEN, "No authentication token presented.");
 
 	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(-32003, "Provided token was expired, will be removed.");
+	public static final int CODE_INVALID_TOKEN = -32003;
+	public static final JSONRPC2Error INVALID_TOKEN = new JSONRPC2ExtendedError(CODE_INVALID_TOKEN, "Authentication token doesn't exist.");
+
+	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+	public static final int CODE_TOKEN_EXPIRED = -32004;
+	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(CODE_TOKEN_EXPIRED, "Provided authentication token was expired, will be removed.");
 	
 	/** Code used for invalid JSON-RPC 2.0, implementation defined error. Error describes missing parameter/parameters */
-	public static final int CODE_MISSING_PARAMETER = -32004;
+	public static final int CODE_MISSING_PARAMETER = -32005;
 	
 	/** 
 	 * Creates a new JSON-RPC 2.0 error with the specified code and 

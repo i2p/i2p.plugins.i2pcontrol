@@ -24,7 +24,7 @@ public class AuthHandler implements RequestHandler {
 	// Processes the requests
 	public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
 		if (req.getMethod().equals("authenticate")) {
-			JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req);
+			JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req, JSONRPC2Helper.USE_NO_AUTH);
 			if (err != null)
 				return new JSONRPC2Response(err, req.getID());
 			
@@ -39,7 +39,7 @@ public class AuthHandler implements RequestHandler {
 			}
 			
 			Map outParams = new HashMap();
-			outParams.put("tokenID", token.getId());				
+			outParams.put("token", token.getId());				
 			return new JSONRPC2Response(outParams, req.getID());
 		} else {
 			// Method name not supported
