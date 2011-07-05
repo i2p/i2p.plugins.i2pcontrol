@@ -36,7 +36,7 @@ public class StatHandler implements RequestHandler {
 			}
 			long period;
 			try{
-				period = Long.parseLong((String) inParams.get("period"));
+				period = (Long) inParams.get("period");
 			} catch (NumberFormatException e){
 				return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
 			}

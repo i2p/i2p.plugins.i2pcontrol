@@ -53,7 +53,6 @@ public class JSONRPC2Servlet extends HttpServlet{
 	@Override
 	public void init(){
 		_log = I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class);
-		_log.setMinimumPriority(Log.INFO);
 		readBuffer = new char[BUFFER_LENGTH];
 		
 		disp = new Dispatcher();

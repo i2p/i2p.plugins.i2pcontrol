@@ -32,17 +32,17 @@ public class LogServlet extends HttpServlet {
         PrintWriter out = httpServletResponse.getWriter();
         out.println("<html>\n<body>");
         out.println("<h2>Logs</h2>");
-        out.println("<h3>Most recent: </h3>");
+        out.println("<h3>Most recent: </h3>\r\n<br><pre>");
         List<String> strs = I2PAppContext.getGlobalContext().logManager().getBuffer().getMostRecentMessages();
         for (String s : strs){
-        	out.println(s + "<br>");
+        	out.println(s);
         }
-        out.println("<br>\r\n<h3>Recent critical: </h3>");
+        out.println("</pre>\r\n<br>\r\n<h3>Recent critical: </h3>\r\n<br><pre>");
         strs = I2PAppContext.getGlobalContext().logManager().getBuffer().getMostRecentCriticalMessages();
         for (String s : strs){
-        	out.println(s + "<br>");
+        	out.println(s);
         }
-        out.println("</body>\n</html>");
+        out.println("\r\n<br></pre>\r\n</body>\n</html>");
         out.close();
     }
 
