@@ -35,7 +35,9 @@ public class ConfigurationManager {
 	//Configurations with an Integer as value
 	private static Map<String, Integer> integerConfigurations = new HashMap<String, Integer>();
 
-	private ConfigurationManager() {}
+	private ConfigurationManager() {
+		readConfFile();
+	}
 	
 	public synchronized static ConfigurationManager getInstance() {
 		if(instance == null) {
@@ -70,7 +72,7 @@ public class ConfigurationManager {
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
-			_log.error("Unable to find config file, " + DEFAULT_CONFIG_LOCATION);
+			_log.info("Unable to find config file, " + DEFAULT_CONFIG_LOCATION);
 		} catch (IOException e) {
 			_log.error("Unable to read from config file, " + DEFAULT_CONFIG_LOCATION);
 		}

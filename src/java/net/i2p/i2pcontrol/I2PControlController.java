@@ -25,6 +25,7 @@ import java.util.logging.LogManager;
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.security.KeyStoreInitializer;
 import net.i2p.i2pcontrol.security.SecurityManager;
+import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.util.Log;
 
 import org.mortbay.http.SslListener;
@@ -47,8 +48,8 @@ import org.mortbay.util.InetAddrPort;
 public class I2PControlController{
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
     private static Object _lock = new Object();
+    private static ConfigurationManager _conf = ConfigurationManager.getInstance();
     private static Server _server;
-    private static Settings _settings;
     
     
     public static void main(String args[]) {
@@ -111,5 +112,6 @@ public class I2PControlController{
 		} catch (InterruptedException e) {
 			_log.error("Stopping server" + e);
 		}
+    	_conf.writeConfFile();
     }
 }
