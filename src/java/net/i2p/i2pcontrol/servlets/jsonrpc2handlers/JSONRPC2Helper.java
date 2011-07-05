@@ -47,7 +47,7 @@ public class JSONRPC2Helper {
 			}
 			if (missingArgs.length() > 0){
 				missingArgs = missingArgs.substring(0, missingArgs.length()-1);
-				return new JSONRPC2ExtendedError(JSONRPC2ExtendedError.CODE_MISSING_PARAMETER, "Missing parameter(s): " + missingArgs);
+				return new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS, "Missing parameter(s): " + missingArgs);
 			}
 		}
 		return null;
