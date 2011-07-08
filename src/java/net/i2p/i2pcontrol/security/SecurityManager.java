@@ -43,7 +43,7 @@ import net.i2p.util.Log;
  * Manage the password storing for I2PControl.
  */
 public class SecurityManager {
-	public final static String CERT_ALIAS = "CA";
+	public final static String CERT_ALIAS = "I2PControl CA";
 	private final static String SSL_PROVIDER = "SunJSSE";
 	private final static String DEFAULT_AUTH_BCRYPT_SALT = "$2a$11$5aOLx2x/8i4fNaitoCSSWu";
 	private final static String DEFAULT_AUTH_PASSWORD = "$2a$11$5aOLx2x/8i4fNaitoCSSWuut2wEl3Hupuca8DCT.NXzvH9fq1pBU.";

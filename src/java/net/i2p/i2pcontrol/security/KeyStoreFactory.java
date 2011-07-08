@@ -1,29 +1,25 @@
 package net.i2p.i2pcontrol.security;
 
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.KeyStore.Builder;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
@@ -33,36 +29,24 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.DERBMPString;
-import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERNull;
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROutputStream;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.jce.interfaces.PKCS12BagAttributeCarrier;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.x509.X509Util;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.bouncycastle.x509.extension.AuthorityKeyIdentifierStructure;
-import org.bouncycastle.x509.extension.SubjectKeyIdentifierStructure;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.*;
-import org.bouncycastle.crypto.AsymmetricBlockCipher;
-import org.bouncycastle.crypto.InvalidCipherTextException;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.encodings.PKCS1Encoding;
-import org.bouncycastle.crypto.engines.RSAEngine;
-import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import sun.security.util.ObjectIdentifier;
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateIssuerName;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateSubjectName;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
 
 public class KeyStoreFactory {
-	public static final String DEFAULT_SIGNATURE_ALGORITHM = "SHA1withRSA";
+	public static final ObjectIdentifier DEFAULT_CERTIFICATE_ALGORITHM = AlgorithmId.sha512WithRSAEncryption_oid;
+	public static final String DEFAULT_CERTIFICATE_ALGORITHM_STRING = "SHA512WithRSA";
 	public static final String DEFAULT_KEYSTORE_TYPE = "JKS";
 	public static final String DEFAULT_KEYSTORE_PROVIDER = "SUN";
 	public static final String DEFAULT_KEYSTORE_LOCATION = "key.store";
@@ -70,9 +54,6 @@ public class KeyStoreFactory {
 	public static final String DEFAULT_KEYSTORE_ALGORITHM  = "SunX509";
 	private static KeyStore _keystore = null;
 	
-	static {
-		Security.addProvider(new BouncyCastleProvider());
-	}
 	
 	public static KeyPair generateKeyPair() {
 		KeyPairGenerator keyGen;
@@ -82,9 +63,6 @@ public class KeyStoreFactory {
 			keyGen.initialize(1024, random);
 
 			KeyPair pair = keyGen.generateKeyPair();
-			PrivateKey privKey = pair.getPrivate();
-			PublicKey pubKey = pair.getPublic();
-
 			return pair;
 
 		} catch (NoSuchAlgorithmException e) {
@@ -95,107 +73,59 @@ public class KeyStoreFactory {
 		return null;
 	}
 	
-	public static X509Certificate generateCACertificate(String caName, KeyPair keyPair, int validNbrDays){
-		Date startDate = new Date(System.currentTimeMillis()); // time from which certificate is valid
-		
-		Calendar expiry = Calendar.getInstance();
-		expiry.add(Calendar.DAY_OF_YEAR, validNbrDays);
-		Date expiryDate = expiry.getTime();	// time after which certificate is not valid
-		
-		byte[] bigNum = new byte[1024];
-		(new SecureRandom()).nextBytes(bigNum);
-		BigInteger serialNumber = new BigInteger(bigNum);
-		serialNumber = serialNumber.abs();	// serial number for certificate
-		
-		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-		X500Principal dname = new X500Principal("CN=" + caName);
-
-		certGen.setSerialNumber(serialNumber);
-		certGen.setIssuerDN(dname);
-		certGen.setNotBefore(startDate);
-		certGen.setNotAfter(expiryDate);
-		certGen.setSubjectDN(dname);
-		certGen.setPublicKey(keyPair.getPublic());
-		certGen.setSignatureAlgorithm(DEFAULT_SIGNATURE_ALGORITHM);
-
-
+	 
+	/**
+	 * Create a self-signed X.509 Certificate
+	 * @param dn the X.509 Distinguished Name, eg "CN=Test, L=London, C=GB"
+	 * @param pair the KeyPair
+	 * @param days how many days from now the Certificate is valid for
+	 * @param algorithm the signing algorithm, eg "SHA1withRSA"
+	 */ 
+	static X509Certificate generateCACertificate(String dn, KeyPair pair, int days) {
 		try {
-			X509Certificate cert = certGen.generate(keyPair.getPrivate(), "BC"); // BC == BouncyCastle
+			PrivateKey privkey = pair.getPrivate();
+			X509CertInfo info = new X509CertInfo();
+			Date from = new Date();
+			Date to = new Date(from.getTime() + days * 86400000l);
+			CertificateValidity interval = new CertificateValidity(from, to);
+			BigInteger sn = new BigInteger(64, new SecureRandom());
+			X500Name owner = new X500Name("CN=" + dn);
+
+			info.set(X509CertInfo.VALIDITY, interval);
+			info.set(X509CertInfo.SERIAL_NUMBER,
+					new CertificateSerialNumber(sn));
+			info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
+			info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
+			info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
+			info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
+			AlgorithmId algo = new AlgorithmId(DEFAULT_CERTIFICATE_ALGORITHM);
+			info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
+
+			// Sign the cert to identify the algorithm that's used.
+			X509CertImpl cert = new X509CertImpl(info);
+			cert.sign(privkey, DEFAULT_CERTIFICATE_ALGORITHM_STRING);
+
+			// Update the algorith, and resign.
+			algo = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
+			info.set(CertificateAlgorithmId.NAME + "."
+					+ CertificateAlgorithmId.ALGORITHM, algo);
+			cert = new X509CertImpl(info);
+			cert.sign(privkey, DEFAULT_CERTIFICATE_ALGORITHM_STRING);
 			return cert;
-		} catch (CertificateEncodingException e) {
-			// TODO Auto-generated catch block
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (CertificateException e) {
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchProviderException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchProviderException e) {
 			e.printStackTrace();
 		} catch (SignatureException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}   // note: private key of CA
+		}
 		return null;
-	}
-
-	public static X509Certificate generateCertificate(X509Certificate caCert, PrivateKey caPrivKey, String certName, KeyPair certKeyPair, int validNbrDays) {
-
-			Date startDate = new Date(System.currentTimeMillis()); // time from which certificate is valid
-			
-			Calendar expiry = Calendar.getInstance();
-			expiry.add(Calendar.DAY_OF_YEAR, validNbrDays);
-			Date expiryDate = expiry.getTime();               // time after which certificate is not valid
-			
-			byte[] bigNum = new byte[1024];
-			(new SecureRandom()).nextBytes(bigNum);
-			BigInteger serialNumber = new BigInteger(bigNum);
-			serialNumber = serialNumber.abs();	// serial number for certificate
-			
-			X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-			X500Principal subjectName = new X500Principal("CN=" + certName);
-
-			certGen.setSerialNumber(serialNumber);
-			certGen.setIssuerDN(caCert.getSubjectX500Principal());
-			certGen.setNotBefore(startDate);
-			certGen.setNotAfter(expiryDate);
-			certGen.setSubjectDN(subjectName);
-			certGen.setPublicKey(certKeyPair.getPublic());
-			certGen.setSignatureAlgorithm(DEFAULT_SIGNATURE_ALGORITHM);
-
-			try {
-				certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-				certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(certKeyPair.getPublic()));
-				X509Certificate cert = certGen.generate(caPrivKey, "BC");   // note: private key of CA
-				return cert;
-			} catch (CertificateParsingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CertificateEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InvalidKeyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchProviderException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SignatureException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
 	}
 	
 	public static X509Certificate readCert(KeyStore ks, String certAlias, String password){
@@ -291,97 +221,10 @@ public class KeyStoreFactory {
 	}
 	
 	
-	public static X509CertificateObject signWithCa(X509Certificate x509Issuer, RSAPrivateCrtKeyParameters caKeyParameters, TBSCertificateStructure tbsCert) {
-		
-		try{
-	        SHA1Digest digester = new SHA1Digest();
-	
-	        AsymmetricBlockCipher rsa = new PKCS1Encoding(new RSAEngine());
-	        ByteArrayOutputStream  bOut = new ByteArrayOutputStream();
-	        DEROutputStream dOut = new DEROutputStream(bOut);
-	        
-			DERObjectIdentifier sigOID = X509Util.getAlgorithmOID("SHA1WithRSAEncryption");
-			AlgorithmIdentifier sigAlgId = new AlgorithmIdentifier(sigOID, new DERNull());
-	
-	        dOut.writeObject(tbsCert);
-	
-	        byte[] signature;
-	
-	        byte[] certBlock = bOut.toByteArray();
-	
-	        // first create digest
-	        digester.update(certBlock, 0, certBlock.length);
-	        byte[] hash = new byte[digester.getDigestSize()];
-	        digester.doFinal(hash, 0);
-	
-	        // and sign that
-	        rsa.init(true, caKeyParameters);
-	        DigestInfo dInfo = new DigestInfo( new AlgorithmIdentifier(X509ObjectIdentifiers.id_SHA1, null), hash);
-	        byte[] digest = dInfo.getEncoded(ASN1Encodable.DER);
-	        signature = rsa.processBlock(digest, 0, digest.length);
-	
-	        ASN1EncodableVector v = new ASN1EncodableVector();
-	        v.add(tbsCert);
-	        v.add(sigAlgId);
-	        v.add(new DERBitString(signature));
-	        X509CertificateObject clientCert = new X509CertificateObject(new X509CertificateStructure(new DERSequence(v))); 
-	        
-	        
-			try {
-				clientCert.verify(x509Issuer.getPublicKey());
-			} catch (Exception e) {
-				System.out.println("Failed to verify client certificate against caCert");
-				e.printStackTrace();
-			}
-	        return clientCert;
-        
-		} catch(IOException e){
-			e.printStackTrace();
-		} catch (InvalidCipherTextException e) {
-			e.printStackTrace();
-		} catch (CertificateParsingException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public static PKCS10CertificationRequest createCSR(String name, KeyPair csrKeyPair){
-		X500Principal subjectName = new X500Principal("CN=" + name);
-
-		try {
-			PKCS10CertificationRequest kpGen = new PKCS10CertificationRequest(
-				DEFAULT_SIGNATURE_ALGORITHM,
-				subjectName,
-				csrKeyPair.getPublic(),
-				null,
-				csrKeyPair.getPrivate());
-			return kpGen;
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchProviderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SignatureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 	public static KeyStore writeCACertToKeyStore(KeyStore keyStore, String keyPassword, String alias, PrivateKey caPrivKey, X509Certificate caCert){
         try {
-        	
-        PKCS12BagAttributeCarrier bagCert = (X509CertificateObject) caCert;
-        bagCert.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName,
-                new DERBMPString(alias));
-        
-        bagCert.setBagAttribute(
-                PKCSObjectIdentifiers.pkcs_9_at_localKeyId,
-                new SubjectKeyIdentifierStructure(caCert.getPublicKey()));
+       
 
         X509Certificate[] chain = new X509Certificate[1];
         chain[0] = caCert;
@@ -403,62 +246,6 @@ public class KeyStoreFactory {
 		return null;
 	}
 	
-	public static KeyStore writeCertToStore(KeyStore keyStore, String keyPassword, String alias, PrivateKey userPrivKey, X509Certificate clientCert, X509Certificate caCert){
-        
-		try {
-			clientCert.verify(caCert.getPublicKey());
-		} catch (Exception e) {
-			System.out.println("Failed to verify client certificate against caCert");
-			e.printStackTrace();
-		}
-        
-        try {
-        	
-        PKCS12BagAttributeCarrier bagCert = (X509CertificateObject) clientCert;
-        bagCert.setBagAttribute(PKCSObjectIdentifiers.pkcs_9_at_friendlyName,
-                new DERBMPString(alias));
-        
-        bagCert.setBagAttribute(
-                PKCSObjectIdentifiers.pkcs_9_at_localKeyId,
-                new SubjectKeyIdentifierStructure(clientCert.getPublicKey()));
-
-
-        X509Certificate[] chain = new X509Certificate[2];
-
-        // first the client, then the CA certificate
-        chain[0] = clientCert;
-        chain[1] = caCert;
-
-       
-
-        keyStore.setKeyEntry(alias, userPrivKey, keyPassword.toCharArray(), chain);
-        keyStore.store(new FileOutputStream(DEFAULT_KEYSTORE_LOCATION), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-        try {
-        	clientCert.verify(chain[1].getPublicKey());
-		} catch (InvalidKeyException e) {
-			System.out.println("Unable to verify clientCert against caCert");
-			e.printStackTrace();
-		} catch (NoSuchProviderException e) {
-			System.out.println("Unable to verify clientCert against caCert");
-			e.printStackTrace();
-		} catch (SignatureException e) {
-			System.out.println("Unable to verify clientCert against caCert");
-			e.printStackTrace();
-		}
-        return keyStore;
-        } catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (CertificateException e) {
-			e.printStackTrace();
-		} catch (KeyStoreException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 	public static synchronized KeyStore getDefaultKeyStore(){
 		if (_keystore == null){
