@@ -13,30 +13,47 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
-public class StatHandler implements RequestHandler {
+/*
+ *  Copyright 2011 hottuna (dev@robertfoss.se)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
-	private String[] requiredArgs = {"stat", "period"};
+public class GetRateHandler implements RequestHandler {
+
+	private String[] requiredArgs = {"Stat", "Period"};
 	// Reports the method names of the handled requests
 	public String[] handledRequests() {
-		return new String[]{"getRate"};
+		return new String[]{"GetRate"};
 	}
 	
 	// Processes the requests
 	public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-		if (req.getMethod().equals("getRate")) {
+		if (req.getMethod().equals("GetRate")) {
 			JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req);
 			if (err != null)
 				return new JSONRPC2Response(err, req.getID());
 			
 			HashMap inParams = (HashMap) req.getParams();
 			
-			String input = (String) inParams.get("stat");
+			String input = (String) inParams.get("Stat");
 			if (input == null){
 				return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
 			}
 			long period;
 			try{
-				period = (Long) inParams.get("period");
+				period = (Long) inParams.get("Period");
 			} catch (NumberFormatException e){
 				return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
 			}
@@ -53,7 +70,7 @@ public class StatHandler implements RequestHandler {
 			if (rate.getRate(period) == null)
 				return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
 			Map outParams = new HashMap();
-			outParams.put("result", rate.getRate(period).getAverageValue());
+			outParams.put("Result", rate.getRate(period).getAverageValue());
 			return new JSONRPC2Response(outParams, req.getID());
 		}
 		return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());

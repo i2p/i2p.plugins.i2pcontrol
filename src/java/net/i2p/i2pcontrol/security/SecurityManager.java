@@ -29,7 +29,6 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 import sun.misc.BASE64Encoder;
 
@@ -140,7 +139,8 @@ public class SecurityManager {
 		SHA256Generator hashGen = new SHA256Generator(I2PAppContext.getGlobalContext());
 		byte[] bytes = string.getBytes();
 		bytes = hashGen.calculateHash(bytes).toByteArray();
-		return new String(Base64.encode(bytes));
+		BASE64Encoder encoder = new BASE64Encoder();
+		return encoder.encodeBuffer(bytes).trim();
 	}
 	
 	

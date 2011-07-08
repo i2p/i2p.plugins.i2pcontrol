@@ -13,7 +13,7 @@ public class AuthToken {
 	
 	public AuthToken(String password){
 		String hash = SecurityManager.getPasswdHash(password);
-		this.id = SecurityManager.getHash(hash+ Calendar.getInstance().getTime());
+		this.id = SecurityManager.getHash(hash + Calendar.getInstance().getTimeInMillis());
 		Calendar expiry = Calendar.getInstance();
 		expiry.add(Calendar.DAY_OF_YEAR, VALIDITY_TIME);
 		this.expiry = expiry.getTime();

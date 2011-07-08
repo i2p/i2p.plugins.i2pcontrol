@@ -30,9 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 import net.i2p.I2PAppContext;
 import net.i2p.util.Log;
 
-import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.AuthHandler;
+import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.AuthenticateHandler;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.EchoHandler;
-import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.StatHandler;
+import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.GetRateHandler;
+import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.NetworkSettingHandler;
+import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.OLDNetworkInfoHandler;
 
 import com.thetransactioncompany.jsonrpc2.*;
 import com.thetransactioncompany.jsonrpc2.server.*;
@@ -57,8 +59,9 @@ public class JSONRPC2Servlet extends HttpServlet{
 		
 		disp = new Dispatcher();
 		disp.register(new EchoHandler());
-		disp.register(new StatHandler());
-		disp.register(new AuthHandler());
+		disp.register(new GetRateHandler());
+		disp.register(new AuthenticateHandler());
+		disp.register(new NetworkSettingHandler());
 	}
 	
 	@Override

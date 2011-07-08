@@ -12,23 +12,23 @@ import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
 public class EchoHandler implements RequestHandler {
 
-	private String[] requiredArgs = {"echo"};
+	private String[] requiredArgs = {"Echo"};
 	// Reports the method names of the handled requests
 	public String[] handledRequests() {
-		return new String[]{"echo"};
+		return new String[]{"Echo"};
 	}
 	
 	// Processes the requests
 	public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-		if (req.getMethod().equals("echo")) {
+		if (req.getMethod().equals("Echo")) {
 			JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req);
 			if (err != null)
 				return new JSONRPC2Response(err, req.getID());
 			
 			HashMap inParams = (HashMap) req.getParams();
-			String echo = (String) inParams.get("echo");
+			String echo = (String) inParams.get("Echo");
 			Map outParams = new HashMap();
-			outParams.put("result", echo);
+			outParams.put("Result", echo);
 			return new JSONRPC2Response(outParams, req.getID());
 		}
 		else {

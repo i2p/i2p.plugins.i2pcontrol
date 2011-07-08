@@ -13,24 +13,41 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
-public class AuthHandler implements RequestHandler {
+/*
+ *  Copyright 2011 hottuna (dev@robertfoss.se)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
 
-	private String[] requiredArgs = {"password"};
+public class AuthenticateHandler implements RequestHandler {
+
+	private String[] requiredArgs = {"Password"};
 	// Reports the method names of the handled requests
 	public String[] handledRequests() {
-		return new String[]{"authenticate"};
+		return new String[]{"Authenticate"};
 	}
 	
 	// Processes the requests
 	public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-		if (req.getMethod().equals("authenticate")) {
+		if (req.getMethod().equals("Authenticate")) {
 			JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req, JSONRPC2Helper.USE_NO_AUTH);
 			if (err != null)
 				return new JSONRPC2Response(err, req.getID());
 			
 			HashMap inParams = (HashMap) req.getParams();
 			
-			String pwd = (String) inParams.get("password");
+			String pwd = (String) inParams.get("Password");
 			
 			// Try get an AuthToken
 			AuthToken token = SecurityManager.validatePasswd(pwd);
@@ -39,7 +56,7 @@ public class AuthHandler implements RequestHandler {
 			}
 			
 			Map outParams = new HashMap();
-			outParams.put("token", token.getId());				
+			outParams.put("Token", token.getId());				
 			return new JSONRPC2Response(outParams, req.getID());
 		} else {
 			// Method name not supported

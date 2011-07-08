@@ -7,6 +7,7 @@
     <path id="cp">
         <pathelement path="${java.class.path}" />
         <pathelement location="${i2plib}/i2p.jar" />
+        <pathelement location="${i2plib}/router.jar" />
         <pathelement location="${i2plib}/i2ptunnel.jar" />
         <pathelement location="${jettylib}/ant.jar"/>
         <pathelement location="${jettylib}/org.mortbay.jetty.jar"/>
@@ -15,6 +16,8 @@
         <pathelement location="${jettylib}/javax.servlet.jar" />
         <pathelement location="${jettylib}/commons-logging.jar" />
         <pathelement location="${jettylib}/commons-el.jar" />
+		<pathelement location="${jettylib}/javax.servlet.jar" />
+		<pathelement location="${i2plib}/org.mortbay.jetty.jar" />
     </path>
 
     <target name="all" depends="clean, build" />
@@ -31,8 +34,9 @@
             srcdir="./java" 
             debug="true" deprecation="on" source="1.5" target="1.5" 
             destdir="./build/obj" 
-            classpath="${i2plib}/i2p.jar:${jettylib}/javax.servlet.jar:${i2plib}/org.mortbay.jetty.jar" >
+            classpath="${cp}" >
             <compilerarg line="${javac.compilerargs}" />
+			<classpath refid="cp"/>
         </javac>
     </target>
 

@@ -23,9 +23,11 @@ import java.util.Calendar;
 import java.util.logging.LogManager;
 
 import net.i2p.I2PAppContext;
+import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.i2pcontrol.security.KeyStoreInitializer;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
+import net.i2p.i2pcontrol.util.IsJar;
 import net.i2p.util.Log;
 
 import org.mortbay.http.SslListener;
@@ -68,16 +70,24 @@ public class I2PControlController{
         //File pluginDir = new File(args[1]);
         //if (!pluginDir.exists())
         //    throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
-    	I2PAppContext.getGlobalContext().logManager().setDefaultLimit(Log.STR_DEBUG);
     	
+    	// Enables devtime settings
+    	if (!IsJar.isRunningJar()){
+    		System.out.println("Running from non-jar");
+    		_conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
+    		_conf.getConf("i2p.listen.port", 5555);
+    		I2PAppContext.getGlobalContext().logManager().setDefaultLimit(Log.STR_DEBUG);
+    	}
+
         _server = new Server();
         try {
         	SslListener ssl = new SslListener();
         	ssl.setProvider(SecurityManager.getSecurityProvider());
         	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
-        	// FIXME: Change to use new ConrigurationManager.
-        	ssl.setInetAddrPort(new InetAddrPort(Settings.getListenIP(), Settings.getListenPort()));
-        	ssl.setWantClientAuth(false); // Don't care about client authetication.
+        	ssl.setInetAddrPort(new InetAddrPort(
+        			_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
+        			_conf.getConf("i2p.listen.port", 7560)));
+        	ssl.setWantClientAuth(false); // Don't care about client authentication.
         	ssl.setPassword(SecurityManager.getKeyStorePassword());
         	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
         	ssl.setKeystoreType(SecurityManager.getKeyStoreType());

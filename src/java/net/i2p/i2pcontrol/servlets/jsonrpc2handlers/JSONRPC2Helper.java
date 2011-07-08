@@ -10,6 +10,23 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 
+/*
+ *  Copyright 2011 hottuna (dev@robertfoss.se)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 public class JSONRPC2Helper {
 	public final static Boolean USE_NO_AUTH = false;
 	public final static Boolean USE_AUTH = true;
@@ -71,7 +88,7 @@ public class JSONRPC2Helper {
 	 * @return null if everything is fine, JSONRPC2Error for any corresponding error.
 	 */
 	private static JSONRPC2Error validateToken(HashMap params){
-		String tokenID = (String) params.get("token");
+		String tokenID = (String) params.get("Token");
 		if (tokenID == null){
 			return JSONRPC2ExtendedError.NO_TOKEN;
 		}
