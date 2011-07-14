@@ -1,6 +1,5 @@
 package net.i2p.i2pcontrol.security;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -18,18 +16,12 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
 import java.util.Date;
-
-import javax.security.auth.x500.X500Principal;
 
 import sun.security.util.ObjectIdentifier;
 import sun.security.x509.AlgorithmId;
@@ -105,7 +97,7 @@ public class KeyStoreFactory {
 			X509CertImpl cert = new X509CertImpl(info);
 			cert.sign(privkey, DEFAULT_CERTIFICATE_ALGORITHM_STRING);
 
-			// Update the algorith, and resign.
+			// Update the algorithm, and resign.
 			algo = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
 			info.set(CertificateAlgorithmId.NAME + "."
 					+ CertificateAlgorithmId.ALGORITHM, algo);

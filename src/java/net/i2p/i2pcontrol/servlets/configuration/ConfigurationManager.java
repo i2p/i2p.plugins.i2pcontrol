@@ -47,15 +47,15 @@ public class ConfigurationManager {
 	}
 	
 	/**
-	 * Collects arguments of the form --word, --word=otherword and -blah
+	 * Collects settingNameuments of the form --word, --word=otherword and -blah
 	 * to determine user parameters.
-	 * @param args Command line arguments to the application
+	 * @param settingNames Command line settingNameuments to the application
 	 */
-	public void loadArguments(String[] args) {
-		for(int i=0; i<args.length; i++) {
-			String arg = args[i];
-			if(arg.startsWith("--")) {
-				parseConfigStr(arg.substring(2));
+	public void loadsettingNameuments(String[] settingNames) {
+		for(int i=0; i<settingNames.length; i++) {
+			String settingName = settingNames[i];
+			if(settingName.startsWith("--")) {
+				parseConfigStr(settingName.substring(2));
 			}
 		}
 	}
@@ -135,16 +135,16 @@ public class ConfigurationManager {
 	
 	/**
 	 * Check if a specific boolean configuration exists.
-	 * @param arg The key for the configuration.
+	 * @param settingName The key for the configuration.
 	 * @param defaultValue If the configuration is not found, we use a default value.
 	 * @return The value of a configuration: true if found, defaultValue if not found.
 	 */
-	public boolean getConf(String arg, boolean defaultValue) {
-		Boolean value = booleanConfigurations.get(arg);
+	public boolean getConf(String settingName, boolean defaultValue) {
+		Boolean value = booleanConfigurations.get(settingName);
 		if(value != null) {
 			return value;
 		} else {
-			booleanConfigurations.put(arg, defaultValue);
+			booleanConfigurations.put(settingName, defaultValue);
 			return defaultValue;
 		}
 	}
@@ -152,33 +152,60 @@ public class ConfigurationManager {
 	
 	/**
 	 * Check if a specific boolean configuration exists.
-	 * @param arg The key for the configuration.
+	 * @param settingName The key for the configuration.
 	 * @param defaultValue If the configuration is not found, we use a default value.
 	 * @return The value of a configuration: true if found, defaultValue if not found.
 	 */
-	public int getConf(String arg, int defaultValue) {
-		Integer value = integerConfigurations.get(arg);
+	public int getConf(String settingName, int defaultValue) {
+		Integer value = integerConfigurations.get(settingName);
 		if(value != null) {
 			return value;
 		} else {
-			integerConfigurations.put(arg, defaultValue);
+			integerConfigurations.put(settingName, defaultValue);
 			return defaultValue;
 		}
 	}
 	
 	/**
 	 * Get a specific String configuration.
-	 * @param arg The key for the configuration.
+	 * @param settingName The key for the configuration.
 	 * @param defaultValue If the configuration is not found, we use a default value.
 	 * @return The value of the configuration, or the defaultValue.
 	 */
-	public String getConf(String arg, String defaultValue) {
-		String value = stringConfigurations.get(arg);
+	public String getConf(String settingName, String defaultValue) {
+		String value = stringConfigurations.get(settingName);
 		if(value != null) {
 			return value;
 		} else {
-			stringConfigurations.put(arg, defaultValue);
+			stringConfigurations.put(settingName, defaultValue);
 			return defaultValue;
 		}
+	}
+	
+	/**
+	 * Set a specific int setting
+	 * @param settingName
+	 * @param nbr
+	 */
+	public void setConf(String settingName, int nbr){
+		integerConfigurations.put(settingName, nbr);
+	}
+	
+	/**
+	 * Set a specific string setting
+	 * @param settingName
+	 * @param string
+	 */
+	public void setConf(String settingName, String str){
+		stringConfigurations.put(settingName, str);
+	}
+	
+	/**
+	 * Set a specific boolean setting
+	 * @param settingName
+	 * @param boolean
+	 */
+	public void setConf(String settingName, boolean bool){
+		booleanConfigurations.put(settingName, bool);
 	}
 }

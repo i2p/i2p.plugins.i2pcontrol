@@ -75,7 +75,7 @@ public class I2PControlController{
     	if (!IsJar.isRunningJar()){
     		System.out.println("Running from non-jar");
     		_conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
-    		_conf.getConf("i2p.listen.port", 5555);
+    		_conf.getConf("i2pcontrol.listen.port", 5555);
     		I2PAppContext.getGlobalContext().logManager().setDefaultLimit(Log.STR_DEBUG);
     	}
 
@@ -86,7 +86,7 @@ public class I2PControlController{
         	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
         	ssl.setInetAddrPort(new InetAddrPort(
         			_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
-        			_conf.getConf("i2p.listen.port", 7560)));
+        			_conf.getConf("i2pcontrol.listen.port", 7560)));
         	ssl.setWantClientAuth(false); // Don't care about client authentication.
         	ssl.setPassword(SecurityManager.getKeyStorePassword());
         	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
@@ -101,7 +101,7 @@ public class I2PControlController{
 	        context.addServlet("/logs", "net.i2p.i2pcontrol.servlets.LogServlet");
 			_server.start();
         } catch (IOException e) {
-			_log.error("Unable to add listener " + Settings.getListenIP()+":"+Settings.getListenPort() + " - " + e.getMessage());
+			_log.error("Unable to add listener " + _conf.getConf("i2pcontrol.listen.address", "127.0.0.1")+":"+_conf.getConf("i2pcontrol.listen.port", 7560) + " - " + e.getMessage());
 		} catch (ClassNotFoundException e) {
 			_log.error("Unable to find class net.i2p.i2pcontrol.JSONRPCServlet: " + e.getMessage());
 		} catch (InstantiationException e) {
