@@ -3,12 +3,14 @@
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
     <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
+	<property name="wrapperlib" value="${i2pbase}/installer/lib/wrapper/all"/>
 
     <path id="cp">
         <pathelement path="${java.class.path}" />
         <pathelement location="${i2plib}/i2p.jar" />
         <pathelement location="${i2plib}/router.jar" />
         <pathelement location="${i2plib}/i2ptunnel.jar" />
+		<pathelement location="${i2plib}/org.mortbay.jetty.jar" />
         <pathelement location="${jettylib}/ant.jar"/>
         <pathelement location="${jettylib}/org.mortbay.jetty.jar"/>
         <pathelement location="${jettylib}/jasper-compiler.jar" />
@@ -17,7 +19,7 @@
         <pathelement location="${jettylib}/commons-logging.jar" />
         <pathelement location="${jettylib}/commons-el.jar" />
 		<pathelement location="${jettylib}/javax.servlet.jar" />
-		<pathelement location="${i2plib}/org.mortbay.jetty.jar" />
+        <pathelement location="${wrapperlib}/wrapper.jar" />
     </path>
 
     <target name="all" depends="clean, build" />

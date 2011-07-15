@@ -26,6 +26,7 @@ import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.i2pcontrol.security.KeyStoreInitializer;
 import net.i2p.i2pcontrol.security.SecurityManager;
+import net.i2p.i2pcontrol.servlets.JSONRPC2Servlet;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.i2pcontrol.util.IsJar;
 import net.i2p.util.Log;
@@ -78,6 +79,7 @@ public class I2PControlController{
     		_conf.getConf("i2pcontrol.listen.port", 5555);
     		I2PAppContext.getGlobalContext().logManager().setDefaultLimit(Log.STR_DEBUG);
     	}
+    	I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG); // Delete me
 
         _server = new Server();
         try {
@@ -86,7 +88,7 @@ public class I2PControlController{
         	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
         	ssl.setInetAddrPort(new InetAddrPort(
         			_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
-        			_conf.getConf("i2pcontrol.listen.port", 7560)));
+        			_conf.getConf("i2pcontrol.listen.port", 7650)));
         	ssl.setWantClientAuth(false); // Don't care about client authentication.
         	ssl.setPassword(SecurityManager.getKeyStorePassword());
         	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
@@ -115,6 +117,7 @@ public class I2PControlController{
 
     
     private static void stop() {
+    	_conf.writeConfFile();
     	try {
 			if (_server != null)
 				_server.stop();
@@ -122,6 +125,5 @@ public class I2PControlController{
 		} catch (InterruptedException e) {
 			_log.error("Stopping server" + e);
 		}
-    	_conf.writeConfFile();
     }
 }

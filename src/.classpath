@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="/home/hottuna/Apps/i2p/lib/javax.servlet.jar"/>
 	<classpathentry kind="lib" path="/home/hottuna/Apps/i2p/lib/commons-logging.jar"/>
 	<classpathentry kind="lib" path="/home/hottuna/Apps/i2p/lib/router.jar"/>
+	<classpathentry kind="lib" path="/home/hottuna/Apps/i2p/lib/wrapper.jar"/>
 	<classpathentry kind="output" path="build/obj"/>
 </classpath>

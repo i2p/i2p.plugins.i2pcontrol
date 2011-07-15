@@ -29,12 +29,9 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-
-import sun.misc.BASE64Encoder;
-
-
 import net.i2p.I2PAppContext;
 import net.i2p.crypto.SHA256Generator;
+import net.i2p.data.Base64;
 import net.i2p.i2pcontrol.security.jbcrypt.BCrypt;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.util.Log;
@@ -110,9 +107,8 @@ public class SecurityManager {
 	 * @return base64 encode of X509Certificate
 	 */
 	private static String getBase64FromCert(X509Certificate cert){
-		BASE64Encoder encoder = new BASE64Encoder();
 		try {
-			return encoder.encodeBuffer(cert.getEncoded());
+			return Base64.encode(cert.getEncoded());
 		} catch (CertificateEncodingException e) {
 			e.printStackTrace();
 		}
@@ -139,8 +135,7 @@ public class SecurityManager {
 		SHA256Generator hashGen = new SHA256Generator(I2PAppContext.getGlobalContext());
 		byte[] bytes = string.getBytes();
 		bytes = hashGen.calculateHash(bytes).toByteArray();
-		BASE64Encoder encoder = new BASE64Encoder();
-		return encoder.encodeBuffer(bytes).trim();
+		return Base64.encode(bytes);
 	}
 	
 	
