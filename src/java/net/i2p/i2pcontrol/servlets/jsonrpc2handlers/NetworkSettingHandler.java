@@ -41,6 +41,7 @@ import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
 public class NetworkSettingHandler implements RequestHandler {
     private static final int BW_BURST_PCT = 110;
+    private static final int BW_BURST_TIME = 20;
     private static RouterContext _context;
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(NetworkSettingHandler.class);
     
@@ -220,9 +221,12 @@ public class NetworkSettingHandler implements RequestHandler {
 									req.getID());
 				}
 				Integer burstRate = (rate * BW_BURST_PCT)/100;
+				Integer burstSize = (burstRate * BW_BURST_TIME);
 				if (oldBWIn == null || !oldBWIn.equals(rate.toString())){
+					_context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH, rate.toString());
 	                _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_INBOUND_BURST_BANDWIDTH, burstRate.toString());
-	                _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH_PEAK, rate.toString());
+	                _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH_PEAK, burstSize.toString());
+	                _context.bandwidthLimiter().reinitialize();
 				}
 				settingsSaved = true;
 			} else {
@@ -244,9 +248,12 @@ public class NetworkSettingHandler implements RequestHandler {
 									req.getID());
 				}
 				Integer burstRate = (rate * BW_BURST_PCT)/100;
+				Integer burstSize = (burstRate * BW_BURST_TIME);
 				if (oldBWOut == null || !oldBWOut.equals(rate.toString())){
+					_context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH, rate.toString());
 	                _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_OUTBOUND_BURST_BANDWIDTH, burstRate.toString());
-	                _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH_PEAK, rate.toString());
+	                _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH_PEAK, burstSize.toString());
+	                _context.bandwidthLimiter().reinitialize();
 				}
 				settingsSaved = true;
 			} else {
@@ -264,6 +271,8 @@ public class NetworkSettingHandler implements RequestHandler {
 				outParams.put("i2p.router.net.laptopmode", oldLaptopMode);
 			}
 		}
+		
+        
 		outParams.put("SettingsSaved", settingsSaved);
 		outParams.put("RestartNeeded", restartNeeded);
 		return new JSONRPC2Response(outParams, req.getID());

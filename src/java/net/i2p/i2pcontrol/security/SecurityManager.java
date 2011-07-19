@@ -58,7 +58,7 @@ public class SecurityManager {
 		// Start running periodic task after 20 minutes, run periodically every 10th minute.
 		timer.scheduleAtFixedRate(new Sweeper(), 1000*60*20, 1000*60*10);
 
-		// Get supported SSL copher suites.
+		// Get supported SSL cipher suites.
 		SocketFactory SSLF = SSLSocketFactory.getDefault();
 		try{
 			SSL_CIPHER_SUITES =  ((SSLSocket)SSLF.createSocket()).getSupportedCipherSuites();
@@ -155,6 +155,22 @@ public class SecurityManager {
 		}
 	}
 	
+	/**
+	 * Set new password. Old tokens will NOT remain valid, to encourage the new password being tested.
+	 * @param newPasswd
+	 * @return Returns true if a new password was set.
+	 */
+	public static boolean setPasswd(String newPasswd){
+		String newHash = getPasswdHash(newPasswd);
+		String oldHash = ConfigurationManager.getInstance().getConf("auth.password", DEFAULT_AUTH_PASSWORD);
+
+		if (!newHash.equals(oldHash)){
+			ConfigurationManager.getInstance().setConf("auth.password", newHash);
+			authTokens.clear();
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Checks whether the AuthToken with the given ID exists and if it does whether is has expired.

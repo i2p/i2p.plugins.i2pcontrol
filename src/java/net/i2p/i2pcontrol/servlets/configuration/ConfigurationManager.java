@@ -23,9 +23,9 @@ import net.i2p.util.Log;
  *
  */
 public class ConfigurationManager {
-	private static final String DEFAULT_CONFIG_LOCATION = "I2PControl.conf";
+	private static String configLocation = "I2PControl.conf";
+	private static boolean configLocationModified = false;
 	private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(ConfigurationManager.class);
-
 	
 	private static ConfigurationManager instance;
 	//Configurations with a String as value
@@ -35,6 +35,21 @@ public class ConfigurationManager {
 	//Configurations with an Integer as value
 	private static Map<String, Integer> integerConfigurations = new HashMap<String, Integer>();
 
+	
+	/**
+	 * Should only be set before getInstance is first called.
+	 * @param dir
+	 */
+	public static void setConfDir(String dir){
+		if (!configLocationModified){
+			if (dir.endsWith("/")){
+				configLocation = dir + configLocation;
+			} else {
+				configLocation = dir + "/" + configLocation;
+			}
+		}
+	}
+	
 	private ConfigurationManager() {
 		readConfFile();
 	}
@@ -65,16 +80,16 @@ public class ConfigurationManager {
 	 */
 	public static void readConfFile(){
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(DEFAULT_CONFIG_LOCATION));
+			BufferedReader br = new BufferedReader(new FileReader(configLocation));
 			String input;
 			while ((input = br.readLine()) != null){
 				parseConfigStr(input);
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
-			_log.info("Unable to find config file, " + DEFAULT_CONFIG_LOCATION);
+			_log.info("Unable to find config file, " + configLocation);
 		} catch (IOException e) {
-			_log.error("Unable to read from config file, " + DEFAULT_CONFIG_LOCATION);
+			_log.error("Unable to read from config file, " + configLocation);
 		}
 	}
 	
@@ -93,13 +108,13 @@ public class ConfigurationManager {
 			tree.put(e.getKey(), e.getValue().toString());
 		}
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(DEFAULT_CONFIG_LOCATION));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(configLocation));
 			for (Entry<String,String> e : tree.entrySet()){
 				bw.write(e.getKey() + "=" + e.getValue() + "\r\n");
 			}
 			bw.close();
 		} catch (IOException e1) {
-			_log.error("Couldn't open file, " + DEFAULT_CONFIG_LOCATION + " for writing config.");
+			_log.error("Couldn't open file, " + configLocation + " for writing config.");
 		}
 	}
 	

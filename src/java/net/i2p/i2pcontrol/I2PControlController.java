@@ -19,6 +19,7 @@ package net.i2p.i2pcontrol;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.logging.LogManager;
 
@@ -51,7 +52,7 @@ import org.mortbay.util.InetAddrPort;
 public class I2PControlController{
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
     private static Object _lock = new Object();
-    private static ConfigurationManager _conf = ConfigurationManager.getInstance();
+    private static ConfigurationManager _conf;
     private static Server _server;
     
     
@@ -68,10 +69,13 @@ public class I2PControlController{
 
 
     private static void start(String args[]) {
-        //File pluginDir = new File(args[1]);
-        //if (!pluginDir.exists())
-        //    throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
+        File pluginDir = new File(args[1]);
+        if (!pluginDir.exists())
+            throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
     	
+        ConfigurationManager.setConfDir(pluginDir.getAbsolutePath());
+        _conf = ConfigurationManager.getInstance();
+        
     	// Enables devtime settings
     	if (!IsJar.isRunningJar()){
     		System.out.println("Running from non-jar");
@@ -80,29 +84,10 @@ public class I2PControlController{
     		I2PAppContext.getGlobalContext().logManager().setDefaultLimit(Log.STR_DEBUG);
     	}
     	I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG); // Delete me
-
-        _server = new Server();
-        try {
-        	SslListener ssl = new SslListener();
-        	ssl.setProvider(SecurityManager.getSecurityProvider());
-        	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
-        	ssl.setInetAddrPort(new InetAddrPort(
-        			_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
-        			_conf.getConf("i2pcontrol.listen.port", 7650)));
-        	ssl.setWantClientAuth(false); // Don't care about client authentication.
-        	ssl.setPassword(SecurityManager.getKeyStorePassword());
-        	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
-        	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
-        	ssl.setKeystore((new File(SecurityManager.getKeyStoreLocation())).getAbsolutePath());
-        	ssl.setName("SSL Listener");
-        	_server.addListener(ssl);
-        	
-	        ServletHttpContext context = (ServletHttpContext) _server.getContext("/");
-	        context.addServlet("/", "net.i2p.i2pcontrol.servlets.SettingsServlet");
-	        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPC2Servlet");
-	        context.addServlet("/logs", "net.i2p.i2pcontrol.servlets.LogServlet");
-			_server.start();
-        } catch (IOException e) {
+    	
+    	try{
+    		_server = buildServer();
+	    } catch (IOException e) {
 			_log.error("Unable to add listener " + _conf.getConf("i2pcontrol.listen.address", "127.0.0.1")+":"+_conf.getConf("i2pcontrol.listen.port", 7560) + " - " + e.getMessage());
 		} catch (ClassNotFoundException e) {
 			_log.error("Unable to find class net.i2p.i2pcontrol.JSONRPCServlet: " + e.getMessage());
@@ -113,6 +98,62 @@ public class I2PControlController{
 		} catch (Exception e) {
 			_log.error("Unable to start jetty server: " + e.getMessage());
 		}
+    }
+    
+    
+    /**
+     * Builds a new server. Used for changing ports during operation and such.
+     * @return Server - A new server built from current configuration.
+     * @throws UnknownHostException
+     * @throws Exception
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    public static Server buildServer() throws UnknownHostException, Exception, InstantiationException, IllegalAccessException{
+        Server server = new Server();
+
+    	SslListener ssl = new SslListener();
+    	ssl.setProvider(SecurityManager.getSecurityProvider());
+    	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
+    	ssl.setInetAddrPort(new InetAddrPort(
+    			_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
+    			_conf.getConf("i2pcontrol.listen.port", 7650)));
+    	ssl.setWantClientAuth(false); // Don't care about client authentication.
+    	ssl.setPassword(SecurityManager.getKeyStorePassword());
+    	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
+    	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
+    	ssl.setKeystore((new File(SecurityManager.getKeyStoreLocation())).getAbsolutePath());
+    	ssl.setName("SSL Listener");
+    	server.addListener(ssl);
+    	
+        ServletHttpContext context = (ServletHttpContext) server.getContext("/");
+        context.addServlet("/", "net.i2p.i2pcontrol.servlets.SettingsServlet");
+        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPC2Servlet");
+        context.addServlet("/logs", "net.i2p.i2pcontrol.servlets.LogServlet");
+		server.start();
+		
+		return server;
+    }
+    
+    
+    /**
+     * Replaces the current server with a new one. Shuts down the current server after 60 seconds.
+     */
+    public static void setServer(final Server server){
+    	(new Thread(){
+    		@Override
+    		public void run(){
+    			try {
+					Thread.sleep(60*1000);
+				} catch (InterruptedException e1) { }
+    			if (_server != null){
+    				try {
+    					_server.stop();
+    					_server = server;
+    				} catch (InterruptedException e) {}
+    			}
+    		}
+    	}).start();
     }
 
     

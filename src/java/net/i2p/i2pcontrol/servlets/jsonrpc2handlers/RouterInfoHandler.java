@@ -95,8 +95,10 @@ public class RouterInfoHandler implements RequestHandler {
 			Router router = _context.router();
 			if (router == null) {
 				outParams.put("i2p.router.uptime", "[not up]");
-			} else {
-				outParams.put("i2p.router.uptime", DataHelper.formatDuration2(router.getUptime()));
+			} else {				
+				String uptime = DataHelper.formatDuration2(router.getUptime());
+				uptime = uptime.replace("&nbsp;", " ");
+				outParams.put("i2p.router.uptime", uptime);
 			}
 		}
 		
