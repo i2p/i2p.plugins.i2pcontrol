@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.i2p.I2PAppContext;
+import net.i2p.stat.Rate;
 import net.i2p.stat.RateStat;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
@@ -58,19 +59,21 @@ public class GetRateHandler implements RequestHandler {
 				return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
 			}
 
-			RateStat rate = I2PAppContext.getGlobalContext().statManager().getRate(input);
+			RateStat rateStat = I2PAppContext.getGlobalContext().statManager().getRate(input);
 			
 			// If RateStat or the requested period doesn't already exist, create them.
-			if (rate == null || rate.getRate(period) == null){
+			if (rateStat == null || rateStat.getRate(period) == null){
 				long[] tempArr = new long[1];
 				tempArr[0] = period;
 				I2PAppContext.getGlobalContext().statManager().createRequiredRateStat(input, "I2PControl", "I2PControl", tempArr);
-				rate = I2PAppContext.getGlobalContext().statManager().getRate(input);
+				rateStat = I2PAppContext.getGlobalContext().statManager().getRate(input);
 			}
-			if (rate.getRate(period) == null)
+			if (rateStat.getRate(period) == null)
 				return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
 			Map outParams = new HashMap();
-			outParams.put("Result", rate.getRate(period).getAverageValue());
+			Rate rate = rateStat.getRate(period);
+			rate.coalesce();
+			outParams.put("Result", rate.getAverageValue());
 			return new JSONRPC2Response(outParams, req.getID());
 		}
 		return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
