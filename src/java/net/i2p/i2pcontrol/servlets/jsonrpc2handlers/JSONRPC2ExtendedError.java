@@ -86,7 +86,7 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
 	public static final JSONRPC2Error INVALID_TOKEN = new JSONRPC2ExtendedError(-32003, "Authentication token doesn't exist.");
 
 	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(-32004, "Provided authentication token was expired, will be removed.");
+	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(-32004, "Provided authentication token was expired and will be removed.");
 	
 	
 	/** 
