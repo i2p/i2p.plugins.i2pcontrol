@@ -55,12 +55,6 @@ public class JSONRPC2Helper {
 			}
 		}
 		
-		// Validate I2PControl API version.
-		JSONRPC2Error err = validateAPIVersion(params);
-		if (err != null){
-			return err;
-		}
-		
 		// If there exist any required arguments.
 		if (requiredArgs != null && requiredArgs.length > 0){
 			String missingArgs = "";
@@ -111,28 +105,4 @@ public class JSONRPC2Helper {
 		return null;
 	}
 	
-	/**
-	 * Validate the provided I2PControl API version against the ones supported by I2PControl.
-	 */
-	private static JSONRPC2Error validateAPIVersion(HashMap params){
-		
-		Integer apiVersion;
-		try {
-			Object input = params.get("API");
-			apiVersion = ((Long) input).intValue();
-		} catch (ClassCastException e){
-			e.printStackTrace();
-			return JSONRPC2ExtendedError.UNSPECIFIED_API_VERSION;
-		}
-		
-		if (!I2PControlVersion.SUPPORTED_API_VERSIONS.contains(apiVersion)){
-			String supportedAPIVersions = "";
-			for (Integer i : I2PControlVersion.SUPPORTED_API_VERSIONS){
-				supportedAPIVersions += ", "+ i;
-			}
-			return new JSONRPC2Error(JSONRPC2ExtendedError.UNSUPPORTED_API_VERSION.getCode(),
-					"The provided API version \'" + apiVersion + "\' is not supported. The supported versions are" + supportedAPIVersions+".");
-		}
-		return null;
-	}
 }
