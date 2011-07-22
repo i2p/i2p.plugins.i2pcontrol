@@ -22,6 +22,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
@@ -30,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.i2p.I2PAppContext;
 import net.i2p.util.Log;
 
+import net.i2p.i2pcontrol.I2PControlVersion;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.AuthenticateHandler;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.EchoHandler;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.GetRateHandler;
@@ -89,6 +92,7 @@ public class JSONRPC2Servlet extends HttpServlet{
 
 	    	if (msg instanceof JSONRPC2Request) {
 	    		jsonResp = disp.dispatch((JSONRPC2Request)msg, null);
+	    		jsonResp.toJSON().put("API", I2PControlVersion.API_VERSION);
 		    	_log.debug("Request: " + msg);
 		    	_log.debug("Response: " + jsonResp);
 	    	}

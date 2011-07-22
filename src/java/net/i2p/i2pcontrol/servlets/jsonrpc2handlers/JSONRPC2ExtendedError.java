@@ -88,6 +88,13 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
 	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
 	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(-32004, "Provided authentication token was expired and will be removed.");
 	
+	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+	public static final JSONRPC2Error UNSPECIFIED_API_VERSION = new JSONRPC2ExtendedError(-32005, "The version of the I2PControl API wasn't specified, but is required to be specified.");
+	
+	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+	public static final JSONRPC2Error UNSUPPORTED_API_VERSION = new JSONRPC2ExtendedError(-32006, "The version of the I2PControl API specified is not supported by I2PControl.");
+
+	
 	
 	/** 
 	 * Creates a new JSON-RPC 2.0 error with the specified code and 

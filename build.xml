@@ -3,24 +3,26 @@
    
     <target name="all" depends="clean,plugin" />
 
-    <target name="war">
+    <target name="jar">
         <ant dir="src" target="build" />
     </target>
 
-    <target name="plugin" depends="war"> 
+    <target name="plugin" depends="jar"> 
         <!-- get version number -->
         <buildnumber file="scripts/build.number" />
-        <property name="release.number" value="0.0.0" />
+        <property name="release.number" value="0.0.1" />
 
         <!-- make the update xpi2p -->
+		<mkdir dir="plugin/lib"/>
         <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
         <copy file="README.txt" todir="plugin/" overwrite="true" />
         <copy file="scripts/clients.config" todir="plugin/" overwrite="true" />
-		<!--<copy file="scripts/webapps.config" todir="plugin/console/" overwrite="true" /> Console WebApp disabled-->
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
+
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="update-only=true" />
         </exec>
+
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="version=${release.number}-b${build.number}" />
         </exec>
@@ -30,12 +32,7 @@
             <arg value="plugin/lib/I2PControl.jar.pack" />
             <arg value="src/build/I2PControl.jar" />
         </exec>
-        <!--<exec executable="pack200" failonerror="true">
-            <arg value="-no-gzip"/>  //Add a dash
-            <arg value="-effort=9"/> //Add a dash
-            <arg value="plugin/console/webapps/I2PControl.war.pack" />
-            <arg value="src/build/I2PControl.war.jar" />
-        </exec> -->
+
         <exec executable="scripts/makeplugin.sh" failonerror="true" >
             <arg value="plugin" />
         </exec>

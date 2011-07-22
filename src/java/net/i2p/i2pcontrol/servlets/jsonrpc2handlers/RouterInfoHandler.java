@@ -109,6 +109,26 @@ public class RouterInfoHandler implements RequestHandler {
 		if (inParams.containsKey("i2p.router.net.status")) {
 			outParams.put("i2p.router.net.status", getNetworkStatus());
 		}
+		
+		if (inParams.containsKey("i2p.router.net.bw.inbound.1s")) {
+			outParams.put("i2p.router.net.bw.inbound.1s", _context.bandwidthLimiter().getReceiveBps());
+		}
+		
+		if (inParams.containsKey("i2p.router.net.bw.outbound.1s")) {
+			outParams.put("i2p.router.net.bw.outbound.1s", _context.bandwidthLimiter().getSendBps());
+		}
+		
+		if (inParams.containsKey("i2p.router.net.bw.inbound.15s")) {
+			outParams.put("i2p.router.net.bw.inbound.15s", _context.bandwidthLimiter().getReceiveBps15s());
+		}
+		
+		if (inParams.containsKey("i2p.router.net.bw.outbound.15s")) {
+			outParams.put("i2p.router.net.bw.outbound.15s", _context.bandwidthLimiter().getSendBps15s());
+		}
+		
+		if (inParams.containsKey("i2p.router.net.tunnels.participating")) {
+			outParams.put("i2p.router.net.tunnels.participating", _context.tunnelManager().getParticipatingCount());
+		}		
 
 		return new JSONRPC2Response(outParams, req.getID());
 	}

@@ -1,5 +1,6 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
+import net.i2p.i2pcontrol.I2PControlVersion;
 import net.i2p.i2pcontrol.security.*;
 import net.i2p.i2pcontrol.security.SecurityManager;
 
@@ -54,7 +55,13 @@ public class JSONRPC2Helper {
 			}
 		}
 		
-		// If there exist any required arguments
+		// Validate I2PControl API version.
+		JSONRPC2Error err = validateAPIVersion(params);
+		if (err != null){
+			return err;
+		}
+		
+		// If there exist any required arguments.
 		if (requiredArgs != null && requiredArgs.length > 0){
 			String missingArgs = "";
 			for (int i = 0; i < requiredArgs.length; i++){
@@ -100,6 +107,31 @@ public class JSONRPC2Helper {
 			JSONRPC2Error err = new JSONRPC2ExtendedError(JSONRPC2ExtendedError.TOKEN_EXPIRED.getCode(),
 					"Provided authentication token expired "+e.getExpirytime()+", will be removed.");
 			return err;
+		}
+		return null;
+	}
+	
+	/**
+	 * Validate the provided I2PControl API version against the ones supported by I2PControl.
+	 */
+	private static JSONRPC2Error validateAPIVersion(HashMap params){
+		
+		Integer apiVersion;
+		try {
+			Object input = params.get("API");
+			apiVersion = ((Long) input).intValue();
+		} catch (ClassCastException e){
+			e.printStackTrace();
+			return JSONRPC2ExtendedError.UNSPECIFIED_API_VERSION;
+		}
+		
+		if (!I2PControlVersion.SUPPORTED_API_VERSIONS.contains(apiVersion)){
+			String supportedAPIVersions = "";
+			for (Integer i : I2PControlVersion.SUPPORTED_API_VERSIONS){
+				supportedAPIVersions += ", "+ i;
+			}
+			return new JSONRPC2Error(JSONRPC2ExtendedError.UNSUPPORTED_API_VERSION.getCode(),
+					"The provided API version \'" + apiVersion + "\' is not supported. The supported versions are" + supportedAPIVersions+".");
 		}
 		return null;
 	}
