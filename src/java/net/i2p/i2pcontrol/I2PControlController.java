@@ -51,7 +51,6 @@ import org.mortbay.util.InetAddrPort;
  */
 public class I2PControlController{
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
-    private static Object _lock = new Object();
     private static ConfigurationManager _conf;
     private static Server _server;
     
@@ -156,7 +155,7 @@ public class I2PControlController{
 
     
     private static void stop() {
-    	_conf.writeConfFile();
+    	ConfigurationManager.writeConfFile();
     	try {
 			if (_server != null)
 				_server.stop();
