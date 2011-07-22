@@ -127,9 +127,7 @@ public class I2PControlController{
     	server.addListener(ssl);
     	
         ServletHttpContext context = (ServletHttpContext) server.getContext("/");
-        context.addServlet("/", "net.i2p.i2pcontrol.servlets.SettingsServlet");
         context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPC2Servlet");
-        context.addServlet("/logs", "net.i2p.i2pcontrol.servlets.LogServlet");
 		server.start();
 		
 		return server;
