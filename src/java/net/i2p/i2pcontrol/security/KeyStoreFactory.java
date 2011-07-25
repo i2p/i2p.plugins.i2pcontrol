@@ -23,6 +23,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import net.i2p.i2pcontrol.I2PControlController;
+
 import sun.security.util.ObjectIdentifier;
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.CertificateAlgorithmId;
@@ -41,7 +43,7 @@ public class KeyStoreFactory {
 	public static final String DEFAULT_CERTIFICATE_ALGORITHM_STRING = "SHA512WithRSA";
 	public static final String DEFAULT_KEYSTORE_TYPE = "JKS";
 	public static final String DEFAULT_KEYSTORE_PROVIDER = "SUN";
-	public static final String DEFAULT_KEYSTORE_LOCATION = "key.store";
+	public static final String DEFAULT_KEYSTORE_NAME = "key.store";
 	public static final String DEFAULT_KEYSTORE_PASSWORD = "nut'nfancy";
 	public static final String DEFAULT_KEYSTORE_ALGORITHM  = "SunX509";
 	private static KeyStore _keystore = null;
@@ -222,7 +224,8 @@ public class KeyStoreFactory {
         chain[0] = caCert;
 
         keyStore.setKeyEntry(alias, caPrivKey, keyPassword.toCharArray(), chain);
-        keyStore.store(new FileOutputStream(DEFAULT_KEYSTORE_LOCATION), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+		File keyStoreFile = new File(I2PControlController.getPluginDir()+File.separator+DEFAULT_KEYSTORE_NAME);
+        keyStore.store(new FileOutputStream(DEFAULT_KEYSTORE_NAME), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
         return keyStore;
         } catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
@@ -241,15 +244,16 @@ public class KeyStoreFactory {
 	
 	public static synchronized KeyStore getDefaultKeyStore(){
 		if (_keystore == null){
-			_keystore = null;
+			File keyStoreFile = new File(I2PControlController.getPluginDir()+File.separator+DEFAULT_KEYSTORE_NAME);
+			
 			try {
 				_keystore = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
-				if ((new File(DEFAULT_KEYSTORE_LOCATION)).exists()){
-					InputStream is = new FileInputStream(DEFAULT_KEYSTORE_LOCATION);
+				if (keyStoreFile.exists()){
+					InputStream is = new FileInputStream(keyStoreFile);
 					_keystore.load(is, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
 					return _keystore;
 				} else {
-					throw new IOException("KeyStore file " + DEFAULT_KEYSTORE_LOCATION + "wasn't readable");
+					throw new IOException("KeyStore file " + keyStoreFile.getAbsolutePath() + " wasn't readable");
 				}
 			} catch (Exception e) {
 				// Ignore. Not an issue. Let's just create a new keystore instead.
@@ -257,7 +261,7 @@ public class KeyStoreFactory {
 			try {
 				_keystore = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
 				_keystore.load(null, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-				_keystore.store(new FileOutputStream(DEFAULT_KEYSTORE_LOCATION), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+				_keystore.store(new FileOutputStream(keyStoreFile), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
 				return _keystore;
 			} catch (Exception e){
 				// Log perhaps?
@@ -266,5 +270,10 @@ public class KeyStoreFactory {
 		} else {
 			return _keystore;
 		}
+	}
+	
+	public static String getKeyStoreLocation(){
+		File keyStoreFile = new File(I2PControlController.getPluginDir()+File.separator+DEFAULT_KEYSTORE_NAME);
+		return keyStoreFile.getAbsolutePath();
 	}
 }

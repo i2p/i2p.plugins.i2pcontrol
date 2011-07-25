@@ -51,6 +51,7 @@ import org.mortbay.util.InetAddrPort;
  */
 public class I2PControlController{
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
+    private static String _pluginDir = "";
     private static ConfigurationManager _conf;
     private static Server _server;
     
@@ -58,8 +59,16 @@ public class I2PControlController{
     public static void main(String args[]) {
         if (args.length != 3 || (!"-d".equals(args[0])))
             throw new IllegalArgumentException("Usage: PluginController -d $PLUGIN [start|stop]");
+        
         if ("start".equals(args[2])){
+        	File pluginDir = new File(args[1]);
+        	if (!pluginDir.exists())
+        		throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");        	
+        	_pluginDir = pluginDir.getAbsolutePath();
+        	ConfigurationManager.setConfDir(pluginDir.getAbsolutePath());
+        	_conf = ConfigurationManager.getInstance();
             start(args);
+            
         } else if ("stop".equals(args[2]))
             stop();
         else
@@ -68,13 +77,6 @@ public class I2PControlController{
 
 
     private static void start(String args[]) {
-        File pluginDir = new File(args[1]);
-        if (!pluginDir.exists())
-            throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
-    	
-        ConfigurationManager.setConfDir(pluginDir.getAbsolutePath());
-        _conf = ConfigurationManager.getInstance();
-        
     	// Enables devtime settings
     	if (!IsJar.isRunningJar()){
     		System.out.println("Running from non-jar");
@@ -164,4 +166,9 @@ public class I2PControlController{
 			_log.error("Stopping server" + e);
 		}
     }
+    
+    public static String getPluginDir(){
+    	return _pluginDir;
+    }
+
 }

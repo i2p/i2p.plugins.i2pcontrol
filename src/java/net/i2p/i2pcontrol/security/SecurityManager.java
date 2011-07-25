@@ -79,7 +79,8 @@ public class SecurityManager {
 	}
 	
 	public static String getKeyStoreLocation(){
-		return KeyStoreFactory.DEFAULT_KEYSTORE_LOCATION;
+		
+		return KeyStoreFactory.DEFAULT_KEYSTORE_NAME;
 	}
 	
 	public static String getKeyStorePassword(){
