@@ -36,7 +36,7 @@
             srcdir="./java" 
             debug="true" deprecation="on" source="1.5" target="1.5" 
             destdir="./build/obj" 
-            classpath="${cp}" >
+            classpath="${cp}">
             <compilerarg line="${javac.compilerargs}" />
 			<classpath refid="cp"/>
         </javac>
