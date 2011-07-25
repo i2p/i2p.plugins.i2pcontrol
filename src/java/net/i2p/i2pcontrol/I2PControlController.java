@@ -80,8 +80,8 @@ public class I2PControlController{
     	// Enables devtime settings
     	if (!IsJar.isRunningJar()){
     		System.out.println("Running from non-jar");
-    		_conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
-    		_conf.getConf("i2pcontrol.listen.port", 5555);
+    		_conf.setConf("i2pcontrol.listen.address", "127.0.0.1");
+    		_conf.setConf("i2pcontrol.listen.port", 5555);
     		I2PAppContext.getGlobalContext().logManager().setDefaultLimit(Log.STR_DEBUG);
     	}
     	I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG); // Delete me

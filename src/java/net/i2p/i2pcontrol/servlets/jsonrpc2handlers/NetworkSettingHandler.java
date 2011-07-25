@@ -92,6 +92,7 @@ public class NetworkSettingHandler implements RequestHandler {
 			String oldNTCPPort = _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_PORT);
 			if ((inParam = (String) inParams.get("i2p.router.net.ntcp.port")) != null){
 				if (oldNTCPPort == null || !oldNTCPPort.equals(inParam.trim())){
+					System.out.println("NTCP: " + oldNTCPPort + "->" + inParam);
 					_context.router().setConfigSetting(CommSystemFacadeImpl.PROP_I2NP_NTCP_PORT, inParam);
 					restartNeeded = true;
 				}
@@ -133,9 +134,10 @@ public class NetworkSettingHandler implements RequestHandler {
 			}
 		}
 		if (inParams.containsKey("i2p.router.net.ssu.port")){
-			String oldSSUPort = _context.getProperty(UDPTransport.PROP_EXTERNAL_PORT);
+			String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, UDPTransport.DEFAULT_INTERNAL_PORT);
 			if ((inParam = (String) inParams.get("i2p.router.net.ssu.port")) != null){
 				if (oldSSUPort== null || !oldSSUPort.equals(inParam.trim())){
+					System.out.println("UDP: " + oldSSUPort + "->" + inParam);
 					_context.router().setConfigSetting(UDPTransport.PROP_EXTERNAL_PORT, inParam);
 					_context.router().setConfigSetting(UDPTransport.PROP_INTERNAL_PORT, inParam);
 					restartNeeded = true;
@@ -272,6 +274,8 @@ public class NetworkSettingHandler implements RequestHandler {
 			}
 		}
 		
+		if (settingsSaved)
+			_context.router().saveConfig();
         
 		outParams.put("SettingsSaved", settingsSaved);
 		outParams.put("RestartNeeded", restartNeeded);
