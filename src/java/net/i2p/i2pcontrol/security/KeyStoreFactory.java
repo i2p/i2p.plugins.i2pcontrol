@@ -225,7 +225,7 @@ public class KeyStoreFactory {
 
         keyStore.setKeyEntry(alias, caPrivKey, keyPassword.toCharArray(), chain);
 		File keyStoreFile = new File(I2PControlController.getPluginDir()+File.separator+DEFAULT_KEYSTORE_NAME);
-        keyStore.store(new FileOutputStream(DEFAULT_KEYSTORE_NAME), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+        keyStore.store(new FileOutputStream(keyStoreFile), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
         return keyStore;
         } catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
