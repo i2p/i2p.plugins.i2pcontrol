@@ -25,6 +25,7 @@ import java.util.logging.LogManager;
 
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.router.RouterManager;
+import net.i2p.i2pcontrol.security.KeyStoreFactory;
 import net.i2p.i2pcontrol.security.KeyStoreInitializer;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.JSONRPC2Servlet;
@@ -123,7 +124,7 @@ public class I2PControlController{
     	ssl.setPassword(SecurityManager.getKeyStorePassword());
     	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
     	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
-    	ssl.setKeystore((new File(SecurityManager.getKeyStoreLocation())).getAbsolutePath());
+    	ssl.setKeystore((new File(KeyStoreFactory.getKeyStoreLocation())).getAbsolutePath());
     	ssl.setName("SSL Listener");
     	server.addListener(ssl);
     	

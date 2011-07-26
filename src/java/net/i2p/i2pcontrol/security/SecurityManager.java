@@ -78,11 +78,6 @@ public class SecurityManager {
 		return SSL_PROVIDER;
 	}
 	
-	public static String getKeyStoreLocation(){
-		
-		return KeyStoreFactory.DEFAULT_KEYSTORE_NAME;
-	}
-	
 	public static String getKeyStorePassword(){
 		return KeyStoreFactory.DEFAULT_KEYSTORE_PASSWORD;
 	}
