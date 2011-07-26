@@ -89,7 +89,12 @@ public class RouterInfoHandler implements RequestHandler {
 		Map outParams = new HashMap();
 
 		if (inParams.containsKey("i2p.router.version")) {
-			outParams.put("i2p.router.version", RouterVersion.FULL_VERSION);
+			try {
+			Class rvClass = Class.forName("net.i2p.router.RouterVersion");
+			java.lang.reflect.Field field = rvClass.getDeclaredField("FULL_VERSION");
+			String fullVersion = (String) field.get(new RouterVersion());
+			outParams.put("i2p.router.version", fullVersion);
+			} catch (Exception e){} // Ignore
 		}
 
 		if (inParams.containsKey("i2p.router.uptime")) {
