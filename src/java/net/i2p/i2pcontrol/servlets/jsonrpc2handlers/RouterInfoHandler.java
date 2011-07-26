@@ -73,6 +73,7 @@ public class RouterInfoHandler implements RequestHandler {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private JSONRPC2Response process(JSONRPC2Request req) {
 		JSONRPC2Error err = JSONRPC2Helper.validateParams(null, req);
 		if (err != null)
@@ -128,7 +129,23 @@ public class RouterInfoHandler implements RequestHandler {
 		
 		if (inParams.containsKey("i2p.router.net.tunnels.participating")) {
 			outParams.put("i2p.router.net.tunnels.participating", _context.tunnelManager().getParticipatingCount());
-		}		
+		}
+		
+		if (inParams.containsKey("i2p.router.net.netdb.knownpeers")) {
+			outParams.put("i2p.router.net.netdb.knownpeers", _context.netDb().getKnownRouters());
+		}
+		
+		if (inParams.containsKey("i2p.router.net.netdb.activepeers")) {
+			outParams.put("i2p.router.net.netdb.activepeers", _context.commSystem().countActivePeers());
+		}
+		
+		if (inParams.containsKey("i2p.router.net.netdb.fastpeers")) {
+			outParams.put("i2p.router.net.netdb.fastpeers", _context.profileOrganizer().countFastPeers());
+		}
+		
+		if (inParams.containsKey("i2p.router.net.netdb.highcapacitypeers")) {
+			outParams.put("i2p.router.net.netdb.highcapapcitypeers", _context.profileOrganizer().countHighCapacityPeers());
+		}
 
 		return new JSONRPC2Response(outParams, req.getID());
 	}

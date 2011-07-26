@@ -128,7 +128,6 @@ public class ConfigurationManager {
 		if (eqIndex != -1){
 			String key = str.substring(0, eqIndex).trim().toLowerCase();
 			String value = str.substring(eqIndex+1, str.length()).trim();
-			System.out.println("Key:Value, " + key + ":" + value);
 			//Try parse as integer.
 			try {
 				int i = Integer.parseInt(value);
