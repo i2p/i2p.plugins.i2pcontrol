@@ -95,11 +95,9 @@ public class RouterInfoHandler implements RequestHandler {
 		if (inParams.containsKey("i2p.router.uptime")) {
 			Router router = _context.router();
 			if (router == null) {
-				outParams.put("i2p.router.uptime", "[not up]");
-			} else {				
-				String uptime = DataHelper.formatDuration2(router.getUptime());
-				uptime = uptime.replace("&nbsp;", " ");
-				outParams.put("i2p.router.uptime", uptime);
+				outParams.put("i2p.router.uptime", 0);
+			} else {
+				outParams.put("i2p.router.uptime", router.getUptime());
 			}
 		}
 		
@@ -108,7 +106,7 @@ public class RouterInfoHandler implements RequestHandler {
 		}
 
 		if (inParams.containsKey("i2p.router.net.status")) {
-			outParams.put("i2p.router.net.status", getNetworkStatus());
+			outParams.put("i2p.router.net.status", getNetworkStatus().ordinal());
 		}
 		
 		if (inParams.containsKey("i2p.router.net.bw.inbound.1s")) {
@@ -132,71 +130,90 @@ public class RouterInfoHandler implements RequestHandler {
 		}
 		
 		if (inParams.containsKey("i2p.router.net.netdb.knownpeers")) {
-			outParams.put("i2p.router.net.netdb.knownpeers", _context.netDb().getKnownRouters());
+			// Why max(-1, 0) is used I don't know, it is the implementation used in the router console.
+			outParams.put("i2p.router.netdb.knownpeers", Math.max(_context.netDb().getKnownRouters()-1,0));
 		}
 		
 		if (inParams.containsKey("i2p.router.net.netdb.activepeers")) {
-			outParams.put("i2p.router.net.netdb.activepeers", _context.commSystem().countActivePeers());
+			outParams.put("i2p.router.netdb.activepeers", _context.commSystem().countActivePeers());
 		}
 		
 		if (inParams.containsKey("i2p.router.net.netdb.fastpeers")) {
-			outParams.put("i2p.router.net.netdb.fastpeers", _context.profileOrganizer().countFastPeers());
+			outParams.put("i2p.router.netdb.fastpeers", _context.profileOrganizer().countFastPeers());
 		}
 		
 		if (inParams.containsKey("i2p.router.net.netdb.highcapacitypeers")) {
-			outParams.put("i2p.router.net.netdb.highcapapcitypeers", _context.profileOrganizer().countHighCapacityPeers());
+			outParams.put("i2p.router.netdb.highcapapcitypeers", _context.profileOrganizer().countHighCapacityPeers());
 		}
-
+		
+		if (inParams.containsKey("i2p.router.net.netdb.isreseeding")) {
+			outParams.put("i2p.router.netdb.isreseeding", Boolean.valueOf(System.getProperty("net.i2p.router.web.ReseedHandler.reseedInProgress")).booleanValue());
+		}		
 		return new JSONRPC2Response(outParams, req.getID());
 	}
 
+	private static enum NETWORK_STATUS{
+		OK,
+		TESTING,
+		FIREWALLED,
+		HIDDEN,
+		WARN_FIREWALLED_AND_FAST,
+		WARN_FIREWALLED_AND_FLOODFILL,
+		WARN_FIREWALLED_WITH_INBOUND_TCP,
+		WARN_FIREWALLED_WITH_UDP_DISABLED,
+		ERROR_I2CP,
+		ERROR_CLOCK_SKEW,
+		ERROR_PRIVATE_TCP_ADDRESS,
+		ERROR_SYMMETRIC_NAT,
+		ERROR_UDP_PORT_IN_USE,
+		ERROR_NO_ACTIVE_PEERS_CHECK_CONNECTION_AND_FIREWALL,
+		ERROR_UDP_DISABLED_AND_TCP_UNSET,
+	};
 	
 	// Ripped out of SummaryHelper.java
-	private String getNetworkStatus() {
+	private NETWORK_STATUS getNetworkStatus() {
 		if (_context.router().getUptime() > 60 * 1000
 				&& (!_context.router().gracefulShutdownInProgress())
 				&& !_context.clientManager().isAlive())
-			return ("ERR-Client Manager I2CP Error - check logs");
+			return (NETWORK_STATUS.ERROR_I2CP);
 		long skew = _context.commSystem().getFramedAveragePeerClockSkew(33);
 		// Display the actual skew, not the offset
 		if (Math.abs(skew) > 60 * 1000)
-			return "ERR-Clock Skew of " + Math.abs(skew);
+			return NETWORK_STATUS.ERROR_CLOCK_SKEW;
 		if (_context.router().isHidden())
-			return ("Hidden");
+			return (NETWORK_STATUS.HIDDEN);
 
 		int status = _context.commSystem().getReachabilityStatus();
 		switch (status) {
 		case CommSystemFacade.STATUS_OK:
 			RouterAddress ra = _context.router().getRouterInfo().getTargetAddress("NTCP");
 			if (ra == null || (new NTCPAddress(ra)).isPubliclyRoutable())
-				return "OK";
-			return "ERR-Private TCP Address";
+				return NETWORK_STATUS.OK;
+			return NETWORK_STATUS.ERROR_PRIVATE_TCP_ADDRESS;
 		case CommSystemFacade.STATUS_DIFFERENT:
-			return "ERR-SymmetricNAT";
+			return NETWORK_STATUS.ERROR_SYMMETRIC_NAT;
 		case CommSystemFacade.STATUS_REJECT_UNSOLICITED:
 			if (_context.router().getRouterInfo().getTargetAddress("NTCP") != null)
-				return "WARN-Firewalled with Inbound TCP Enabled";
-			if (((FloodfillNetworkDatabaseFacade) _context.netDb())
-					.floodfillEnabled())
-				return "WARN-Firewalled and Floodfill";
-			if (_context.router().getRouterInfo().getCapabilities()
-					.indexOf('O') >= 0)
-				return "WARN-Firewalled and Fast";
-			return "Firewalled";
+				return NETWORK_STATUS.WARN_FIREWALLED_WITH_INBOUND_TCP;
+			if (((FloodfillNetworkDatabaseFacade) _context.netDb()).floodfillEnabled())
+				return NETWORK_STATUS.WARN_FIREWALLED_AND_FLOODFILL;
+			if (_context.router().getRouterInfo().getCapabilities().indexOf('O') >= 0)
+				return NETWORK_STATUS.WARN_FIREWALLED_AND_FAST;
+			return NETWORK_STATUS.FIREWALLED;
 		case CommSystemFacade.STATUS_HOSED:
-			return "ERR-UDP Port In Use";
+			return NETWORK_STATUS.ERROR_UDP_PORT_IN_USE;
 		case CommSystemFacade.STATUS_UNKNOWN: // fallthrough
 		default:
 			ra = _context.router().getRouterInfo().getTargetAddress("SSU");
 			if (ra == null && _context.router().getUptime() > 5 * 60 * 1000) {
 				if (_context.commSystem().countActivePeers() <= 0)
-					return "ERR-No Active Peers, Check Network Connection and Firewall";
+					return NETWORK_STATUS.ERROR_NO_ACTIVE_PEERS_CHECK_CONNECTION_AND_FIREWALL;
 				else if (_context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_HOSTNAME) == null || _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_PORT) == null)
-					return "ERR-UDP Disabled and Inbound TCP host/port not set";
+					return NETWORK_STATUS.ERROR_UDP_DISABLED_AND_TCP_UNSET;
 				else
-					return "WARN-Firewalled with UDP Disabled";
+					return NETWORK_STATUS.WARN_FIREWALLED_WITH_UDP_DISABLED;
 			}
-			return "Testing";
+			return NETWORK_STATUS.TESTING;
 		}
 	}
 }

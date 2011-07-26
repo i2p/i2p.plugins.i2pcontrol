@@ -16,6 +16,7 @@ import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
 import net.i2p.router.RouterVersion;
 import net.i2p.router.networkdb.kademlia.FloodfillNetworkDatabaseFacade;
+import net.i2p.router.networkdb.reseed.Reseeder;
 import net.i2p.router.transport.CommSystemFacadeImpl;
 import net.i2p.router.transport.FIFOBandwidthRefiller;
 import net.i2p.router.transport.TransportManager;
@@ -47,9 +48,9 @@ import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
  *
  */
 
-public class RouterRunnerHandler implements RequestHandler {
+public class RouterManagerHandler implements RequestHandler {
 	private static RouterContext _context;
-	private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(RouterRunnerHandler.class);
+	private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(RouterManagerHandler.class);
 	
 	private final static int SHUTDOWN_WAIT = 1500;
 
@@ -63,12 +64,12 @@ public class RouterRunnerHandler implements RequestHandler {
 
 	// Reports the method names of the handled requests
 	public String[] handledRequests() {
-		return new String[] { "RouterRunner" };
+		return new String[] { "RouterManager" };
 	}
 
 	// Processes the requests
 	public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-		if (req.getMethod().equals("RouterRunner")) {
+		if (req.getMethod().equals("RouterManager")) {
 			return process(req);
 		} else {
 			// Method name not supported
@@ -149,7 +150,17 @@ public class RouterRunnerHandler implements RequestHandler {
 			return new JSONRPC2Response(outParams, req.getID());
 		}
 		
-		// If no option was elected, return empty message.
+		if (inParams.containsKey("Reseed")){
+			outParams.put("Reseed", null);
+			(new Thread(){
+				@Override
+				public void run(){
+					Reseeder reseeder = new Reseeder(_context);
+					reseeder.requestReseed();
+				}
+			}).start();
+		}
+		
 		return new JSONRPC2Response(outParams, req.getID());
 	}
 	

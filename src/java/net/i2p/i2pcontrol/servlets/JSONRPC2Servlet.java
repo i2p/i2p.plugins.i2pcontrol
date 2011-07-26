@@ -39,7 +39,7 @@ import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.GetRateHandler;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.I2PControlHandler;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.NetworkSettingHandler;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.RouterInfoHandler;
-import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.RouterRunnerHandler;
+import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.RouterManagerHandler;
 
 import com.thetransactioncompany.jsonrpc2.*;
 import com.thetransactioncompany.jsonrpc2.server.*;
@@ -68,7 +68,7 @@ public class JSONRPC2Servlet extends HttpServlet{
 		disp.register(new AuthenticateHandler());
 		disp.register(new NetworkSettingHandler());
 		disp.register(new RouterInfoHandler());
-		disp.register(new RouterRunnerHandler());
+		disp.register(new RouterManagerHandler());
 		disp.register(new I2PControlHandler());
 	}
 	

@@ -124,7 +124,7 @@ public class I2PControlController{
     	ssl.setPassword(SecurityManager.getKeyStorePassword());
     	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
     	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
-    	ssl.setKeystore((new File(KeyStoreFactory.getKeyStoreLocation())).getAbsolutePath());
+    	ssl.setKeystore(KeyStoreFactory.getKeyStoreLocation());
     	ssl.setName("SSL Listener");
     	server.addListener(ssl);
     	
