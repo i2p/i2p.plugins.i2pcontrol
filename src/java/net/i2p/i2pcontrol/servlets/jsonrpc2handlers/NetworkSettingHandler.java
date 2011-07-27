@@ -94,11 +94,20 @@ public class NetworkSettingHandler implements RequestHandler {
 				if (oldNTCPPort == null || !oldNTCPPort.equals(inParam.trim())){
 					System.out.println("NTCP: " + oldNTCPPort + "->" + inParam);
 					_context.router().setConfigSetting(CommSystemFacadeImpl.PROP_I2NP_NTCP_PORT, inParam);
+					_context.router().setConfigSetting(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
+					_context.setProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_PORT, "false"); //
 					restartNeeded = true;
 				}
 				settingsSaved = true;
 			} else{
-				outParams.put("i2p.router.net.ntcp.port", oldNTCPPort);
+	            String sAutoPort = _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_PORT, "true");
+	            boolean oldAutoPort = "true".equalsIgnoreCase(sAutoPort);
+	            if (oldAutoPort){
+	    			String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, UDPTransport.DEFAULT_INTERNAL_PORT);
+					outParams.put("i2p.router.net.ntcp.port", oldSSUPort);
+	            } else {
+	            	outParams.put("i2p.router.net.ntcp.port", oldNTCPPort);
+	            }
 			}
 		}
 		if(inParams.containsKey("i2p.router.net.ntcp.hostname")){
