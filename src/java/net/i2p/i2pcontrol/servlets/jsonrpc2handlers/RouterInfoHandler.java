@@ -134,24 +134,24 @@ public class RouterInfoHandler implements RequestHandler {
 			outParams.put("i2p.router.net.tunnels.participating", _context.tunnelManager().getParticipatingCount());
 		}
 		
-		if (inParams.containsKey("i2p.router.net.netdb.knownpeers")) {
+		if (inParams.containsKey("i2p.router.netdb.knownpeers")) {
 			// Why max(-1, 0) is used I don't know, it is the implementation used in the router console.
 			outParams.put("i2p.router.netdb.knownpeers", Math.max(_context.netDb().getKnownRouters()-1,0));
 		}
 		
-		if (inParams.containsKey("i2p.router.net.netdb.activepeers")) {
+		if (inParams.containsKey("i2p.router.netdb.activepeers")) {
 			outParams.put("i2p.router.netdb.activepeers", _context.commSystem().countActivePeers());
 		}
 		
-		if (inParams.containsKey("i2p.router.net.netdb.fastpeers")) {
+		if (inParams.containsKey("i2p.router.netdb.fastpeers")) {
 			outParams.put("i2p.router.netdb.fastpeers", _context.profileOrganizer().countFastPeers());
 		}
 		
-		if (inParams.containsKey("i2p.router.net.netdb.highcapacitypeers")) {
+		if (inParams.containsKey("i2p.router.netdb.highcapacitypeers")) {
 			outParams.put("i2p.router.netdb.highcapapcitypeers", _context.profileOrganizer().countHighCapacityPeers());
 		}
 		
-		if (inParams.containsKey("i2p.router.net.netdb.isreseeding")) {
+		if (inParams.containsKey("i2p.router.netdb.isreseeding")) {
 			outParams.put("i2p.router.netdb.isreseeding", Boolean.valueOf(System.getProperty("net.i2p.router.web.ReseedHandler.reseedInProgress")).booleanValue());
 		}		
 		return new JSONRPC2Response(outParams, req.getID());
