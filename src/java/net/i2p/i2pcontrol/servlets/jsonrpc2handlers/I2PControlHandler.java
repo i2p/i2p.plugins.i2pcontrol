@@ -1,5 +1,6 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,6 +129,7 @@ public class I2PControlHandler implements RequestHandler {
 				}
 			}
 		}
+		
 		if(inParams.containsKey("i2pcontrol.password")){
 			if ((inParam = (String) inParams.get("i2pcontrol.password")) != null){
 				if (SecurityManager.setPasswd(inParam)){
@@ -135,6 +137,38 @@ public class I2PControlHandler implements RequestHandler {
 					settingsSaved = true;
 				}
 				ConfigurationManager.writeConfFile();
+			}
+		}
+		
+		if(inParams.containsKey("i2pcontrol.address")){
+			String  oldAddress = _conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
+			if ((inParam = (String) inParams.get("i2pcontrol.address")) != null){				
+				if (oldAddress == null || !inParam.equals(oldAddress.toString())){
+					InetAddress newAddress;
+					try {
+						newAddress = InetAddress.getByName(inParam);
+					} catch (UnknownHostException e){
+						return new JSONRPC2Response(
+								new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
+										"\"i2pcontrol.address\" must be a string representing a hostname or ipaddress. " + inParam + " isn't valid."), 
+										req.getID());
+					}
+					try {
+						_conf.setConf("i2pcontrol.listen.address", newAddress.toString());
+						Server server = I2PControlController.buildServer();
+						I2PControlController.setServer(server);
+						ConfigurationManager.writeConfFile();
+						outParams.put("i2pcontrol.address", null);
+						settingsSaved = true;						
+					} catch (Exception e) {
+						_conf.setConf("i2pcontrol.listen.address", oldAddress);
+						return new JSONRPC2Response(
+								new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
+										"\"i2pcontrol.address\" has been set to an invalid address, reverting. "),	req.getID());
+					}
+				}
+			} else {
+				outParams.put("i2pcontrol.address", oldAddress);
 			}
 		}
 		
