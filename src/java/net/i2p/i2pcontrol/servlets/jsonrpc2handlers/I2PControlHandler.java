@@ -165,6 +165,13 @@ public class I2PControlHandler implements RequestHandler {
 						settingsSaved = true;						
 					} catch (Exception e) {
 						_conf.setConf("i2pcontrol.listen.address", oldAddress);
+						Server server;
+						try {
+							server = I2PControlController.buildServer();
+							I2PControlController.setServer(server);
+						} catch (Exception e2){
+							_log.log(Log.CRIT, "Unable to resume server on previous listening ip. Fuckballs." );
+						}
 						_log.error("Client tried to set listen address to, " + newAddress + " which isn't valid", e);
 						return new JSONRPC2Response(
 								new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
