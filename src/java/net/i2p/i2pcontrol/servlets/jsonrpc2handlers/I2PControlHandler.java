@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mortbay.jetty.Server;
+import org.mortbay.util.InetAddrPort;
 
 import net.i2p.I2PAppContext;
 import net.i2p.data.RouterInfo;
@@ -143,10 +144,11 @@ public class I2PControlHandler implements RequestHandler {
 		if(inParams.containsKey("i2pcontrol.address")){
 			String  oldAddress = _conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
 			if ((inParam = (String) inParams.get("i2pcontrol.address")) != null){				
-				if (oldAddress == null || !inParam.equals(oldAddress.toString())){
-					InetAddress newAddress;
+				if ((oldAddress == null || !inParam.equals(oldAddress.toString()) && 
+						(inParam.equals("0.0.0.0") || inParam.equals("127.0.0.1")))){
+					InetAddrPort newAddress;
 					try {
-						newAddress = InetAddress.getByName(inParam);
+						newAddress = new InetAddrPort(inParam ,1000);
 					} catch (UnknownHostException e){
 						return new JSONRPC2Response(
 								new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
@@ -154,7 +156,8 @@ public class I2PControlHandler implements RequestHandler {
 										req.getID());
 					}
 					try {
-						_conf.setConf("i2pcontrol.listen.address", newAddress.toString());
+						_conf.setConf("i2pcontrol.listen.address", inParam);
+						I2PControlController._server.stop();
 						Server server = I2PControlController.buildServer();
 						I2PControlController.setServer(server);
 						ConfigurationManager.writeConfFile();
@@ -162,6 +165,7 @@ public class I2PControlHandler implements RequestHandler {
 						settingsSaved = true;						
 					} catch (Exception e) {
 						_conf.setConf("i2pcontrol.listen.address", oldAddress);
+						_log.error("Client tried to set listen address to, " + newAddress + " which isn't valid", e);
 						return new JSONRPC2Response(
 								new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
 										"\"i2pcontrol.address\" has been set to an invalid address, reverting. "),	req.getID());

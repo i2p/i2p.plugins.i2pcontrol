@@ -54,7 +54,7 @@ public class I2PControlController{
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
     private static String _pluginDir = "";
     private static ConfigurationManager _conf;
-    private static Server _server;
+    public static Server _server;
     
     
     public static void main(String args[]) {
@@ -117,9 +117,8 @@ public class I2PControlController{
     	SslListener ssl = new SslListener();
     	ssl.setProvider(SecurityManager.getSecurityProvider());
     	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
-    	ssl.setInetAddrPort(new InetAddrPort(
-    			_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
-    			_conf.getConf("i2pcontrol.listen.port", 7650)));
+    	ssl.setHost(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"));
+    	ssl.setPort(_conf.getConf("i2pcontrol.listen.port", 7650));
     	ssl.setWantClientAuth(false); // Don't care about client authentication.
     	ssl.setPassword(SecurityManager.getKeyStorePassword());
     	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
