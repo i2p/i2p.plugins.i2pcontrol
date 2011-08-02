@@ -33,6 +33,7 @@ import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.i2pcontrol.util.IsJar;
 import net.i2p.util.Log;
 
+import org.mortbay.http.HttpListener;
 import org.mortbay.http.SslListener;
 import org.mortbay.http.handler.AbstractHttpHandler;
 import org.mortbay.jetty.Server;
@@ -54,7 +55,7 @@ public class I2PControlController{
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
     private static String _pluginDir = "";
     private static ConfigurationManager _conf;
-    public static Server _server;
+    private static Server _server;
     
     
     public static void main(String args[]) {
@@ -114,17 +115,8 @@ public class I2PControlController{
     public static Server buildServer() throws UnknownHostException, Exception, InstantiationException, IllegalAccessException{
         Server server = new Server();
 
-    	SslListener ssl = new SslListener();
-    	ssl.setProvider(SecurityManager.getSecurityProvider());
-    	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
-    	ssl.setHost(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"));
-    	ssl.setPort(_conf.getConf("i2pcontrol.listen.port", 7650));
-    	ssl.setWantClientAuth(false); // Don't care about client authentication.
-    	ssl.setPassword(SecurityManager.getKeyStorePassword());
-    	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
-    	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
-    	ssl.setKeystore(KeyStoreFactory.getKeyStoreLocation());
-    	ssl.setName("SSL Listener");
+    	SslListener ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), 
+    			_conf.getConf("i2pcontrol.listen.port", 7650));
     	server.addListener(ssl);
     	
         ServletHttpContext context = (ServletHttpContext) server.getContext("/");
@@ -134,6 +126,103 @@ public class I2PControlController{
 		return server;
     }
     
+    
+    /**
+     * Creates a SSLListener with all the default options. The listener will use all the default options.
+     * @param address - The address the listener will listen to.
+     * @param port - The port the listener will listen to.
+     * @return - Newly created listener
+     * @throws UnknownHostException
+     */
+    public static SslListener buildSslListener(String address, int port) throws UnknownHostException{
+    	int listeners = 0;
+    	if (_server != null){
+    		listeners = _server.getListeners().length;
+    	}
+    	
+    	SslListener ssl = new SslListener();
+    	ssl.setProvider(SecurityManager.getSecurityProvider());
+    	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
+    	ssl.setHost(address);
+    	ssl.setPort(port);
+    	ssl.setWantClientAuth(false); // Don't care about client authentication.
+    	ssl.setPassword(SecurityManager.getKeyStorePassword());
+    	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
+    	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
+    	ssl.setKeystore(KeyStoreFactory.getKeyStoreLocation());
+    	ssl.setName("SSL Listener-" + ++listeners);
+    	
+    	return ssl;
+    }
+    
+    /**
+     * Add a listener to the server.
+     * @param listener
+     * @throws Exception 
+     */
+    public static void addListener(HttpListener listener) throws Exception{
+    	if (_server != null){
+    		listener.start();
+    		_server.addListener(listener);
+    	}
+    }
+    
+    /**
+     * Remove a listener from the server.
+     * @param listener
+     */
+    public static void removeListener(HttpListener listener){
+    	if (_server != null){
+    		_server.removeListener(listener);
+    	}
+    }
+    
+    /**
+     * Add a listener to the server
+     * If a listener listening to the same port as the provided listener 
+     * uses already exists within the server, replace the one already used by
+     * the server with the provided listener.
+     * @param listener
+     * @throws Exception 
+     */
+    public static void replaceListener(HttpListener listener) throws Exception{
+    	if (_server != null){
+    		for (HttpListener currentListener : _server.getListeners()){
+    			if (currentListener.getPort() == listener.getPort()){
+    				_server.removeListener(currentListener);
+    				try {
+						currentListener.stop();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+    			}
+    		}
+    		listener.start();
+    		_server.addListener(listener);
+    	}
+    }
+    
+    /**
+     * Get all listeners of the server.
+     * @return
+     */
+    public static HttpListener[] getListeners(){
+    	if (_server != null){
+    		return _server.getListeners();
+    	}
+    	return new HttpListener[0];
+    }
+    
+    /**
+     * Removes all listeners
+     */
+    public static void clearListeners(){
+    	if (_server != null){
+	    	for (HttpListener listen : getListeners()){
+	    		_server.removeListener(listen);
+	    	}
+    	}
+    }
     
     /**
      * Replaces the current server with a new one. Shuts down the current server after 60 seconds.
