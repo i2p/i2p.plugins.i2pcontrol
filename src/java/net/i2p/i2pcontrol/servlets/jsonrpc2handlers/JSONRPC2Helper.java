@@ -94,7 +94,7 @@ public class JSONRPC2Helper {
 			return JSONRPC2ExtendedError.NO_TOKEN;
 		}
 		try {
-			SecurityManager.verifyToken(tokenID);
+			SecurityManager.getInstance().verifyToken(tokenID);
 		} catch (InvalidAuthTokenException e){
 			return JSONRPC2ExtendedError.INVALID_TOKEN;
 		} catch (ExpiredAuthTokenException e){

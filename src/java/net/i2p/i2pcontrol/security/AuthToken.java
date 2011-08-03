@@ -8,12 +8,14 @@ import java.util.Date;
 
 public class AuthToken {
 	private static final int VALIDITY_TIME = 1; // Measured in days
+	private SecurityManager _secMan;
 	private String id;
 	private Date expiry;
 	
 	public AuthToken(String password){
-		String hash = SecurityManager.getPasswdHash(password);
-		this.id = SecurityManager.getHash(hash + Calendar.getInstance().getTimeInMillis());
+		_secMan = SecurityManager.getInstance();
+		String hash = _secMan.getPasswdHash(password);
+		this.id = _secMan.getHash(hash + Calendar.getInstance().getTimeInMillis());
 		Calendar expiry = Calendar.getInstance();
 		expiry.add(Calendar.DAY_OF_YEAR, VALIDITY_TIME);
 		this.expiry = expiry.getTime();

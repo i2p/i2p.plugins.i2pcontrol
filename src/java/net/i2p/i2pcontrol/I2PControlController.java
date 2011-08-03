@@ -55,12 +55,13 @@ public class I2PControlController{
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
     private static String _pluginDir = "";
     private static ConfigurationManager _conf;
+    private static SecurityManager _secMan;
     private static Server _server;
     
     
     public static void main(String args[]) {
         if (args.length != 3 || (!"-d".equals(args[0])))
-            throw new IllegalArgumentException("Usage: PluginController -d $PLUGIN [start|stop]");
+            throw new IllegalArgumentException("Usage: PluginController -d $PLUGINDIR [start|stop]");
         
         if ("start".equals(args[2])){
         	File pluginDir = new File(args[1]);
@@ -69,12 +70,14 @@ public class I2PControlController{
         	_pluginDir = pluginDir.getAbsolutePath();
         	ConfigurationManager.setConfDir(pluginDir.getAbsolutePath());
         	_conf = ConfigurationManager.getInstance();
+        	_secMan = SecurityManager.getInstance();
             start(args);
+            //stop(); // Delete Me
             
         } else if ("stop".equals(args[2]))
             stop();
         else
-            throw new IllegalArgumentException("Usage: PluginController -d $PLUGIN [start|stop]");
+            throw new IllegalArgumentException("Usage: PluginController -d $PLUGINDIR [start|stop]");
     }  
 
 
@@ -141,14 +144,14 @@ public class I2PControlController{
     	}
     	
     	SslListener ssl = new SslListener();
-    	ssl.setProvider(SecurityManager.getSecurityProvider());
-    	ssl.setCipherSuites(SecurityManager.getSupprtedSSLCipherSuites());
+    	ssl.setProvider(_secMan.getSecurityProvider());
+    	ssl.setCipherSuites(_secMan.getSupprtedSSLCipherSuites());
     	ssl.setHost(address);
     	ssl.setPort(port);
     	ssl.setWantClientAuth(false); // Don't care about client authentication.
-    	ssl.setPassword(SecurityManager.getKeyStorePassword());
-    	ssl.setKeyPassword(SecurityManager.getKeyStorePassword());
-    	ssl.setKeystoreType(SecurityManager.getKeyStoreType());
+    	ssl.setPassword(_secMan.getKeyStorePassword());
+    	ssl.setKeyPassword(_secMan.getKeyStorePassword());
+    	ssl.setKeystoreType(_secMan.getKeyStoreType());
     	ssl.setKeystore(KeyStoreFactory.getKeyStoreLocation());
     	ssl.setName("SSL Listener-" + ++listeners);
     	
@@ -247,13 +250,45 @@ public class I2PControlController{
     
     private static void stop() {
     	ConfigurationManager.writeConfFile();
+    	_secMan.stopTimedEvents();
+    	
     	try {
-			if (_server != null)
+			if (_server != null){
 				_server.stop();
-			_server = null;
+				for (HttpListener listener : _server.getListeners()){
+					listener.stop();
+				}
+				_server.destroy();
+				_server = null;
+			}
 		} catch (InterruptedException e) {
 			_log.error("Stopping server" + e);
 		}
+    	// Get and stop all running threads
+    	ThreadGroup threadgroup = Thread.currentThread().getThreadGroup();
+    	Thread[] threads = new Thread[threadgroup.activeCount()+3];
+    	threadgroup.enumerate(threads, true);
+    	for (Thread thread : threads){
+//    		System.out.println("Active thread: " + thread.getName());
+    		if (thread != null ){//&& thread.isAlive()){
+    			thread.interrupt();
+    		}
+    	}
+    	
+    	for (Thread thread : threads){
+    		if (thread != null){
+				System.out.println("Active thread: " + thread.getName());
+				//if (thread != null && thread.isAlive()){
+				//	thread.interrupt();
+				//}
+    		}
+    	}
+    	//Thread.currentThread().getName()
+    	threadgroup.interrupt();
+    	
+    	
+    	
+    	//Thread.currentThread().getThreadGroup().destroy();
     }
     
     public static String getPluginDir(){

@@ -51,7 +51,8 @@ public class AuthenticateHandler implements RequestHandler {
 			String pwd = (String) inParams.get("Password");
 			
 			// Try get an AuthToken
-			AuthToken token = SecurityManager.validatePasswd(pwd);
+			
+			AuthToken token = SecurityManager.getInstance().validatePasswd(pwd);
 			if (token == null){
 				return new JSONRPC2Response(JSONRPC2ExtendedError.INVALID_PASSWORD, req.getID());
 			}

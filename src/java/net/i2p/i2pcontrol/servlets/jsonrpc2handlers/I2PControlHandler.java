@@ -145,7 +145,7 @@ public class I2PControlHandler implements RequestHandler {
 		
 		if(inParams.containsKey("i2pcontrol.password")){
 			if ((inParam = (String) inParams.get("i2pcontrol.password")) != null){
-				if (SecurityManager.setPasswd(inParam)){
+				if (SecurityManager.getInstance().setPasswd(inParam)){
 					outParams.put("i2pcontrol.password", null);
 					settingsSaved = true;
 				}

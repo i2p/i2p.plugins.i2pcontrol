@@ -44,17 +44,25 @@ public class SecurityManager {
 	private final static String SSL_PROVIDER = "SunJSSE";
 	private final static String DEFAULT_AUTH_BCRYPT_SALT = "$2a$11$5aOLx2x/8i4fNaitoCSSWu";
 	private final static String DEFAULT_AUTH_PASSWORD = "$2a$11$5aOLx2x/8i4fNaitoCSSWuut2wEl3Hupuca8DCT.NXzvH9fq1pBU.";
-	private final static HashMap<String,AuthToken> authTokens;
-	private final static Timer timer;
-	private static String[] SSL_CIPHER_SUITES;
-	private static KeyStore _ks;
-	private static Log _log;
+	private HashMap<String,AuthToken> authTokens;
+	private Timer timer;
+	private String[] SSL_CIPHER_SUITES;
+	private KeyStore _ks;
+	private Log _log;
+	private static SecurityManager _securityManager;
 	
-	static {
+	public static SecurityManager getInstance(){
+		if (_securityManager == null){
+			_securityManager = new SecurityManager();
+		}
+		return _securityManager;
+	}
+	
+	private SecurityManager(){
 		_log = I2PAppContext.getGlobalContext().logManager().getLog(SecurityManager.class);
 		authTokens = new HashMap<String,AuthToken>();
 		
-		timer = new Timer();
+		timer = new Timer("SecurityManager Timer Sweeper ");
 		// Start running periodic task after 20 minutes, run periodically every 10th minute.
 		timer.scheduleAtFixedRate(new Sweeper(), 1000*60*20, 1000*60*10);
 
@@ -70,27 +78,31 @@ public class SecurityManager {
 		_ks = KeyStoreInitializer.getKeyStore();
 	}
 	
-	public static String[] getSupprtedSSLCipherSuites(){
+	public String[] getSupprtedSSLCipherSuites(){
 		return SSL_CIPHER_SUITES;
 	}
 	
-	public static String getSecurityProvider(){
+	public String getSecurityProvider(){
 		return SSL_PROVIDER;
 	}
 	
-	public static String getKeyStorePassword(){
+	public String getKeyStorePassword(){
 		return KeyStoreFactory.DEFAULT_KEYSTORE_PASSWORD;
 	}
 	
-	public static String getKeyStoreType(){
+	public String getKeyStoreType(){
 		return KeyStoreFactory.DEFAULT_KEYSTORE_TYPE;
+	}
+	
+	public void stopTimedEvents(){
+		timer.cancel();
 	}
 	
 	/**
 	 * Return the X509Certificate of the server as a Base64 encoded string.
 	 * @return base64 encode of X509Certificate
 	 */
-	public static String getBase64Cert(){
+	public String getBase64Cert(){
 		X509Certificate caCert = KeyStoreFactory.readCert(_ks,
 				CERT_ALIAS, 
 				KeyStoreFactory.DEFAULT_KEYSTORE_PASSWORD);
@@ -118,7 +130,7 @@ public class SecurityManager {
 	 * @param pwd
 	 * @return BCrypt hash of salt and input string
 	 */
-	public static String getPasswdHash(String pwd){
+	public String getPasswdHash(String pwd){
 		return BCrypt.hashpw(pwd, ConfigurationManager.getInstance().getConf("auth.salt", DEFAULT_AUTH_BCRYPT_SALT));
 	}
 
@@ -127,7 +139,7 @@ public class SecurityManager {
 	 * @param string
 	 * @return
 	 */
-	public static String getHash(String string) {
+	public String getHash(String string) {
 		SHA256Generator hashGen = new SHA256Generator(I2PAppContext.getGlobalContext());
 		byte[] bytes = string.getBytes();
 		bytes = hashGen.calculateHash(bytes).toByteArray();
@@ -140,7 +152,7 @@ public class SecurityManager {
 	 * The token will be valid for one day.
 	 * @return Returns AuthToken if password is valid. If password is invalid null will be returned. 
 	 */
-	public static AuthToken validatePasswd(String pwd){
+	public AuthToken validatePasswd(String pwd){
 		String storedPass = ConfigurationManager.getInstance().getConf("auth.password", DEFAULT_AUTH_PASSWORD);
 		if (getPasswdHash(pwd).equals(storedPass)){
 			AuthToken token = new AuthToken(pwd);
@@ -156,7 +168,7 @@ public class SecurityManager {
 	 * @param newPasswd
 	 * @return Returns true if a new password was set.
 	 */
-	public static boolean setPasswd(String newPasswd){
+	public boolean setPasswd(String newPasswd){
 		String newHash = getPasswdHash(newPasswd);
 		String oldHash = ConfigurationManager.getInstance().getConf("auth.password", DEFAULT_AUTH_PASSWORD);
 
@@ -174,7 +186,7 @@ public class SecurityManager {
 	 * @throws InvalidAuthTokenException
 	 * @throws ExpiredAuthTokenException
 	 */
-	public static void verifyToken(String tokenID) throws InvalidAuthTokenException, ExpiredAuthTokenException {
+	public void verifyToken(String tokenID) throws InvalidAuthTokenException, ExpiredAuthTokenException {
 		AuthToken token = authTokens.get(tokenID);
 		if (token == null){
 			throw new InvalidAuthTokenException("AuthToken with ID: " + tokenID + " couldn't be found.");
@@ -192,7 +204,8 @@ public class SecurityManager {
 	 * @author hottuna
 	 *
 	 */
-	private static class Sweeper extends TimerTask{	
+	private class Sweeper extends TimerTask{	
+		
 		@Override
 		public void run(){
 			_log.debug("Starting cleanup job..");
