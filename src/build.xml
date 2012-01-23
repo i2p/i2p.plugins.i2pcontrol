@@ -11,7 +11,7 @@
         <pathelement location="${i2plib}/router.jar" />
         <pathelement location="${i2plib}/i2ptunnel.jar" />
 		<pathelement location="${i2plib}/org.mortbay.jetty.jar" />
-        <pathelement location="${jettylib}/ant.jar"/>
+        <pathelement location="${ant.home}/lib/ant.jar"/>
         <pathelement location="${jettylib}/org.mortbay.jetty.jar"/>
         <pathelement location="${jettylib}/jasper-compiler.jar" />
         <pathelement location="${jettylib}/jasper-runtime.jar" />
