@@ -6,7 +6,7 @@ import java.util.Set;
 public class I2PControlVersion {
 	
 	/** The current version of I2PControl */
-	public final static String VERSION = "0.0.2";
+	public final static String VERSION = "0.0.4";
 	
 	/** The current version of the I2PControl API being primarily being implemented */
 	public final static int API_VERSION = 1;

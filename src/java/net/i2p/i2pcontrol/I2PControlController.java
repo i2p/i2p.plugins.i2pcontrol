@@ -18,27 +18,27 @@ package net.i2p.i2pcontrol;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Calendar;
-import java.util.logging.LogManager;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.security.SslSocketConnector;
+import org.mortbay.jetty.servlet.ServletHandler;
 
 import net.i2p.I2PAppContext;
-import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.i2pcontrol.security.KeyStoreFactory;
-import net.i2p.i2pcontrol.security.KeyStoreInitializer;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.JSONRPC2Servlet;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.i2pcontrol.util.IsJar;
 import net.i2p.util.Log;
 
-import org.mortbay.http.HttpListener;
-import org.mortbay.http.SslListener;
-import org.mortbay.http.handler.AbstractHttpHandler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.ServletHttpContext;
-import org.mortbay.util.InetAddrPort;
+//import org.mortbay.http.SslListener;
+//import org.mortbay.http.handler.AbstractHttpHandler;
+//import org.mortbay.jetty.Server;
+//import org.mortbay.jetty.servlet.ServletHttpContext;
+//import org.mortbay.util.InetAddrPort;
+
+//import org.mortbay.servlet.jetty.*;
 
 /**
  * This handles the starting and stopping of an eepsite tunnel and jetty
@@ -118,12 +118,13 @@ public class I2PControlController{
     public static Server buildServer() throws UnknownHostException, Exception, InstantiationException, IllegalAccessException{
         Server server = new Server();
 
-    	SslListener ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), 
+    	SslSocketConnector ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), 
     			_conf.getConf("i2pcontrol.listen.port", 7650));
-    	server.addListener(ssl);
+    	_server.addConnector(ssl);
     	
-        ServletHttpContext context = (ServletHttpContext) server.getContext("/");
-        context.addServlet("/jsonrpc", "net.i2p.i2pcontrol.servlets.JSONRPC2Servlet");
+    	ServletHandler sh = new ServletHandler();
+    	sh.addServletWithMapping(net.i2p.i2pcontrol.servlets.JSONRPC2Servlet.class, "/");
+    	server.getServer().setHandler(sh);
 		server.start();
 		
 		return server;
@@ -137,15 +138,15 @@ public class I2PControlController{
      * @return - Newly created listener
      * @throws UnknownHostException
      */
-    public static SslListener buildSslListener(String address, int port) throws UnknownHostException{
+    public static SslSocketConnector buildSslListener(String address, int port) throws UnknownHostException{
     	int listeners = 0;
     	if (_server != null){
-    		listeners = _server.getListeners().length;
+    		listeners = _server.getConnectors().length;
     	}
     	
-    	SslListener ssl = new SslListener();
+    	SslSocketConnector ssl = new SslSocketConnector();
     	ssl.setProvider(_secMan.getSecurityProvider());
-    	ssl.setCipherSuites(_secMan.getSupprtedSSLCipherSuites());
+    	//ssl.setCipherSuites(_secMan.getSupprtedSSLCipherSuites()); Removed in Jetty 5->6 port.
     	ssl.setHost(address);
     	ssl.setPort(port);
     	ssl.setWantClientAuth(false); // Don't care about client authentication.
@@ -163,10 +164,10 @@ public class I2PControlController{
      * @param listener
      * @throws Exception 
      */
-    public static void addListener(HttpListener listener) throws Exception{
+    public static void addListener(Connector listener) throws Exception{
     	if (_server != null){
     		listener.start();
-    		_server.addListener(listener);
+    		_server.addConnector(listener);
     	}
     }
     
@@ -174,9 +175,9 @@ public class I2PControlController{
      * Remove a listener from the server.
      * @param listener
      */
-    public static void removeListener(HttpListener listener){
+    public static void removeListener(Connector listener){
     	if (_server != null){
-    		_server.removeListener(listener);
+    		_server.removeConnector(listener);
     	}
     }
     
@@ -188,11 +189,11 @@ public class I2PControlController{
      * @param listener
      * @throws Exception 
      */
-    public static void replaceListener(HttpListener listener) throws Exception{
+    public static void replaceListener(Connector listener) throws Exception{
     	if (_server != null){
-    		for (HttpListener currentListener : _server.getListeners()){
+    		for (Connector currentListener : _server.getConnectors()){
     			if (currentListener.getPort() == listener.getPort()){
-    				_server.removeListener(currentListener);
+    				_server.removeConnector(currentListener);
     				try {
 						currentListener.stop();
 					} catch (InterruptedException e) {
@@ -201,7 +202,7 @@ public class I2PControlController{
     			}
     		}
     		listener.start();
-    		_server.addListener(listener);
+    		_server.addConnector(listener);
     	}
     }
     
@@ -209,11 +210,11 @@ public class I2PControlController{
      * Get all listeners of the server.
      * @return
      */
-    public static HttpListener[] getListeners(){
+    public static Connector[] getListeners(){
     	if (_server != null){
-    		return _server.getListeners();
+    		return _server.getConnectors();
     	}
-    	return new HttpListener[0];
+    	return new Connector[0];
     }
     
     /**
@@ -221,8 +222,8 @@ public class I2PControlController{
      */
     public static void clearListeners(){
     	if (_server != null){
-	    	for (HttpListener listen : getListeners()){
-	    		_server.removeListener(listen);
+	    	for (Connector listen : getListeners()){
+	    		_server.removeConnector(listen);
 	    	}
     	}
     }
@@ -241,7 +242,9 @@ public class I2PControlController{
     				try {
     					_server.stop();
     					_server = server;
-    				} catch (InterruptedException e) {}
+    				} catch (InterruptedException e) {} catch (Exception e) {
+						//e.printStackTrace();
+					}
     			}
     		}
     	}).start();
@@ -255,13 +258,13 @@ public class I2PControlController{
     	try {
 			if (_server != null){
 				_server.stop();
-				for (HttpListener listener : _server.getListeners()){
+				for (Connector listener : _server.getConnectors()){
 					listener.stop();
 				}
 				_server.destroy();
 				_server = null;
 			}
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			_log.error("Stopping server" + e);
 		}
     	// Get and stop all running threads

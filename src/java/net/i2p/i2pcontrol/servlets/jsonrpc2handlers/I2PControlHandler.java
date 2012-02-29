@@ -5,26 +5,17 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.http.SslListener;
-import org.mortbay.jetty.Server;
-import org.mortbay.util.InetAddrPort;
+import org.mortbay.jetty.security.SslSocketConnector;
 
 import net.i2p.I2PAppContext;
-import net.i2p.data.RouterInfo;
 import net.i2p.i2pcontrol.I2PControlController;
 import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
-import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
-import net.i2p.router.transport.CommSystemFacadeImpl;
-import net.i2p.router.transport.FIFOBandwidthRefiller;
-import net.i2p.router.transport.TransportManager;
-import net.i2p.router.transport.udp.UDPTransport;
 import net.i2p.util.Log;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import com.thetransactioncompany.jsonrpc2.server.MessageContext;
@@ -114,9 +105,10 @@ public class I2PControlHandler implements RequestHandler {
 										req.getID());
 					}
 					try {
-						SslListener ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), newPort);
+						SslSocketConnector ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), newPort);
 						I2PControlController.clearListeners();
 						I2PControlController.replaceListener(ssl);
+						
 						_conf.setConf("i2pcontrol.listen.port", newPort);
 
 						
@@ -126,7 +118,7 @@ public class I2PControlHandler implements RequestHandler {
 					} catch (Exception e) {
 						try {
 							_conf.setConf("i2pcontrol.listen.port", oldPort);
-							SslListener ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), newPort);
+							SslSocketConnector ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), newPort);
 							I2PControlController.clearListeners();
 							I2PControlController.replaceListener(ssl);
 						} catch (Exception e2){
@@ -158,9 +150,10 @@ public class I2PControlHandler implements RequestHandler {
 			if ((inParam = (String) inParams.get("i2pcontrol.address")) != null){				
 				if ((oldAddress == null || !inParam.equals(oldAddress.toString()) && 
 						(inParam.equals("0.0.0.0") || inParam.equals("127.0.0.1")))){
-					InetAddrPort newAddress;
+					InetAddress[] newAddress;
+
 					try {
-						newAddress = new InetAddrPort(inParam ,1000);
+						newAddress = InetAddress.getAllByName(inParam);
 					} catch (UnknownHostException e){
 						return new JSONRPC2Response(
 								new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
@@ -168,7 +161,7 @@ public class I2PControlHandler implements RequestHandler {
 										req.getID());
 					}
 					try {
-						SslListener ssl = I2PControlController.buildSslListener(inParam, _conf.getConf("i2pcontrol.listen.port", 7650));
+						SslSocketConnector ssl = I2PControlController.buildSslListener(inParam, _conf.getConf("i2pcontrol.listen.port", 7650));
 						I2PControlController.clearListeners();
 						I2PControlController.replaceListener(ssl);
 						_conf.setConf("i2pcontrol.listen.address", inParam);
@@ -179,13 +172,13 @@ public class I2PControlHandler implements RequestHandler {
 					} catch (Exception e) {
 						_conf.setConf("i2pcontrol.listen.address", oldAddress);
 						try {
-							SslListener ssl = I2PControlController.buildSslListener(inParam, _conf.getConf("i2pcontrol.listen.port", 7650));
+							SslSocketConnector ssl = I2PControlController.buildSslListener(inParam, _conf.getConf("i2pcontrol.listen.port", 7650));
 							I2PControlController.clearListeners();
 							I2PControlController.replaceListener(ssl);
 						} catch (Exception e2){
 							_log.log(Log.CRIT, "Unable to resume server on previous listening ip." );
 						}
-						_log.error("Client tried to set listen address to, " + newAddress + " which isn't valid.", e);
+						_log.error("Client tried to set listen address to, " + newAddress.toString() + " which isn't valid.", e);
 						return new JSONRPC2Response(
 								new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
 										"\"i2pcontrol.address\" has been set to an invalid address, reverting. "),	req.getID());
