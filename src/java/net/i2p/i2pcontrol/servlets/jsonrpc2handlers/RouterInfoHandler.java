@@ -148,7 +148,7 @@ public class RouterInfoHandler implements RequestHandler {
 		}
 		
 		if (inParams.containsKey("i2p.router.netdb.highcapacitypeers")) {
-			outParams.put("i2p.router.netdb.highcapapcitypeers", _context.profileOrganizer().countHighCapacityPeers());
+			outParams.put("i2p.router.netdb.highcapacitypeers", _context.profileOrganizer().countHighCapacityPeers());
 		}
 		
 		if (inParams.containsKey("i2p.router.netdb.isreseeding")) {
