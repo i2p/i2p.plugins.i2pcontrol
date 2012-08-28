@@ -119,15 +119,15 @@ public class I2PControlController{
         Server server = new Server();
 
     	SslSocketConnector ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), 
-    			_conf.getConf("i2pcontrol.listen.port", 7650));
-    	_server.addConnector(ssl);
+    	                                          _conf.getConf("i2pcontrol.listen.port", 7650));
+    	server.addConnector(ssl);
     	
-    	ServletHandler sh = new ServletHandler();
+	ServletHandler sh = new ServletHandler();
     	sh.addServletWithMapping(net.i2p.i2pcontrol.servlets.JSONRPC2Servlet.class, "/");
     	server.getServer().setHandler(sh);
-		server.start();
-		
-		return server;
+    	server.start();
+	
+    	return server;
     }
     
     

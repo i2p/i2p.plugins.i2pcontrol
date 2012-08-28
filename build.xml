@@ -10,7 +10,7 @@
     <target name="plugin" depends="jar"> 
         <!-- get version number -->
         <buildnumber file="scripts/build.number" />
-        <property name="release.number" value="0.0.4" />
+        <property name="release.number" value="0.0.5" />
 
         <!-- make the update xpi2p -->
 		<mkdir dir="plugin/lib"/>

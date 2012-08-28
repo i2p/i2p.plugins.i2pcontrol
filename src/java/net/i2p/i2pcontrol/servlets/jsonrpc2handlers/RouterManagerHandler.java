@@ -16,7 +16,7 @@ import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
 import net.i2p.router.RouterVersion;
 import net.i2p.router.networkdb.kademlia.FloodfillNetworkDatabaseFacade;
-import net.i2p.router.networkdb.reseed.Reseeder;
+import net.i2p.router.networkdb.reseed.ReseedChecker;
 import net.i2p.router.transport.CommSystemFacadeImpl;
 import net.i2p.router.transport.FIFOBandwidthRefiller;
 import net.i2p.router.transport.TransportManager;
@@ -155,7 +155,7 @@ public class RouterManagerHandler implements RequestHandler {
 			(new Thread(){
 				@Override
 				public void run(){
-					Reseeder reseeder = new Reseeder(_context);
+					ReseedChecker reseeder = new ReseedChecker(_context);
 					reseeder.requestReseed();
 				}
 			}).start();
