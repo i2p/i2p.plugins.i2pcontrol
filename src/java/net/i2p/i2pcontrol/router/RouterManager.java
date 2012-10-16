@@ -33,48 +33,47 @@ import net.i2p.util.SecureFileOutputStream;
  *
  */
 public class RouterManager {
-	
-	private final static Log _log = new Log(RouterManager.class);
-	private static I2PAppContext context = I2PAppContext.getCurrentContext();
-	private static boolean startedTestRouter = false;
-	private final static String I2P_DIR = "/home/hottuna/Apps/i2p/";
-	private final static String I2P_CONFIG_FILE = "/home/hottuna/.i2p/router.config";
-	
-	
-	public static I2PAppContext getAppContext() {
-		return context;
-	}
-	
-	public static RouterContext getRouterContext() throws Exception {
-		// If not running as a plugin from within I2P.
-		if (!IsJar.isRunningJar() && !startedTestRouter){
-			context = buildMinimalRouter();
-		}
-		if(context.isRouterContext()) {
-			return (RouterContext) context;
-		}else {
-			throw new Exception("No RouterContext available!");
-		}
-	}
-	
-	private static Router getRouter() {
-		try {
-			return getRouterContext().router();
-		} catch (Exception e) {
-	        _log.error("Failed to get router. Why did we request it if no RouterContext is available?", e);
+    private final static Log _log = new Log(RouterManager.class);
+    private static I2PAppContext context = I2PAppContext.getCurrentContext();
+    private static boolean startedTestRouter = false;
+    private final static String I2P_DIR = "/home/hottuna/Apps/i2p/";
+    private final static String I2P_CONFIG_FILE = "/home/hottuna/.i2p/router.config";
+
+
+    public static I2PAppContext getAppContext() {
+        return context;
+    }
+
+    public static RouterContext getRouterContext() throws Exception {
+        // If not running as a plugin from within I2P.
+        if (!IsJar.isRunningJar() && !startedTestRouter){
+            context = buildMinimalRouter();
+        }
+        if(context.isRouterContext()) {
+            return (RouterContext) context;
+        }else {
+            throw new Exception("No RouterContext available!");
+        }
+    }
+
+    private static Router getRouter() {
+        try {
+            return getRouterContext().router();
+        } catch (Exception e) {
+            _log.error("Failed to get router. Why did we request it if no RouterContext is available?", e);
             return null;
         }
     }
-	
-	private static RouterContext buildMinimalRouter(){
-		Properties prp = new Properties();
-		prp.setProperty("i2p.dir.base", I2P_DIR);
-		prp.setProperty("i2p.dir.config", I2P_DIR);
-		prp.setProperty("router.pingFile", "testrouter.ping");
-		prp.setProperty("router.configLocation", I2P_CONFIG_FILE);
-		Router rtr = new  Router(prp);
 
-		// Massive block stolen from CreateRouterInfoJob. 
+    private static RouterContext buildMinimalRouter(){
+        Properties prp = new Properties();
+        prp.setProperty("i2p.dir.base", I2P_DIR);
+        prp.setProperty("i2p.dir.config", I2P_DIR);
+        prp.setProperty("router.pingFile", "testrouter.ping");
+        prp.setProperty("router.configLocation", I2P_CONFIG_FILE);
+        Router rtr = new  Router(prp);
+
+        // Massive block stolen from CreateRouterInfoJob. 
         RouterInfo info = new RouterInfo();
         FileOutputStream fos1 = null;
         FileOutputStream fos2 = null;
@@ -103,17 +102,17 @@ public class RouterManager {
             ident.setPublicKey(pubkey);
             ident.setSigningPublicKey(signingPubKey);
             info.setIdentity(ident);
-            
+
             info.sign(signingPrivKey);
 
             if (!info.isValid())
                 throw new DataFormatException("RouterInfo we just built is invalid: " + info);
-            
+
             String infoFilename = rtr.getContext().getProperty(Router.PROP_INFO_FILENAME, Router.PROP_INFO_FILENAME_DEFAULT);
             File ifile = new File(rtr.getContext().getRouterDir(), infoFilename);
             fos1 = new SecureFileOutputStream(ifile);
             info.writeBytes(fos1);
-            
+
             String keyFilename = rtr.getContext().getProperty(Router.PROP_KEYS_FILENAME, Router.PROP_KEYS_FILENAME_DEFAULT);
             File kfile = new File(rtr.getContext().getRouterDir(), keyFilename);
             fos2 = new SecureFileOutputStream(kfile);
@@ -121,49 +120,49 @@ public class RouterManager {
             signingPrivKey.writeBytes(fos2);
             pubkey.writeBytes(fos2);
             signingPubKey.writeBytes(fos2);
-            
+
             rtr.getContext().keyManager().setSigningPrivateKey(signingPrivKey);
             rtr.getContext().keyManager().setSigningPublicKey(signingPubKey);
             rtr.getContext().keyManager().setPrivateKey(privkey);
             rtr.getContext().keyManager().setPublicKey(pubkey);
-            
+
             _log.info("Router info created and stored at " + ifile.getAbsolutePath() + " with private keys stored at " + kfile.getAbsolutePath());
         } catch (DataFormatException dfe) {
-        	_log.error("Error building the new router information", dfe);
+            _log.error("Error building the new router information", dfe);
         } catch (IOException ioe) {
             _log.error("Error writing out the new router information", ioe);
         } finally {
             if (fos1 != null) try { fos1.close(); } catch (IOException ioe) {}
             if (fos2 != null) try { fos2.close(); } catch (IOException ioe) {}
         }
-		
-		rtr.setRouterInfo(info);
-		rtr.getContext().initAll();
-		return rtr.getContext();
-	}
-	
-	private class SimpleRouterContext extends RouterContext{
 
-		public SimpleRouterContext(Router router) {
-			super(router);
-		}
-		public SimpleRouterContext(Router router, Properties prop) {
-			super(router, prop);
-		}
-	}
-	
-	/*
-	private static boolean deletePingFile(){
-		return (new File("/tmp/router.ping")).delete();
-	}
-	*/
-	
-	public static void main(String[] args){
-		try {
-			getRouterContext();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+        rtr.setRouterInfo(info);
+        rtr.getContext().initAll();
+        return rtr.getContext();
+    }
+
+    private class SimpleRouterContext extends RouterContext{
+
+        public SimpleRouterContext(Router router) {
+            super(router);
+        }
+        public SimpleRouterContext(Router router, Properties prop) {
+            super(router, prop);
+        }
+    }
+
+    /*
+    private static boolean deletePingFile(){
+        return (new File("/tmp/router.ping")).delete();
+    }
+    */
+
+    public static void main(String[] args){
+        try {
+            getRouterContext();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }
