@@ -72,100 +72,100 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
  * @author <a href="http://dzhuvinov.com">Vladimir Dzhuvinov</a>
  * @version 1.16 (2010-10-04)
  */
-public class JSONRPC2ExtendedError extends JSONRPC2Error {	
-	
-	private static final long serialVersionUID = -6574632977222371077L;
+public class JSONRPC2ExtendedError extends JSONRPC2Error {
 
-	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error INVALID_PASSWORD = new JSONRPC2ExtendedError(-32001, "Invalid password provided.");
+    private static final long serialVersionUID = -6574632977222371077L;
 
-	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error NO_TOKEN = new JSONRPC2ExtendedError(-32002, "No authentication token presented.");
+    /** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+    public static final JSONRPC2Error INVALID_PASSWORD = new JSONRPC2ExtendedError(-32001, "Invalid password provided.");
 
-	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error INVALID_TOKEN = new JSONRPC2ExtendedError(-32003, "Authentication token doesn't exist.");
+    /** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+    public static final JSONRPC2Error NO_TOKEN = new JSONRPC2ExtendedError(-32002, "No authentication token presented.");
 
-	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(-32004, "Provided authentication token was expired and will be removed.");
-	
-	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error UNSPECIFIED_API_VERSION = new JSONRPC2ExtendedError(-32005, "The version of the I2PControl API wasn't specified, but is required to be specified.");
-	
-	/** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
-	public static final JSONRPC2Error UNSUPPORTED_API_VERSION = new JSONRPC2ExtendedError(-32006, "The version of the I2PControl API specified is not supported by I2PControl.");
+    /** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+    public static final JSONRPC2Error INVALID_TOKEN = new JSONRPC2ExtendedError(-32003, "Authentication token doesn't exist.");
 
-	
-	
-	/** 
-	 * Creates a new JSON-RPC 2.0 error with the specified code and 
-	 * message. The optional data is omitted.
-	 * 
-	 * @param code    The error code (standard pre-defined or
-	 *                application-specific).
-	 * @param message The error message.
-	 */
-	public JSONRPC2ExtendedError(int code, String message) {		
-		super(code, message);
-	}
-	
-	
-	/** 
-	 * Creates a new JSON-RPC 2.0 error with the specified code,
-	 * message and data.
-	 * 
-	 * @param code    The error code (standard pre-defined or
-	 *                application-specific).
-	 * @param message The error message.
-	 * @param data    Optional error data, must <a href="#map">map</a>
-	 *                to a valid JSON type.
-	 */
-	public JSONRPC2ExtendedError(int code, String message, Object data) {
-		super(code, message, data);
-	}
-	
-	
-	/** 
-	 * Gets the JSON-RPC 2.0 error code.
-	 *
-	 * @return The error code.
-	 */
-	public int getCode() {
-		return code;
-	}
-	
-	
-	/**
-	 * Gets the JSON-RPC 2.0 error data.
-	 *
-	 * @return The error data, {@code null} if none was specified.
-	 */
-	public Object getData() {
-		return data;	
-	}
-	
-	
-	/** 
-	 * Gets a JSON representation of the JSON-RPC 2.0 error.
-	 *
-	 * @return A JSON object representing this error object.
-	 */
-	public JSONObject toJSON() {
-		JSONObject out = new JSONObject();
-		
-		out.put("code", code);
-		out.put("message", super.getMessage());
-		if (data != null)
-			out.put("data", data);
-		return out;
-	}
-	
-	
-	/** 
-	 * Serialises the error object to a JSON string.
-	 *
-	 * @return A JSON-encoded string representing this error object.
-	 */
-	public String toString() {
-		return toJSON().toString();
-	}
+    /** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+    public static final JSONRPC2Error TOKEN_EXPIRED = new JSONRPC2ExtendedError(-32004, "Provided authentication token was expired and will be removed.");
+
+    /** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+    public static final JSONRPC2Error UNSPECIFIED_API_VERSION = new JSONRPC2ExtendedError(-32005, "The version of the I2PControl API wasn't specified, but is required to be specified.");
+
+    /** Invalid JSON-RPC 2.0, implementation defined error (-32099 .. -32000) */
+    public static final JSONRPC2Error UNSUPPORTED_API_VERSION = new JSONRPC2ExtendedError(-32006, "The version of the I2PControl API specified is not supported by I2PControl.");
+
+
+
+    /** 
+     * Creates a new JSON-RPC 2.0 error with the specified code and 
+     * message. The optional data is omitted.
+     * 
+     * @param code    The error code (standard pre-defined or
+     *                application-specific).
+     * @param message The error message.
+     */
+    public JSONRPC2ExtendedError(int code, String message) {        
+        super(code, message);
+    }
+
+
+    /** 
+     * Creates a new JSON-RPC 2.0 error with the specified code,
+     * message and data.
+     * 
+     * @param code    The error code (standard pre-defined or
+     *                application-specific).
+     * @param message The error message.
+     * @param data    Optional error data, must <a href="#map">map</a>
+     *                to a valid JSON type.
+     */
+    public JSONRPC2ExtendedError(int code, String message, Object data) {
+        super(code, message, data);
+    }
+
+
+    /** 
+     * Gets the JSON-RPC 2.0 error code.
+     *
+     * @return The error code.
+     */
+    public int getCode() {
+        return code;
+    }
+
+
+    /**
+     * Gets the JSON-RPC 2.0 error data.
+     *
+     * @return The error data, {@code null} if none was specified.
+     */
+    public Object getData() {
+        return data;
+    }
+
+
+    /** 
+     * Gets a JSON representation of the JSON-RPC 2.0 error.
+     *
+     * @return A JSON object representing this error object.
+     */
+    public JSONObject toJSON() {
+        JSONObject out = new JSONObject();
+
+        out.put("code", code);
+        out.put("message", super.getMessage());
+        if (data != null)
+            out.put("data", data);
+        return out;
+    }
+
+
+    /** 
+     * Serialises the error object to a JSON string.
+     *
+     * @return A JSON-encoded string representing this error object.
+     */
+    public String toString() {
+        return toJSON().toString();
+    }
 }

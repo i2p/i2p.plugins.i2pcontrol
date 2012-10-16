@@ -49,121 +49,121 @@ import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
  */
 
 public class RouterManagerHandler implements RequestHandler {
-	private static RouterContext _context;
-	private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(RouterManagerHandler.class);
-	
-	private final static int SHUTDOWN_WAIT = 1500;
+    private static RouterContext _context;
+    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(RouterManagerHandler.class);
 
-	static {
-		try {
-			_context = RouterManager.getRouterContext();
-		} catch (Exception e) {
-			_log.error("Unable to initialize RouterContext.", e);
-		}
-	}
+    private final static int SHUTDOWN_WAIT = 1500;
 
-	// Reports the method names of the handled requests
-	public String[] handledRequests() {
-		return new String[] { "RouterManager" };
-	}
+    static {
+        try {
+            _context = RouterManager.getRouterContext();
+        } catch (Exception e) {
+            _log.error("Unable to initialize RouterContext.", e);
+        }
+    }
 
-	// Processes the requests
-	public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-		if (req.getMethod().equals("RouterManager")) {
-			return process(req);
-		} else {
-			// Method name not supported
-			return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND,
-					req.getID());
-		}
-	}
+    // Reports the method names of the handled requests
+    public String[] handledRequests() {
+        return new String[] { "RouterManager" };
+    }
 
-	private JSONRPC2Response process(JSONRPC2Request req) {
-		JSONRPC2Error err = JSONRPC2Helper.validateParams(null, req);
-		if (err != null)
-			return new JSONRPC2Response(err, req.getID());
+    // Processes the requests
+    public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+        if (req.getMethod().equals("RouterManager")) {
+            return process(req);
+        } else {
+            // Method name not supported
+            return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND,
+                    req.getID());
+        }
+    }
 
-		if (_context == null) {
-			return new JSONRPC2Response(new JSONRPC2Error(
-					JSONRPC2Error.INTERNAL_ERROR.getCode(),
-					"RouterContext was not initialized. Query failed"),
-					req.getID());
-		}
-		HashMap inParams = (HashMap) req.getParams();
-		Map outParams = new HashMap();
+    private JSONRPC2Response process(JSONRPC2Request req) {
+        JSONRPC2Error err = JSONRPC2Helper.validateParams(null, req);
+        if (err != null)
+            return new JSONRPC2Response(err, req.getID());
 
-		if (inParams.containsKey("Shutdown")) {
-			outParams.put("Shutdown", null);
-			(new Thread(){
-				@Override
-				public void run(){
-					try {
-						Thread.sleep(SHUTDOWN_WAIT);
-					} catch (InterruptedException e) {}
-		            _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_HARD));
-		            _context.router().shutdown(Router.EXIT_HARD);				}
-			}).start();
-			return new JSONRPC2Response(outParams, req.getID());
-		}
-		
-		if (inParams.containsKey("Restart")) {
-			outParams.put("Restart", null);
-			(new Thread(){
-				@Override
-				public void run(){
-					try {
-						Thread.sleep(SHUTDOWN_WAIT);
-					} catch (InterruptedException e) {}
-		            _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_HARD_RESTART));
-		            _context.router().shutdown(Router.EXIT_HARD_RESTART);
-				}
-			}).start();
-			return new JSONRPC2Response(outParams, req.getID());
-		}
-		
-		if (inParams.containsKey("ShutdownGraceful")) {
-			outParams.put("ShutdownGraceful", null);
-			(new Thread(){
-				@Override
-				public void run(){
-					try {
-						Thread.sleep(SHUTDOWN_WAIT);
-					} catch (InterruptedException e) {}
-		            _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_GRACEFUL));
-		            _context.router().shutdownGracefully();
-		        }
-			}).start();
-			return new JSONRPC2Response(outParams, req.getID());
-		}
-		
-		if (inParams.containsKey("RestartGraceful")) {
-			outParams.put("RestartGraceful", null);
-			(new Thread(){
-				@Override
-				public void run(){
-					try {
-						Thread.sleep(SHUTDOWN_WAIT);
-					} catch (InterruptedException e) {}
-		            _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_GRACEFUL_RESTART));
-		            _context.router().shutdownGracefully(Router.EXIT_GRACEFUL_RESTART);				}
-			}).start();
-			return new JSONRPC2Response(outParams, req.getID());
-		}
-		
-		if (inParams.containsKey("Reseed")){
-			outParams.put("Reseed", null);
-			(new Thread(){
-				@Override
-				public void run(){
-					ReseedChecker reseeder = new ReseedChecker(_context);
-					reseeder.requestReseed();
-				}
-			}).start();
-		}
-		
-		return new JSONRPC2Response(outParams, req.getID());
-	}
-	
+        if (_context == null) {
+            return new JSONRPC2Response(new JSONRPC2Error(
+                    JSONRPC2Error.INTERNAL_ERROR.getCode(),
+                    "RouterContext was not initialized. Query failed"),
+                    req.getID());
+        }
+        HashMap inParams = (HashMap) req.getParams();
+        Map outParams = new HashMap();
+
+        if (inParams.containsKey("Shutdown")) {
+            outParams.put("Shutdown", null);
+            (new Thread(){
+                @Override
+                public void run(){
+                    try {
+                        Thread.sleep(SHUTDOWN_WAIT);
+                    } catch (InterruptedException e) {}
+                    _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_HARD));
+                    _context.router().shutdown(Router.EXIT_HARD);                }
+            }).start();
+            return new JSONRPC2Response(outParams, req.getID());
+        }
+
+        if (inParams.containsKey("Restart")) {
+            outParams.put("Restart", null);
+            (new Thread(){
+                @Override
+                public void run(){
+                    try {
+                        Thread.sleep(SHUTDOWN_WAIT);
+                    } catch (InterruptedException e) {}
+                    _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_HARD_RESTART));
+                    _context.router().shutdown(Router.EXIT_HARD_RESTART);
+                }
+            }).start();
+            return new JSONRPC2Response(outParams, req.getID());
+        }
+
+        if (inParams.containsKey("ShutdownGraceful")) {
+            outParams.put("ShutdownGraceful", null);
+            (new Thread(){
+                @Override
+                public void run(){
+                    try {
+                        Thread.sleep(SHUTDOWN_WAIT);
+                    } catch (InterruptedException e) {}
+                    _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_GRACEFUL));
+                    _context.router().shutdownGracefully();
+                }
+            }).start();
+            return new JSONRPC2Response(outParams, req.getID());
+        }
+
+        if (inParams.containsKey("RestartGraceful")) {
+            outParams.put("RestartGraceful", null);
+            (new Thread(){
+                @Override
+                public void run(){
+                    try {
+                        Thread.sleep(SHUTDOWN_WAIT);
+                    } catch (InterruptedException e) {}
+                    _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_GRACEFUL_RESTART));
+                    _context.router().shutdownGracefully(Router.EXIT_GRACEFUL_RESTART);                }
+            }).start();
+            return new JSONRPC2Response(outParams, req.getID());
+        }
+
+        if (inParams.containsKey("Reseed")){
+            outParams.put("Reseed", null);
+            (new Thread(){
+                @Override
+                public void run(){
+                    ReseedChecker reseeder = new ReseedChecker(_context);
+                    reseeder.requestReseed();
+                }
+            }).start();
+        }
+
+        return new JSONRPC2Response(outParams, req.getID());
+    }
+
     public static class UpdateWrapperManagerTask implements Runnable {
         private int _exitCode;
         public UpdateWrapperManagerTask(int exitCode) {

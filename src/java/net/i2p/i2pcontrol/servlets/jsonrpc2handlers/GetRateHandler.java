@@ -33,49 +33,49 @@ import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
 public class GetRateHandler implements RequestHandler {
 
-	private String[] requiredArgs = {"Stat", "Period"};
-	// Reports the method names of the handled requests
-	public String[] handledRequests() {
-		return new String[]{"GetRate"};
-	}
-	
-	// Processes the requests
-	public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-		if (req.getMethod().equals("GetRate")) {
-			JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req);
-			if (err != null)
-				return new JSONRPC2Response(err, req.getID());
-			
-			HashMap inParams = (HashMap) req.getParams();
-			
-			String input = (String) inParams.get("Stat");
-			if (input == null){
-				return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
-			}
-			long period;
-			try{
-				period = (Long) inParams.get("Period");
-			} catch (NumberFormatException e){
-				return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
-			}
+    private String[] requiredArgs = {"Stat", "Period"};
+    // Reports the method names of the handled requests
+    public String[] handledRequests() {
+        return new String[]{"GetRate"};
+    }
 
-			RateStat rateStat = I2PAppContext.getGlobalContext().statManager().getRate(input);
-			
-			// If RateStat or the requested period doesn't already exist, create them.
-			if (rateStat == null || rateStat.getRate(period) == null){
-				long[] tempArr = new long[1];
-				tempArr[0] = period;
-				I2PAppContext.getGlobalContext().statManager().createRequiredRateStat(input, "I2PControl", "I2PControl", tempArr);
-				rateStat = I2PAppContext.getGlobalContext().statManager().getRate(input);
-			}
-			if (rateStat.getRate(period) == null)
-				return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
-			Map outParams = new HashMap();
-			Rate rate = rateStat.getRate(period);
-			rate.coalesce();
-			outParams.put("Result", rate.getAverageValue());
-			return new JSONRPC2Response(outParams, req.getID());
-		}
-		return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
-	}
+    // Processes the requests
+    public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+        if (req.getMethod().equals("GetRate")) {
+            JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req);
+            if (err != null)
+                return new JSONRPC2Response(err, req.getID());
+
+            HashMap inParams = (HashMap) req.getParams();
+
+            String input = (String) inParams.get("Stat");
+            if (input == null){
+                return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
+            }
+            long period;
+            try{
+                period = (Long) inParams.get("Period");
+            } catch (NumberFormatException e){
+                return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
+            }
+
+            RateStat rateStat = I2PAppContext.getGlobalContext().statManager().getRate(input);
+
+            // If RateStat or the requested period doesn't already exist, create them.
+            if (rateStat == null || rateStat.getRate(period) == null){
+                long[] tempArr = new long[1];
+                tempArr[0] = period;
+                I2PAppContext.getGlobalContext().statManager().createRequiredRateStat(input, "I2PControl", "I2PControl", tempArr);
+                rateStat = I2PAppContext.getGlobalContext().statManager().getRate(input);
+            }
+            if (rateStat.getRate(period) == null)
+                return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
+            Map outParams = new HashMap();
+            Rate rate = rateStat.getRate(period);
+            rate.coalesce();
+            outParams.put("Result", rate.getAverageValue());
+            return new JSONRPC2Response(outParams, req.getID());
+        }
+        return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+    }
 }
