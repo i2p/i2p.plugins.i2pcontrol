@@ -2,7 +2,7 @@
 <project basedir="." default="all" name="I2PControl">
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
-    <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
+    <property name="jettylib" value="${i2pbase}/apps/jetty/jetty-distribution-7.6.8.v20121106/lib"/>
 	<property name="wrapperlib" value="${i2pbase}/installer/lib/wrapper/all"/>
 
     <path id="cp">
@@ -10,16 +10,18 @@
         <pathelement location="${i2plib}/i2p.jar" />
         <pathelement location="${i2plib}/router.jar" />
         <pathelement location="${i2plib}/i2ptunnel.jar" />
-	<pathelement location="${i2plib}/org.mortbay.jetty.jar" />
+        <pathelement location="${i2plib}/org.mortbay.jetty.jar" />
+        <pathelement location="${i2plib}/javax.servlet.jar" />
         <pathelement location="${ant.home}/lib/ant.jar"/>
-        <pathelement location="${jettylib}/org.mortbay.jetty.jar"/>
-	<pathelement location="${jettylib}/jetty-util-6.1.26.jar" />
+        <pathelement location="${jettylib}/jetty-server-7.6.8.v20121106.jar"/>
+        <pathelement location="${jettylib}/jetty-util-7.6.8.v20121106.jar" />
+        <pathelement location="${jettylib}/jetty-http-7.6.8.v20121106.jar" />
         <pathelement location="${jettylib}/jasper-compiler.jar" />
         <pathelement location="${jettylib}/jasper-runtime.jar" />
-        <pathelement location="${jettylib}/javax.servlet.jar" />
+        <pathelement location="${jettylib}/jetty-servlet-7.6.8.v20121106.jar" />
         <pathelement location="${jettylib}/commons-logging.jar" />
-        <pathelement location="${jettylib}/commons-el.jar" />
-	<pathelement location="${jettylib}/javax.servlet.jar" />
+        <pathelement location="${jettylib}/jsp/javax.el-2.1.0.v201105211819.jar" />
+<!--        <pathelement location="${jettylib}/javax.servlet.jar" />-->
         <pathelement location="${wrapperlib}/wrapper.jar" />
     </path>
 

@@ -5,7 +5,8 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
+
 
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.I2PControlController;

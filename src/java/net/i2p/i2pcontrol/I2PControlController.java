@@ -19,10 +19,6 @@ package net.i2p.i2pcontrol;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.security.SslSocketConnector;
-import org.mortbay.jetty.servlet.ServletHandler;
 
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.security.KeyStoreFactory;
@@ -32,13 +28,11 @@ import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.i2pcontrol.util.IsJar;
 import net.i2p.util.Log;
 
-//import org.mortbay.http.SslListener;
-//import org.mortbay.http.handler.AbstractHttpHandler;
-//import org.mortbay.jetty.Server;
-//import org.mortbay.jetty.servlet.ServletHttpContext;
-//import org.mortbay.util.InetAddrPort;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.servlet.ServletHandler;
 
-//import org.mortbay.servlet.jetty.*;
 
 /**
  * This handles the starting and stopping of an eepsite tunnel and jetty

@@ -7,6 +7,9 @@
 	<classpathentry kind="lib" path="/home/hottuna/Apps/i2p/lib/commons-logging.jar"/>
 	<classpathentry kind="lib" path="/home/hottuna/Apps/i2p/lib/router.jar"/>
 	<classpathentry kind="lib" path="/home/hottuna/Apps/i2p/lib/wrapper.jar"/>
-	<classpathentry kind="lib" path="/home/hottuna/Downloads/jetty-6.1.26.jar"/>
+	<classpathentry kind="lib" path="/home/hottuna/Apps/jetty7/jetty-server-7.6.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="/home/hottuna/Apps/jetty7/jetty-util-7.6.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="/home/hottuna/Apps/jetty7/jetty-servlet-7.6.8.v20121106.jar"/>
+	<classpathentry kind="lib" path="/home/hottuna/Apps/jetty7/jetty-security-7.6.8.v20121106.jar"/>
 	<classpathentry kind="output" path="build/obj"/>
 </classpath>
