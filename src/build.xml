@@ -2,7 +2,7 @@
 <project basedir="." default="all" name="I2PControl">
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
-    <property name="jettylib" value="${i2pbase}/apps/jetty/jetty-distribution-7.6.8.v20121106/lib"/>
+    <property name="jettylib" value="${i2pbase}/apps/jetty/jetty-distribution-7.6.10.v20130312/lib"/>
 	<property name="wrapperlib" value="${i2pbase}/installer/lib/wrapper/all"/>
 
     <path id="cp">
