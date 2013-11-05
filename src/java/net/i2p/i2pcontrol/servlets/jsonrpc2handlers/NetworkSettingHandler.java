@@ -9,9 +9,9 @@ import net.i2p.i2pcontrol.I2PControlController;
 import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
-import net.i2p.router.transport.CommSystemFacadeImpl;
 import net.i2p.router.transport.FIFOBandwidthRefiller;
 import net.i2p.router.transport.TransportManager;
+import net.i2p.router.transport.ntcp.NTCPTransport;
 import net.i2p.router.transport.udp.UDPTransport;
 import net.i2p.util.Log;
 
@@ -88,18 +88,18 @@ public class NetworkSettingHandler implements RequestHandler {
         String inParam;
 
         if (inParams.containsKey("i2p.router.net.ntcp.port")){
-            String oldNTCPPort = _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_PORT);
+            String oldNTCPPort = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_PORT);
             if ((inParam = (String) inParams.get("i2p.router.net.ntcp.port")) != null){
                 if (oldNTCPPort == null || !oldNTCPPort.equals(inParam.trim())){
                     System.out.println("NTCP: " + oldNTCPPort + "->" + inParam);
-                    _context.router().setConfigSetting(CommSystemFacadeImpl.PROP_I2NP_NTCP_PORT, inParam);
-                    _context.router().setConfigSetting(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
-                    _context.setProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_PORT, "false"); //
+                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_PORT, inParam);
+                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
+                    _context.setProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); //
                     restartNeeded = true;
                 }
                 settingsSaved = true;
             } else{
-                String sAutoPort = _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_PORT, "true");
+                String sAutoPort = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "true");
                 boolean oldAutoPort = "true".equalsIgnoreCase(sAutoPort);
                 if (oldAutoPort){
                     String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, UDPTransport.DEFAULT_INTERNAL_PORT);
@@ -110,10 +110,10 @@ public class NetworkSettingHandler implements RequestHandler {
             }
         }
         if(inParams.containsKey("i2p.router.net.ntcp.hostname")){
-            String oldNTCPHostname = _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_HOSTNAME);
+            String oldNTCPHostname = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_HOSTNAME);
             if ((inParam = (String) inParams.get("i2p.router.net.ntcp.hostname")) != null){
                 if (oldNTCPHostname == null || !oldNTCPHostname.equals(inParam.trim())){
-                    _context.router().setConfigSetting(CommSystemFacadeImpl.PROP_I2NP_NTCP_HOSTNAME, inParam);
+                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_HOSTNAME, inParam);
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -122,12 +122,12 @@ public class NetworkSettingHandler implements RequestHandler {
             }
         }
         if(inParams.containsKey("i2p.router.net.ntcp.autoip")){
-            String oldNTCPAutoIP = _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_IP);
+            String oldNTCPAutoIP = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_IP);
             if ((inParam = (String) inParams.get("i2p.router.net.ntcp.autoip")) != null){
                 inParam = inParam.trim().toLowerCase();
                 if (oldNTCPAutoIP == null || !oldNTCPAutoIP.equals(inParam)){
                     if ("always".equals(inParam) || "true".equals(inParam) || "false".equals(inParam)){
-                        _context.setProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_AUTO_IP, inParam);
+                        _context.setProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_IP, inParam);
                         restartNeeded = true;
                     } else {
                         return new JSONRPC2Response(

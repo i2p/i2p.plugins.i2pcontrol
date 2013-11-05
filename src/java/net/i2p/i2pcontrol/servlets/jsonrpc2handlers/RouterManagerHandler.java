@@ -20,8 +20,6 @@ import net.i2p.router.networkdb.reseed.ReseedChecker;
 import net.i2p.router.transport.CommSystemFacadeImpl;
 import net.i2p.router.transport.FIFOBandwidthRefiller;
 import net.i2p.router.transport.TransportManager;
-import net.i2p.router.transport.ntcp.NTCPAddress;
-import net.i2p.router.transport.udp.UDPTransport;
 import net.i2p.util.Log;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;

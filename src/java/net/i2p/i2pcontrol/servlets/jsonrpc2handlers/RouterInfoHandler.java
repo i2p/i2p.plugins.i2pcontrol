@@ -14,11 +14,10 @@ import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
 import net.i2p.router.RouterVersion;
 import net.i2p.router.networkdb.kademlia.FloodfillNetworkDatabaseFacade;
-import net.i2p.router.transport.CommSystemFacadeImpl;
 import net.i2p.router.transport.FIFOBandwidthRefiller;
 import net.i2p.router.transport.TransportManager;
-import net.i2p.router.transport.ntcp.NTCPAddress;
-import net.i2p.router.transport.udp.UDPTransport;
+import net.i2p.router.transport.TransportUtil;
+import net.i2p.router.transport.ntcp.NTCPTransport;
 import net.i2p.util.Log;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
@@ -192,7 +191,7 @@ public class RouterInfoHandler implements RequestHandler {
         switch (status) {
         case CommSystemFacade.STATUS_OK:
             RouterAddress ra = _context.router().getRouterInfo().getTargetAddress("NTCP");
-            if (ra == null || (new NTCPAddress(ra)).isPubliclyRoutable())
+            if (ra == null || TransportUtil.isPubliclyRoutable(ra.getIP(), true))
                 return NETWORK_STATUS.OK;
             return NETWORK_STATUS.ERROR_PRIVATE_TCP_ADDRESS;
         case CommSystemFacade.STATUS_DIFFERENT:
@@ -213,7 +212,7 @@ public class RouterInfoHandler implements RequestHandler {
             if (ra == null && _context.router().getUptime() > 5 * 60 * 1000) {
                 if (_context.commSystem().countActivePeers() <= 0)
                     return NETWORK_STATUS.ERROR_NO_ACTIVE_PEERS_CHECK_CONNECTION_AND_FIREWALL;
-                else if (_context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_HOSTNAME) == null || _context.getProperty(CommSystemFacadeImpl.PROP_I2NP_NTCP_PORT) == null)
+                else if (_context.getProperty(NTCPTransport.PROP_I2NP_NTCP_HOSTNAME) == null || _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_PORT) == null)
                     return NETWORK_STATUS.ERROR_UDP_DISABLED_AND_TCP_UNSET;
                 else
                     return NETWORK_STATUS.WARN_FIREWALLED_WITH_UDP_DISABLED;
