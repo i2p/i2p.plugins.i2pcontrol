@@ -39,6 +39,7 @@ import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
 
 public class KeyStoreFactory {
+    private static final float JAVA_VERSION = Float.valueOf(System.getProperty("java.version").charAt(0) + "." + System.getProperty("java.version").charAt(2));
     public static final ObjectIdentifier DEFAULT_CERTIFICATE_ALGORITHM = AlgorithmId.sha512WithRSAEncryption_oid;
     public static final String DEFAULT_CERTIFICATE_ALGORITHM_STRING = "SHA512WithRSA";
     public static final String DEFAULT_KEYSTORE_TYPE = "JKS";
@@ -54,7 +55,7 @@ public class KeyStoreFactory {
         try {
             keyGen = KeyPairGenerator.getInstance("RSA");
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            keyGen.initialize(1024, random);
+            keyGen.initialize(2048, random);
 
             KeyPair pair = keyGen.generateKeyPair();
             return pair;
@@ -88,8 +89,13 @@ public class KeyStoreFactory {
             info.set(X509CertInfo.VALIDITY, interval);
             info.set(X509CertInfo.SERIAL_NUMBER,
                     new CertificateSerialNumber(sn));
-            info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
-            info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
+            if (JAVA_VERSION <  1.8){
+                info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
+                info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
+            } else {
+                info.set(X509CertInfo.SUBJECT, owner);
+                info.set(X509CertInfo.ISSUER, owner);
+            }
             info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
             info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
             AlgorithmId algo = new AlgorithmId(DEFAULT_CERTIFICATE_ALGORITHM);
