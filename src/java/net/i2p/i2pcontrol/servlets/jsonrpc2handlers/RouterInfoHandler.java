@@ -5,8 +5,8 @@ import java.util.Map;
 
 import net.i2p.I2PAppContext;
 import net.i2p.data.DataHelper;
-import net.i2p.data.RouterAddress;
-import net.i2p.data.RouterInfo;
+import net.i2p.data.router.RouterAddress;
+import net.i2p.data.router.RouterInfo;
 import net.i2p.i2pcontrol.I2PControlController;
 import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.CommSystemFacade;
