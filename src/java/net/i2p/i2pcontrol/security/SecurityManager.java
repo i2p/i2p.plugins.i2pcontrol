@@ -156,7 +156,9 @@ public class SecurityManager {
         String storedPass = ConfigurationManager.getInstance().getConf("auth.password", DEFAULT_AUTH_PASSWORD);
         if (getPasswdHash(pwd).equals(storedPass)){
             AuthToken token = new AuthToken(pwd);
-            authTokens.put(token.getId(), token);
+            synchronized (authTokens) {
+                authTokens.put(token.getId(), token);
+            }
             return token;
         } else {
             return null;
@@ -174,7 +176,9 @@ public class SecurityManager {
 
         if (!newHash.equals(oldHash)){
             ConfigurationManager.getInstance().setConf("auth.password", newHash);
-            authTokens.clear();
+            synchronized (authTokens) {
+                authTokens.clear();
+            }
             return true;
         }
         return false;
@@ -191,8 +195,9 @@ public class SecurityManager {
         if (token == null){
             throw new InvalidAuthTokenException("AuthToken with ID: " + tokenID + " couldn't be found.");
         } else if (!token.isValid()){
-            System.out.println("token.isValid: " + token.isValid()); // Delete me
-            authTokens.remove(token.getId());
+            synchronized (authTokens) {
+                authTokens.remove(token.getId());
+            }
             throw new ExpiredAuthTokenException("AuthToken with ID: " + tokenID + " expired " + token.getExpiryTime(), token.getExpiryTime());
         } else {
             return; // Everything is fine. :)
@@ -215,8 +220,10 @@ public class SecurityManager {
                     arr.add(e.getKey());
                 }
             }
-            for (String s : arr){
-                authTokens.remove(s);
+            synchronized (authTokens) {
+                for (String s : arr){
+                    authTokens.remove(s);
+                }
             }
             _log.debug("Cleanup job done.");
         }
