@@ -214,7 +214,7 @@ public class NetworkSettingHandler implements RequestHandler {
         // Non-setable key.
         if (inParams.containsKey("i2p.router.net.ssu.detectedip")){
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.autoip")) == null){
-                outParams.put("i2p.router.net.ssu.detectedip", _context.router().getRouterInfo().getTargetAddress("SSU"));
+                outParams.put("i2p.router.net.ssu.detectedip", _context.router().getRouterInfo().getTargetAddress("SSU").getIP());
             }
         }
         if (inParams.containsKey("i2p.router.net.upnp")){
