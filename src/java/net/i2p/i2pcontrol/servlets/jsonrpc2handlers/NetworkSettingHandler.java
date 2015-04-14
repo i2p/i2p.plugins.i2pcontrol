@@ -91,9 +91,20 @@ public class NetworkSettingHandler implements RequestHandler {
             String oldNTCPPort = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_PORT);
             if ((inParam = (String) inParams.get("i2p.router.net.ntcp.port")) != null){
                 if (oldNTCPPort == null || !oldNTCPPort.equals(inParam.trim())){
-                    System.out.println("NTCP: " + oldNTCPPort + "->" + inParam);
-                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_PORT, inParam);
-                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
+                    Integer newPort;
+                    try {
+                        newPort = Integer.valueOf(inParam);
+                        if (newPort < 1 || newPort > 65535){
+                            throw new NumberFormatException();
+                        }
+                    } catch (NumberFormatException e){
+                        return new JSONRPC2Response(
+                                new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
+                                        "\"i2p.router.net.ntcp.port\" must be a string representing a number in the range 1-65535. " + inParam + " isn't valid."), 
+                                        req.getID());
+                    }
+                    System.out.println("NTCP: " + oldNTCPPort + "->" + newPort);
+                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_PORT, String.valueOf(newPort));                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
                     _context.setProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); //
                     restartNeeded = true;
                 }
@@ -146,8 +157,21 @@ public class NetworkSettingHandler implements RequestHandler {
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.port")) != null){
                 if (oldSSUPort== null || !oldSSUPort.equals(inParam.trim())){
                     System.out.println("UDP: " + oldSSUPort + "->" + inParam);
-                    _context.router().setConfigSetting(UDPTransport.PROP_EXTERNAL_PORT, inParam);
-                    _context.router().setConfigSetting(UDPTransport.PROP_INTERNAL_PORT, inParam);
+                    Integer newPort;
+                    try {
+                        newPort = Integer.valueOf(inParam);
+                        if (newPort < 1 || newPort > 65535){
+                            throw new NumberFormatException();
+                        }
+                    } catch (NumberFormatException e){
+                        return new JSONRPC2Response(
+                                new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
+                                        "\"i2p.router.net.ssu.port\" must be a string representing a number in the range 1-65535. " + inParam + " isn't valid."), 
+                                        req.getID());
+                    }
+                    System.out.println("UDP: " + oldSSUPort + "->" + newPort);
+                    _context.router().setConfigSetting(UDPTransport.PROP_EXTERNAL_PORT, String.valueOf(newPort));
+                    _context.router().setConfigSetting(UDPTransport.PROP_INTERNAL_PORT, String.valueOf(newPort));
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -209,6 +233,17 @@ public class NetworkSettingHandler implements RequestHandler {
             String oldShare = _context.router().getConfigSetting(Router.PROP_BANDWIDTH_SHARE_PERCENTAGE);
             if ((inParam = (String) inParams.get("i2p.router.net.bw.share")) != null){
                 if (oldShare == null || !oldShare.equals(inParam.trim())){
+	                Integer percent;
+	                try{
+	                    percent = Integer.parseInt(inParam);
+	                    if (percent < 0)
+	                        throw new NumberFormatException();
+	                } catch (NumberFormatException e){
+	                    return new JSONRPC2Response(
+	                            new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
+	                                    "\"i2p.router.net.bw.share\" A positive integer must supplied, " + inParam + " isn't valid"), 
+	                                   req.getID());
+	                }
                     _context.router().setConfigSetting(Router.PROP_BANDWIDTH_SHARE_PERCENTAGE, inParam);
                 }
                 settingsSaved = true;
@@ -274,8 +309,8 @@ public class NetworkSettingHandler implements RequestHandler {
             String oldLaptopMode = _context.getProperty(UDPTransport.PROP_LAPTOP_MODE);
             if ((inParam = (String) inParams.get("i2p.router.net.laptopmode")) != null){
                 if (oldLaptopMode == null || !oldLaptopMode.equals(inParam.trim())){
-                    _context.setProperty(UDPTransport.PROP_LAPTOP_MODE, inParam);
-                }
+                	_context.setProperty(UDPTransport.PROP_LAPTOP_MODE, String.valueOf(inParam));
+            	}
                 settingsSaved = true;
             } else {
                 outParams.put("i2p.router.net.laptopmode", oldLaptopMode);
