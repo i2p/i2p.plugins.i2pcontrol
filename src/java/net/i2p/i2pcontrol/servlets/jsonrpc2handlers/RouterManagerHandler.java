@@ -156,12 +156,12 @@ public class RouterManagerHandler implements RequestHandler {
                 public void run(){
                     ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
                     if (clmgr == null) {
-                        outParams.put("Update", "ClientAppManager is null");
+                        outParams.put("FindUpdates", "ClientAppManager is null");
                         return;
                     }
                     UpdateManager upmgr = (UpdateManager) clmgr.getRegisteredApp(UpdateManager.APP_NAME);
                     if (upmgr == null) {
-                        outParams.put("Update", "UpdateManager is null");
+                        outParams.put("FindUpdates", "UpdateManager is null");
                         return;
                     }
                     boolean updateIsAvailable = upmgr.checkAvailable(UpdateType.ROUTER_SIGNED) != null;
@@ -191,7 +191,7 @@ public class RouterManagerHandler implements RequestHandler {
                     }
                     boolean updateStarted = upmgr.update(UpdateType.ROUTER_SIGNED);
                     if (!updateStarted) {
-                        outParams.put("Update", "Update note started");
+                        outParams.put("Update", "Update not started");
                         return;
                     }
                     boolean isUpdating = upmgr.isUpdateInProgress(UpdateType.ROUTER_SIGNED);
