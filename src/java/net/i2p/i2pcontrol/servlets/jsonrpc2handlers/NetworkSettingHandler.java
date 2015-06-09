@@ -5,6 +5,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
+
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.Router;
@@ -99,10 +100,10 @@ public class NetworkSettingHandler implements RequestHandler {
                                         "\"i2p.router.net.ntcp.port\" must be a string representing a number in the range 1-65535. " + inParam + " isn't valid."), 
                                         req.getID());
                     }
-                    System.out.println("NTCP: " + oldNTCPPort + "->" + newPort);
-                    _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_PORT, String.valueOf(newPort));
-                    _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
-                    _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); //
+                    HashMap<String, String> config = new HashMap<String, String>();
+                    config.put(NTCPTransport.PROP_I2NP_NTCP_PORT, String.valueOf(newPort));
+                    config.put(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false");
+                    _context.router().saveConfig(config, null);
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -117,6 +118,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 }
             }
         }
+        
         if(inParams.containsKey("i2p.router.net.ntcp.hostname")){
             String oldNTCPHostname = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_HOSTNAME);
             if ((inParam = (String) inParams.get("i2p.router.net.ntcp.hostname")) != null){
@@ -129,6 +131,7 @@ public class NetworkSettingHandler implements RequestHandler {
                     outParams.put("i2p.router.net.ntcp.hostname", oldNTCPHostname);
             }
         }
+        
         if(inParams.containsKey("i2p.router.net.ntcp.autoip")){
             String oldNTCPAutoIP = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_IP);
             if ((inParam = (String) inParams.get("i2p.router.net.ntcp.autoip")) != null){
@@ -149,11 +152,11 @@ public class NetworkSettingHandler implements RequestHandler {
                 outParams.put("i2p.router.net.ntcp.autoip", oldNTCPAutoIP);
             }
         }
+        
         if (inParams.containsKey("i2p.router.net.ssu.port")){
             String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, 8887);
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.port")) != null){
                 if (oldSSUPort== null || !oldSSUPort.equals(inParam.trim())){
-                    System.out.println("UDP: " + oldSSUPort + "->" + inParam);
                     Integer newPort;
                     try {
                         newPort = Integer.valueOf(inParam);
@@ -166,9 +169,10 @@ public class NetworkSettingHandler implements RequestHandler {
                                         "\"i2p.router.net.ssu.port\" must be a string representing a number in the range 1-65535. " + inParam + " isn't valid."), 
                                         req.getID());
                     }
-                    System.out.println("UDP: " + oldSSUPort + "->" + newPort);
-                    _context.router().saveConfig(UDPTransport.PROP_EXTERNAL_PORT, String.valueOf(newPort));
-                    _context.router().saveConfig(UDPTransport.PROP_INTERNAL_PORT, String.valueOf(newPort));
+                    HashMap<String, String> config = new HashMap<String, String>();
+                    config.put(UDPTransport.PROP_EXTERNAL_PORT, String.valueOf(newPort));
+                    config.put(UDPTransport.PROP_INTERNAL_PORT, String.valueOf(newPort));
+                    _context.router().saveConfig(config, null);
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -176,6 +180,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 outParams.put("i2p.router.net.ssu.port", oldSSUPort);
             }
         }
+        
         if (inParams.containsKey("i2p.router.net.ssu.hostname")){
             String oldSSUHostname = _context.getProperty(UDPTransport.PROP_EXTERNAL_HOST);
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.hostname")) != null){
@@ -188,6 +193,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 outParams.put("i2p.router.net.ssu.hostname", oldSSUHostname);
             }
         }
+        
         if (inParams.containsKey("i2p.router.net.ssu.autoip")){
             String oldSSUAutoIP =  _context.getProperty(UDPTransport.PROP_SOURCES);
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.autoip")) != null){
@@ -208,12 +214,14 @@ public class NetworkSettingHandler implements RequestHandler {
                 outParams.put("i2p.router.net.ssu.autoip", oldSSUAutoIP);
             }
         }
+        
         // Non-setable key.
         if (inParams.containsKey("i2p.router.net.ssu.detectedip")){
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.autoip")) == null){
                 outParams.put("i2p.router.net.ssu.detectedip", _context.router().getRouterInfo().getTargetAddress("SSU").getIP());
             }
         }
+        
         if (inParams.containsKey("i2p.router.net.upnp")){
             String oldUPNP = _context.getProperty(TransportManager.PROP_ENABLE_UPNP);
             if ((inParam = (String) inParams.get("i2p.router.net.upnp")) != null){
@@ -226,6 +234,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 outParams.put("i2p.router.net.upnp", oldUPNP);
             }
         }
+        
         if (inParams.containsKey("i2p.router.net.bw.share")){
             String oldShare = _context.router().getConfigSetting(Router.PROP_BANDWIDTH_SHARE_PERCENTAGE);
             if ((inParam = (String) inParams.get("i2p.router.net.bw.share")) != null){
@@ -248,6 +257,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 outParams.put("i2p.router.net.bw.share", oldShare);
             }
         }
+        
         if (inParams.containsKey("i2p.router.net.bw.in")){
             String oldBWIn = _context.getProperty(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH);
             if ((inParam = (String) inParams.get("i2p.router.net.bw.in")) != null){
@@ -265,9 +275,11 @@ public class NetworkSettingHandler implements RequestHandler {
                 Integer burstRate = (rate * BW_BURST_PCT)/100;
                 Integer burstSize = (burstRate * BW_BURST_TIME);
                 if (oldBWIn == null || !oldBWIn.equals(rate.toString())){
-                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH, rate.toString());
-                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_INBOUND_BURST_BANDWIDTH, burstRate.toString());
-                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH_PEAK, burstSize.toString());
+                    HashMap<String, String> config = new HashMap<String, String>();
+                    config.put(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH, rate.toString());
+                    config.put(FIFOBandwidthRefiller.PROP_INBOUND_BURST_BANDWIDTH, burstRate.toString());
+                    config.put(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH_PEAK, burstSize.toString());
+                    _context.router().saveConfig(config, null);
                     _context.bandwidthLimiter().reinitialize();
                 }
                 settingsSaved = true;
@@ -292,9 +304,11 @@ public class NetworkSettingHandler implements RequestHandler {
                 Integer burstRate = (rate * BW_BURST_PCT)/100;
                 Integer burstSize = (burstRate * BW_BURST_TIME);
                 if (oldBWOut == null || !oldBWOut.equals(rate.toString())){
-                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH, rate.toString());
-                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_OUTBOUND_BURST_BANDWIDTH, burstRate.toString());
-                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH_PEAK, burstSize.toString());
+                    HashMap<String, String> config = new HashMap<String, String>();
+                    config.put(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH, rate.toString());
+                    config.put(FIFOBandwidthRefiller.PROP_OUTBOUND_BURST_BANDWIDTH, burstRate.toString());
+                    config.put(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH_PEAK, burstSize.toString());
+                    _context.router().saveConfig(config, null);
                     _context.bandwidthLimiter().reinitialize();
                 }
                 settingsSaved = true;
