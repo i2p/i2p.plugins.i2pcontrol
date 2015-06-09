@@ -150,14 +150,14 @@ public class RouterManagerHandler implements RequestHandler {
             return new JSONRPC2Response(outParams, req.getID());
         }
 
-        if (inParams.containsKey("CheckUpdates")){
+        if (inParams.containsKey("FindUpdates")){
             Thread t = new Thread(){
                 @Override
                 public void run(){
                     ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
                     UpdateManager upmgr = (UpdateManager) clmgr.getRegisteredApp(UpdateManager.APP_NAME);
                     boolean updateIsAvailable = upmgr.checkAvailable(UpdateType.ROUTER_SIGNED) != null;
-                    outParams.put("CheckUpdates", updateIsAvailable);
+                    outParams.put("FindUpdates", updateIsAvailable);
                 }
             };
             t.start();
