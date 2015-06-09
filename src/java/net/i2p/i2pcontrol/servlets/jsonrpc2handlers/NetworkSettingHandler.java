@@ -110,7 +110,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 String sAutoPort = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "true");
                 boolean oldAutoPort = "true".equalsIgnoreCase(sAutoPort);
                 if (oldAutoPort){
-                    String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, UDPTransport.DEFAULT_INTERNAL_PORT);
+                    String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, 8887);
                     outParams.put("i2p.router.net.ntcp.port", oldSSUPort);
                 } else {
                     outParams.put("i2p.router.net.ntcp.port", oldNTCPPort);
@@ -150,7 +150,7 @@ public class NetworkSettingHandler implements RequestHandler {
             }
         }
         if (inParams.containsKey("i2p.router.net.ssu.port")){
-            String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, UDPTransport.DEFAULT_INTERNAL_PORT);
+            String oldSSUPort = "" + _context.getProperty(UDPTransport.PROP_INTERNAL_PORT, 8887);
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.port")) != null){
                 if (oldSSUPort== null || !oldSSUPort.equals(inParam.trim())){
                     System.out.println("UDP: " + oldSSUPort + "->" + inParam);
