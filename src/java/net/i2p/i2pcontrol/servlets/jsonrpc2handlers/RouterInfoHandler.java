@@ -1,31 +1,24 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import com.thetransactioncompany.jsonrpc2.server.MessageContext;
+import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 import net.i2p.I2PAppContext;
-import net.i2p.data.DataHelper;
 import net.i2p.data.router.RouterAddress;
-import net.i2p.data.router.RouterInfo;
-import net.i2p.i2pcontrol.I2PControlController;
 import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.CommSystemFacade;
 import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
 import net.i2p.router.RouterVersion;
 import net.i2p.router.networkdb.kademlia.FloodfillNetworkDatabaseFacade;
-import net.i2p.router.transport.FIFOBandwidthRefiller;
-import net.i2p.router.transport.TransportManager;
 import net.i2p.router.transport.TransportUtil;
 import net.i2p.router.transport.ntcp.NTCPTransport;
 import net.i2p.util.Log;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
-import com.thetransactioncompany.jsonrpc2.server.MessageContext;
-import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)
@@ -187,7 +180,7 @@ public class RouterInfoHandler implements RequestHandler {
         if (_context.router().isHidden())
             return (NETWORK_STATUS.HIDDEN);
 
-        int status = _context.commSystem().getReachabilityStatus();
+        int status = _context.commSystem().getStatus().getCode();
         switch (status) {
         case CommSystemFacade.STATUS_OK:
             RouterAddress ra = _context.router().getRouterInfo().getTargetAddress("NTCP");
