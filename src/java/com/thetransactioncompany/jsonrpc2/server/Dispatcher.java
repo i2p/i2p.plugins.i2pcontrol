@@ -1,9 +1,12 @@
 package com.thetransactioncompany.jsonrpc2.server;
 
 
-import java.util.*;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Notification;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
-import com.thetransactioncompany.jsonrpc2.*;
+import java.util.Hashtable;
 
 
 /**

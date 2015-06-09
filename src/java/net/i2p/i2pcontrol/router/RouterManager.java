@@ -1,25 +1,9 @@
 package net.i2p.i2pcontrol.router;
 
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Properties;
-
 import net.i2p.I2PAppContext;
-import net.i2p.data.Certificate;
-import net.i2p.data.DataFormatException;
-import net.i2p.data.PrivateKey;
-import net.i2p.data.PublicKey;
-import net.i2p.data.router.RouterIdentity;
-import net.i2p.data.router.RouterInfo;
-import net.i2p.data.SigningPrivateKey;
-import net.i2p.data.SigningPublicKey;
-import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
 import net.i2p.util.Log;
-import net.i2p.util.SecureFileOutputStream;
 
 /**
  * Handle communications with the router instance.

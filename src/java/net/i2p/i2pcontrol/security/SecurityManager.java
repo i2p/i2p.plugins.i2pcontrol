@@ -16,25 +16,20 @@ package net.i2p.i2pcontrol.security;
  *
  */
 
-import java.security.KeyStore;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-
 import net.i2p.I2PAppContext;
 import net.i2p.crypto.SHA256Generator;
 import net.i2p.data.Base64;
 import net.i2p.i2pcontrol.security.jbcrypt.BCrypt;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.util.Log;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import java.security.KeyStore;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.*;
 
 /**
  * Manage the password storing for I2PControl.

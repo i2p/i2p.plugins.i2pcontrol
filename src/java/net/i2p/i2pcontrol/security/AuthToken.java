@@ -1,7 +1,6 @@
 package net.i2p.i2pcontrol.security;
 
 import java.text.SimpleDateFormat;
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 

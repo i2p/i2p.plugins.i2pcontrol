@@ -1,15 +1,13 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
-import net.i2p.i2pcontrol.I2PControlVersion;
-import net.i2p.i2pcontrol.security.*;
-import net.i2p.i2pcontrol.security.SecurityManager;
-
-
-import java.util.HashMap;
-
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import net.i2p.i2pcontrol.security.ExpiredAuthTokenException;
+import net.i2p.i2pcontrol.security.InvalidAuthTokenException;
+import net.i2p.i2pcontrol.security.SecurityManager;
+
+import java.util.HashMap;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)

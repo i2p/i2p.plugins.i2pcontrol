@@ -1,13 +1,13 @@
 package net.i2p.i2pcontrol.security;
 
+import net.i2p.I2PAppContext;
+import net.i2p.i2pcontrol.I2PControlController;
+import net.i2p.util.Log;
+
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
-
-import net.i2p.I2PAppContext;
-import net.i2p.i2pcontrol.I2PControlController;
-import net.i2p.util.Log;
 
 
 public class KeyStoreInitializer {

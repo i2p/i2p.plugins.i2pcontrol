@@ -1,20 +1,13 @@
 package net.i2p.i2pcontrol.servlets.configuration;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import net.i2p.I2PAppContext;
+import net.i2p.util.Log;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-
-import net.i2p.I2PAppContext;
-import net.i2p.i2pcontrol.security.SecurityManager;
-import net.i2p.util.Log;
 
 /**
  * Manage the configuration of I2PControl.

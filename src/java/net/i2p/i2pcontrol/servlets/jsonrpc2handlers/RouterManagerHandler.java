@@ -1,33 +1,23 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.tanukisoftware.wrapper.WrapperManager;
-
-import net.i2p.I2PAppContext;
-import net.i2p.data.DataHelper;
-import net.i2p.data.router.RouterAddress;
-import net.i2p.data.router.RouterInfo;
-import net.i2p.i2pcontrol.I2PControlController;
-import net.i2p.i2pcontrol.router.RouterManager;
-import net.i2p.router.CommSystemFacade;
-import net.i2p.router.Router;
-import net.i2p.router.RouterContext;
-import net.i2p.router.RouterVersion;
-import net.i2p.router.networkdb.kademlia.FloodfillNetworkDatabaseFacade;
-import net.i2p.router.networkdb.reseed.ReseedChecker;
-import net.i2p.router.transport.CommSystemFacadeImpl;
-import net.i2p.router.transport.FIFOBandwidthRefiller;
-import net.i2p.router.transport.TransportManager;
-import net.i2p.util.Log;
-
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
+import net.i2p.I2PAppContext;
+import net.i2p.app.ClientAppManager;
+import net.i2p.i2pcontrol.router.RouterManager;
+import net.i2p.router.Router;
+import net.i2p.router.RouterContext;
+import net.i2p.router.networkdb.reseed.ReseedChecker;
+import net.i2p.update.UpdateManager;
+import net.i2p.update.UpdateType;
+import net.i2p.util.Log;
+import org.tanukisoftware.wrapper.WrapperManager;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)
@@ -88,7 +78,7 @@ public class RouterManagerHandler implements RequestHandler {
                     req.getID());
         }
         HashMap inParams = (HashMap) req.getParams();
-        Map outParams = new HashMap();
+        final Map outParams = new HashMap();
 
         if (inParams.containsKey("Shutdown")) {
             outParams.put("Shutdown", null);
@@ -157,8 +147,51 @@ public class RouterManagerHandler implements RequestHandler {
                     reseeder.requestReseed();
                 }
             }).start();
+            return new JSONRPC2Response(outParams, req.getID());
         }
 
+        if (inParams.containsKey("CheckUpdates")){
+            Thread t = new Thread(){
+                @Override
+                public void run(){
+                    ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
+                    UpdateManager upmgr = (UpdateManager) clmgr.getRegisteredApp(UpdateManager.APP_NAME);
+                    boolean updateIsAvailable = upmgr.checkAvailable(UpdateType.ROUTER_SIGNED) != null;
+                    outParams.put("CheckUpdates", updateIsAvailable);
+                }
+            };
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {}
+            return new JSONRPC2Response(outParams, req.getID());
+        }
+        
+        if (inParams.containsKey("Update")){
+            Thread t = new Thread(){
+                @Override
+                public void run(){
+                    ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
+                    UpdateManager upmgr = (UpdateManager) clmgr.getRegisteredApp(UpdateManager.APP_NAME);
+                    boolean updateStarted = upmgr.update(UpdateType.ROUTER_SIGNED);
+                    if (!updateStarted) {
+                        outParams.put("Update", "Failed");
+                    }
+                    boolean isUpdating = upmgr.isUpdateInProgress(UpdateType.ROUTER_SIGNED);
+                    while (isUpdating) {
+                        try { Thread.sleep(100);} catch (Exception e){}
+                        isUpdating = upmgr.isUpdateInProgress(UpdateType.ROUTER_SIGNED);
+                    }
+                    outParams.put("Update", upmgr.getStatus());
+                }
+            };
+            t.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {}
+            return new JSONRPC2Response(outParams, req.getID());
+        }
+        
         return new JSONRPC2Response(outParams, req.getID());
     }
 

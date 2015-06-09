@@ -1,13 +1,10 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
-
-
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import com.thetransactioncompany.jsonrpc2.server.MessageContext;
+import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.I2PControlController;
 import net.i2p.i2pcontrol.router.RouterManager;
@@ -15,12 +12,12 @@ import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.router.RouterContext;
 import net.i2p.util.Log;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
-import com.thetransactioncompany.jsonrpc2.server.MessageContext;
-import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)

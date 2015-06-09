@@ -1,11 +1,10 @@
 package com.thetransactioncompany.jsonrpc2.util;
 
 
-import java.util.LinkedList;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+
 import java.util.List;
 import java.util.Map;
-
-import com.thetransactioncompany.jsonrpc2.*;
 
 
 /**

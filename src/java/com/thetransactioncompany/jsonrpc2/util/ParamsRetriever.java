@@ -1,9 +1,7 @@
 package com.thetransactioncompany.jsonrpc2.util;
 
 
-import java.lang.reflect.*;
-
-import com.thetransactioncompany.jsonrpc2.*;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
 
 /**

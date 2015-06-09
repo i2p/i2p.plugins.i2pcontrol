@@ -16,21 +16,20 @@ package net.i2p.i2pcontrol;
  *
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.net.UnknownHostException;
-
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.security.KeyStoreFactory;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.JSONRPC2Servlet;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.util.Log;
-
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.UnknownHostException;
 
 
 /**
@@ -77,7 +76,7 @@ public class I2PControlController{
     private static void start(String args[]) {
         I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG);
 
-        try{
+        try {
             _server = buildServer();
         } catch (IOException e) {
             _log.error("Unable to add listener " + _conf.getConf("i2pcontrol.listen.address", "127.0.0.1")+":"+_conf.getConf("i2pcontrol.listen.port", 7560) + " - " + e.getMessage());

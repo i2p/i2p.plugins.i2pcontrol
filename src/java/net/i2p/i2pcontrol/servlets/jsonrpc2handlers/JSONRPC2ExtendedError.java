@@ -1,8 +1,7 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
-import org.json.simple.JSONObject;
-
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import org.json.simple.JSONObject;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)

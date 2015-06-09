@@ -1,9 +1,9 @@
 package com.thetransactioncompany.jsonrpc2.server;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
-import javax.servlet.http.HttpServletRequest;
 
 
 /**
