@@ -1,11 +1,11 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+import com.thetransactioncompany.jsonrpc2.server.MessageContext;
+import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 import net.i2p.I2PAppContext;
-import net.i2p.data.router.RouterInfo;
-import net.i2p.i2pcontrol.I2PControlController;
 import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
@@ -15,12 +15,8 @@ import net.i2p.router.transport.ntcp.NTCPTransport;
 import net.i2p.router.transport.udp.UDPTransport;
 import net.i2p.util.Log;
 
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2ParamsType;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
-import com.thetransactioncompany.jsonrpc2.server.MessageContext;
-import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)
@@ -104,8 +100,9 @@ public class NetworkSettingHandler implements RequestHandler {
                                         req.getID());
                     }
                     System.out.println("NTCP: " + oldNTCPPort + "->" + newPort);
-                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_PORT, String.valueOf(newPort));                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
-                    _context.setProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); //
+                    _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_PORT, String.valueOf(newPort));
+                    _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); // Duplicate below in setProperty to make sure it is properly set.
+                    _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_AUTO_PORT, "false"); //
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -124,7 +121,7 @@ public class NetworkSettingHandler implements RequestHandler {
             String oldNTCPHostname = _context.getProperty(NTCPTransport.PROP_I2NP_NTCP_HOSTNAME);
             if ((inParam = (String) inParams.get("i2p.router.net.ntcp.hostname")) != null){
                 if (oldNTCPHostname == null || !oldNTCPHostname.equals(inParam.trim())){
-                    _context.router().setConfigSetting(NTCPTransport.PROP_I2NP_NTCP_HOSTNAME, inParam);
+                    _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_HOSTNAME, inParam);
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -138,7 +135,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 inParam = inParam.trim().toLowerCase();
                 if (oldNTCPAutoIP == null || !oldNTCPAutoIP.equals(inParam)){
                     if ("always".equals(inParam) || "true".equals(inParam) || "false".equals(inParam)){
-                        _context.setProperty(NTCPTransport.PROP_I2NP_NTCP_AUTO_IP, inParam);
+                        _context.router().saveConfig(NTCPTransport.PROP_I2NP_NTCP_AUTO_IP, inParam);
                         restartNeeded = true;
                     } else {
                         return new JSONRPC2Response(
@@ -170,8 +167,8 @@ public class NetworkSettingHandler implements RequestHandler {
                                         req.getID());
                     }
                     System.out.println("UDP: " + oldSSUPort + "->" + newPort);
-                    _context.router().setConfigSetting(UDPTransport.PROP_EXTERNAL_PORT, String.valueOf(newPort));
-                    _context.router().setConfigSetting(UDPTransport.PROP_INTERNAL_PORT, String.valueOf(newPort));
+                    _context.router().saveConfig(UDPTransport.PROP_EXTERNAL_PORT, String.valueOf(newPort));
+                    _context.router().saveConfig(UDPTransport.PROP_INTERNAL_PORT, String.valueOf(newPort));
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -183,7 +180,7 @@ public class NetworkSettingHandler implements RequestHandler {
             String oldSSUHostname = _context.getProperty(UDPTransport.PROP_EXTERNAL_HOST);
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.hostname")) != null){
                 if (oldSSUHostname == null || !oldSSUHostname.equals(inParam.trim())){
-                    _context.router().setConfigSetting(UDPTransport.PROP_EXTERNAL_HOST, inParam);
+                    _context.router().saveConfig(UDPTransport.PROP_EXTERNAL_HOST, inParam);
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -197,7 +194,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 inParam = inParam.trim().toLowerCase();
                 if (oldSSUAutoIP == null || !oldSSUAutoIP.equals(inParam)){
                     if (inParam.equals("ssu") || inParam.equals("local,ssu") || inParam.equals("upnp,ssu") || inParam.equals("local,upnp,ssu")){
-                    _context.router().setConfigSetting(UDPTransport.PROP_SOURCES, inParam);
+                    _context.router().saveConfig(UDPTransport.PROP_SOURCES, inParam);
                     restartNeeded = true;
                     } else {
                         return new JSONRPC2Response(
@@ -221,7 +218,7 @@ public class NetworkSettingHandler implements RequestHandler {
             String oldUPNP = _context.getProperty(TransportManager.PROP_ENABLE_UPNP);
             if ((inParam = (String) inParams.get("i2p.router.net.upnp")) != null){
                 if (oldUPNP == null || !oldUPNP.equals(inParam.trim())){
-                    _context.router().setConfigSetting(TransportManager.PROP_ENABLE_UPNP, inParam);
+                    _context.router().saveConfig(TransportManager.PROP_ENABLE_UPNP, inParam);
                     restartNeeded = true;
                 }
                 settingsSaved = true;
@@ -244,7 +241,7 @@ public class NetworkSettingHandler implements RequestHandler {
 	                                    "\"i2p.router.net.bw.share\" A positive integer must supplied, " + inParam + " isn't valid"), 
 	                                   req.getID());
 	                }
-                    _context.router().setConfigSetting(Router.PROP_BANDWIDTH_SHARE_PERCENTAGE, inParam);
+                    _context.router().saveConfig(Router.PROP_BANDWIDTH_SHARE_PERCENTAGE, inParam);
                 }
                 settingsSaved = true;
             } else {
@@ -268,9 +265,9 @@ public class NetworkSettingHandler implements RequestHandler {
                 Integer burstRate = (rate * BW_BURST_PCT)/100;
                 Integer burstSize = (burstRate * BW_BURST_TIME);
                 if (oldBWIn == null || !oldBWIn.equals(rate.toString())){
-                    _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH, rate.toString());
-                    _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_INBOUND_BURST_BANDWIDTH, burstRate.toString());
-                    _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH_PEAK, burstSize.toString());
+                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH, rate.toString());
+                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_INBOUND_BURST_BANDWIDTH, burstRate.toString());
+                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_INBOUND_BANDWIDTH_PEAK, burstSize.toString());
                     _context.bandwidthLimiter().reinitialize();
                 }
                 settingsSaved = true;
@@ -295,9 +292,9 @@ public class NetworkSettingHandler implements RequestHandler {
                 Integer burstRate = (rate * BW_BURST_PCT)/100;
                 Integer burstSize = (burstRate * BW_BURST_TIME);
                 if (oldBWOut == null || !oldBWOut.equals(rate.toString())){
-                    _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH, rate.toString());
-                    _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_OUTBOUND_BURST_BANDWIDTH, burstRate.toString());
-                    _context.router().setConfigSetting(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH_PEAK, burstSize.toString());
+                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH, rate.toString());
+                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_OUTBOUND_BURST_BANDWIDTH, burstRate.toString());
+                    _context.router().saveConfig(FIFOBandwidthRefiller.PROP_OUTBOUND_BANDWIDTH_PEAK, burstSize.toString());
                     _context.bandwidthLimiter().reinitialize();
                 }
                 settingsSaved = true;
@@ -309,7 +306,7 @@ public class NetworkSettingHandler implements RequestHandler {
             String oldLaptopMode = _context.getProperty(UDPTransport.PROP_LAPTOP_MODE);
             if ((inParam = (String) inParams.get("i2p.router.net.laptopmode")) != null){
                 if (oldLaptopMode == null || !oldLaptopMode.equals(inParam.trim())){
-                	_context.setProperty(UDPTransport.PROP_LAPTOP_MODE, String.valueOf(inParam));
+                	_context.router().saveConfig(UDPTransport.PROP_LAPTOP_MODE, String.valueOf(inParam));
             	}
                 settingsSaved = true;
             } else {
