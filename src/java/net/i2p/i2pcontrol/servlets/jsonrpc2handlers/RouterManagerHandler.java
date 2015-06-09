@@ -155,7 +155,15 @@ public class RouterManagerHandler implements RequestHandler {
                 @Override
                 public void run(){
                     ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
+                    if (clmgr == null) {
+                        outParams.put("Update", "ClientAppManager is null");
+                        return;
+                    }
                     UpdateManager upmgr = (UpdateManager) clmgr.getRegisteredApp(UpdateManager.APP_NAME);
+                    if (upmgr == null) {
+                        outParams.put("Update", "UpdateManager is null");
+                        return;
+                    }
                     boolean updateIsAvailable = upmgr.checkAvailable(UpdateType.ROUTER_SIGNED) != null;
                     outParams.put("FindUpdates", updateIsAvailable);
                 }
@@ -172,10 +180,19 @@ public class RouterManagerHandler implements RequestHandler {
                 @Override
                 public void run(){
                     ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
+                    if (clmgr == null) {
+                        outParams.put("Update", "ClientAppManager is null");
+                        return;
+                    }
                     UpdateManager upmgr = (UpdateManager) clmgr.getRegisteredApp(UpdateManager.APP_NAME);
+                    if (upmgr == null) {
+                        outParams.put("Update", "UpdateManager is null");
+                        return;
+                    }
                     boolean updateStarted = upmgr.update(UpdateType.ROUTER_SIGNED);
                     if (!updateStarted) {
-                        outParams.put("Update", "Failed");
+                        outParams.put("Update", "Update note started");
+                        return;
                     }
                     boolean isUpdating = upmgr.isUpdateInProgress(UpdateType.ROUTER_SIGNED);
                     while (isUpdating) {
