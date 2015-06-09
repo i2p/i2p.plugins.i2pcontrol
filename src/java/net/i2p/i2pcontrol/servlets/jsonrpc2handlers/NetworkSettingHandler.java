@@ -16,6 +16,8 @@ import net.i2p.router.transport.ntcp.NTCPTransport;
 import net.i2p.router.transport.udp.UDPTransport;
 import net.i2p.util.Log;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -218,7 +220,13 @@ public class NetworkSettingHandler implements RequestHandler {
         // Non-setable key.
         if (inParams.containsKey("i2p.router.net.ssu.detectedip")){
             if ((inParam = (String) inParams.get("i2p.router.net.ssu.autoip")) == null){
-                outParams.put("i2p.router.net.ssu.detectedip", _context.router().getRouterInfo().getTargetAddress("SSU").getIP());
+                byte[] ipBytes = _context.router().getRouterInfo().getTargetAddress("SSU").getIP();
+                try {
+                    InetAddress i = InetAddress.getByAddress(ipBytes);
+                    outParams.put("i2p.router.net.ssu.detectedip", i.getHostAddress());
+                } catch (UnknownHostException e) {
+                    outParams.put("i2p.router.net.ssu.detectedip", "Failed to parse ip address");
+                }
             }
         }
         
