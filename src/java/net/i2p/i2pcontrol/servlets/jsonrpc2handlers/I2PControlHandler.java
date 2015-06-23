@@ -115,7 +115,7 @@ public class I2PControlHandler implements RequestHandler {
                     } catch (Exception e) {
                         try {
                             _conf.setConf("i2pcontrol.listen.port", oldPort);
-                            SslSocketConnector ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), newPort);
+                            SslSocketConnector ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), oldPort);
                             I2PControlController.clearListeners();
                             I2PControlController.replaceListener(ssl);
                         } catch (Exception e2){
