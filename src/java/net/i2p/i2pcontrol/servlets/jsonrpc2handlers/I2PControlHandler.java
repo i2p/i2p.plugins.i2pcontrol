@@ -125,7 +125,8 @@ public class I2PControlHandler implements RequestHandler {
                             return new JSONRPC2Response(
                                     new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
                                             "\"i2pcontrol.port\" has been set to a port that is already in use, reverting. " +
-                                            inParam + " is an already used port."),
+                                            inParam + " is an already used port.\n"
+                                                    + "Exception: " + e.toString()),
                                             req.getID());
                     }
                 }
