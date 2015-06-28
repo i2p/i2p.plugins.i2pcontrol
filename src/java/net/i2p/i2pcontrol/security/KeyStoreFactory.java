@@ -62,7 +62,7 @@ public class KeyStoreFactory {
             info.set(X509CertInfo.VALIDITY, interval);
             info.set(X509CertInfo.SERIAL_NUMBER,
                     new CertificateSerialNumber(sn));
-            if (JAVA_VERSION <  1.8){
+            if (JAVA_VERSION <  1.8f){
                 info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
                 info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
             } else {
