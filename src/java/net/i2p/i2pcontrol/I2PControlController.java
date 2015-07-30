@@ -238,7 +238,9 @@ public class I2PControlController{
 
     private static void stop() {
         ConfigurationManager.writeConfFile();
-        _secMan.stopTimedEvents();
+        if (_secMan != null) {
+            _secMan.stopTimedEvents();
+        }
 
         try {
             if (_server != null){
