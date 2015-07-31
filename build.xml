@@ -33,17 +33,26 @@
             <arg value="src/build/I2PControl.jar" />
         </exec>
 
-        <exec executable="scripts/makeplugin.sh" failonerror="true" >
+        <input message="Enter su3 signing key password:" addproperty="release.password.su3" />
+        <fail message="You must enter a password." >
+            <condition>
+                <equals arg1="${release.password.su3}" arg2=""/>
+            </condition>
+        </fail>
+        <!-- this will fail if no su3 keys exist, as it needs the password twice -->
+        <exec executable="scripts/makeplugin.sh" inputstring="${release.password.su3}" failonerror="true" >
             <arg value="plugin" />
         </exec>
+
         <move file="I2PControl.xpi2p" tofile="I2PControl-update.xpi2p" overwrite="true" />
+        <move file="I2PControl.su3" tofile="I2PControl-update.su3" overwrite="true" />
 
         <!-- make the install xpi2p -->
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="version=${release.number}-b${build.number}" />
         </exec>
-        <exec executable="scripts/makeplugin.sh" failonerror="true" >
+        <exec executable="scripts/makeplugin.sh" inputstring="${release.password.su3}" failonerror="true" >
             <arg value="plugin" />
         </exec>
     </target>
@@ -61,6 +70,8 @@
         <delete file="plugin/README.txt" />
         <delete file="I2PControl.xpi2p" />
         <delete file="I2PControl-update.xpi2p" />
+        <delete file="I2PControl.su3" />
+        <delete file="I2PControl-update.su3" />
     </target>
 
 </project>
