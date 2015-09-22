@@ -17,11 +17,12 @@ package net.i2p.i2pcontrol;
  */
 
 import net.i2p.I2PAppContext;
-import net.i2p.i2pcontrol.security.KeyStoreFactory;
+import net.i2p.i2pcontrol.security.KeyStoreProvider;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.JSONRPC2Servlet;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.util.Log;
+
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
@@ -30,6 +31,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.security.KeyStore;
 
 
 /**
@@ -135,10 +137,10 @@ public class I2PControlController{
         ssl.setHost(address);
         ssl.setPort(port);
         ssl.setWantClientAuth(false); // Don't care about client authentication.
-        ssl.setPassword(_secMan.getKeyStorePassword());
-        ssl.setKeyPassword(_secMan.getKeyStorePassword());
-        ssl.setKeystoreType(_secMan.getKeyStoreType());
-        ssl.setKeystore(KeyStoreFactory.getKeyStoreLocation());
+        ssl.setPassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
+        ssl.setKeyPassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
+        ssl.setKeystoreType(KeyStore.getDefaultType());
+        ssl.setKeystore(KeyStoreProvider.getKeyStoreLocation());
         ssl.setName("SSL Listener-" + ++listeners);
 
         return ssl;

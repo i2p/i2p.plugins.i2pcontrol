@@ -1,104 +1,33 @@
 package net.i2p.i2pcontrol.security;
 
+import net.i2p.crypto.KeyStoreUtil;
 import net.i2p.i2pcontrol.I2PControlController;
-import sun.security.util.ObjectIdentifier;
-import sun.security.x509.*;
-
 import java.io.*;
-import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 
-public class KeyStoreFactory {
-    private static final float JAVA_VERSION = Float.valueOf(System.getProperty("java.version").charAt(0) + "." + System.getProperty("java.version").charAt(2));
-    public static final ObjectIdentifier DEFAULT_CERTIFICATE_ALGORITHM = AlgorithmId.sha512WithRSAEncryption_oid;
-    public static final String DEFAULT_CERTIFICATE_ALGORITHM_STRING = "SHA512WithRSA";
-    public static final String DEFAULT_KEYSTORE_TYPE = "JKS";
-    public static final String DEFAULT_KEYSTORE_PROVIDER = "SUN";
+public class KeyStoreProvider {
+    public static final String DEFAULT_CERTIFICATE_ALGORITHM_STRING = "RSA";
+    public static final int DEFAULT_CERTIFICATE_KEY_LENGTH = 4096;
+    public static final int DEFAULT_CERTIFICATE_VALIDITY = 365*10;
+    public final static String DEFAULT_CERTIFICATE_DOMAIN = "net.i2p.i2pcontrol";
+    public final static String DEFAULT_CERTIFICATE_ALIAS = "I2PControl CA";
     public static final String DEFAULT_KEYSTORE_NAME = "key.store";
     public static final String DEFAULT_KEYSTORE_PASSWORD = "nut'nfancy";
-    public static final String DEFAULT_KEYSTORE_ALGORITHM  = "SunX509";
     private static KeyStore _keystore = null;
 
-
-    public static KeyPair generateKeyPair() {
-        KeyPairGenerator keyGen;
-        try {
-            keyGen = KeyPairGenerator.getInstance("RSA");
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            keyGen.initialize(2048, random);
-
-            KeyPair pair = keyGen.generateKeyPair();
-            return pair;
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    /**
-     * Create a self-signed X.509 Certificate
-     * @param dn the X.509 Distinguished Name, eg "CN=Test, L=London, C=GB"
-     * @param pair the KeyPair
-     * @param days how many days from now the Certificate is valid for
-     * @param algorithm the signing algorithm, eg "SHA1withRSA"
-     */ 
-    static X509Certificate generateCACertificate(String dn, KeyPair pair, int days) {
-        try {
-            PrivateKey privkey = pair.getPrivate();
-            X509CertInfo info = new X509CertInfo();
-            Date from = new Date();
-            Date to = new Date(from.getTime() + days * 86400000l);
-            CertificateValidity interval = new CertificateValidity(from, to);
-            BigInteger sn = new BigInteger(64, new SecureRandom());
-            X500Name owner = new X500Name("CN=" + dn);
-
-            info.set(X509CertInfo.VALIDITY, interval);
-            info.set(X509CertInfo.SERIAL_NUMBER,
-                    new CertificateSerialNumber(sn));
-            if (JAVA_VERSION <  1.8f){
-                info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(owner));
-                info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
-            } else {
-                info.set(X509CertInfo.SUBJECT, owner);
-                info.set(X509CertInfo.ISSUER, owner);
-            }
-            info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
-            info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-            AlgorithmId algo = new AlgorithmId(DEFAULT_CERTIFICATE_ALGORITHM);
-            info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algo));
-
-            // Sign the cert to identify the algorithm that's used.
-            X509CertImpl cert = new X509CertImpl(info);
-            cert.sign(privkey, DEFAULT_CERTIFICATE_ALGORITHM_STRING);
-
-            // Update the algorithm, and resign.
-            algo = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
-            info.set(CertificateAlgorithmId.NAME + "."
-                    + CertificateAlgorithmId.ALGORITHM, algo);
-            cert = new X509CertImpl(info);
-            cert.sign(privkey, DEFAULT_CERTIFICATE_ALGORITHM_STRING);
-            return cert;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            e.printStackTrace();
-        }
-        return null;
+    
+    public static void initialize() {
+        KeyStoreUtil.createKeys(new File(getKeyStoreLocation()),
+                                DEFAULT_KEYSTORE_PASSWORD,
+                                DEFAULT_CERTIFICATE_ALIAS,
+                                DEFAULT_CERTIFICATE_DOMAIN,
+                                "i2pcontrol",
+                                DEFAULT_CERTIFICATE_VALIDITY,
+                                DEFAULT_CERTIFICATE_ALGORITHM_STRING,
+                                DEFAULT_CERTIFICATE_KEY_LENGTH,
+                                DEFAULT_KEYSTORE_PASSWORD);
     }
 
     public static X509Certificate readCert(KeyStore ks, String certAlias, String password){
@@ -217,27 +146,27 @@ public class KeyStoreFactory {
 
     public static synchronized KeyStore getDefaultKeyStore(){
         if (_keystore == null){
-            File keyStoreFile = new File(I2PControlController.getPluginDir()+File.separator+DEFAULT_KEYSTORE_NAME);
+            File keyStoreFile = new File(getKeyStoreLocation());
 
             try {
-                _keystore = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
+                _keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+                if (keyStoreFile.exists()){
+                    InputStream is = new FileInputStream(keyStoreFile);
+                    _keystore.load(is, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+                    return _keystore;
+                }
+                
+                initialize();
+                _keystore = KeyStore.getInstance(KeyStore.getDefaultType());
                 if (keyStoreFile.exists()){
                     InputStream is = new FileInputStream(keyStoreFile);
                     _keystore.load(is, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
                     return _keystore;
                 } else {
                     throw new IOException("KeyStore file " + keyStoreFile.getAbsolutePath() + " wasn't readable");
-                }
+                }               
             } catch (Exception e) {
                 // Ignore. Not an issue. Let's just create a new keystore instead.
-            }
-            try {
-                _keystore = KeyStore.getInstance(DEFAULT_KEYSTORE_TYPE);
-                _keystore.load(null, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-                _keystore.store(new FileOutputStream(keyStoreFile), DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-                return _keystore;
-            } catch (Exception e){
-                // Log perhaps?
             }
             return null;
         } else {

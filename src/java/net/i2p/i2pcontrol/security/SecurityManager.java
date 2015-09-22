@@ -35,7 +35,6 @@ import java.util.*;
  * Manage the password storing for I2PControl.
  */
 public class SecurityManager {
-    public final static String CERT_ALIAS = "I2PControl CA";
     private final static String SSL_PROVIDER = "SunJSSE";
     private final static String DEFAULT_AUTH_BCRYPT_SALT = "$2a$11$5aOLx2x/8i4fNaitoCSSWu";
     private final static String DEFAULT_AUTH_PASSWORD = "$2a$11$5aOLx2x/8i4fNaitoCSSWuut2wEl3Hupuca8DCT.NXzvH9fq1pBU.";
@@ -69,8 +68,7 @@ public class SecurityManager {
             _log.log(Log.CRIT, "Unable to create SSLSocket used for fetching supported ssl cipher suites.", e);
         }
 
-        // Initialize keystore (if needed)
-        _ks = KeyStoreInitializer.getKeyStore();
+        _ks = KeyStoreProvider.getDefaultKeyStore();
     }
 
     public String[] getSupprtedSSLCipherSuites(){
@@ -79,14 +77,6 @@ public class SecurityManager {
 
     public String getSecurityProvider(){
         return SSL_PROVIDER;
-    }
-
-    public String getKeyStorePassword(){
-        return KeyStoreFactory.DEFAULT_KEYSTORE_PASSWORD;
-    }
-
-    public String getKeyStoreType(){
-        return KeyStoreFactory.DEFAULT_KEYSTORE_TYPE;
     }
 
     public void stopTimedEvents(){
@@ -98,9 +88,9 @@ public class SecurityManager {
      * @return base64 encode of X509Certificate
      */
     public String getBase64Cert(){
-        X509Certificate caCert = KeyStoreFactory.readCert(_ks,
-                CERT_ALIAS, 
-                KeyStoreFactory.DEFAULT_KEYSTORE_PASSWORD);
+        X509Certificate caCert = KeyStoreProvider.readCert(_ks,
+                KeyStoreProvider.DEFAULT_CERTIFICATE_ALIAS, 
+                KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
         return getBase64FromCert(caCert);
     }
 
