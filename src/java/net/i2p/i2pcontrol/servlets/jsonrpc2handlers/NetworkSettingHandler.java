@@ -250,12 +250,13 @@ public class NetworkSettingHandler implements RequestHandler {
 	                Integer percent;
 	                try{
 	                    percent = Integer.parseInt(inParam);
-	                    if (percent < 0)
+	                    if (percent < 0 || percent > 100 || inParam.length() == 0) {
 	                        throw new NumberFormatException();
+	                    }
 	                } catch (NumberFormatException e){
 	                    return new JSONRPC2Response(
 	                            new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
-	                                    "\"i2p.router.net.bw.share\" A positive integer must supplied, " + inParam + " isn't valid"), 
+	                                    "\"i2p.router.net.bw.share\" A positive integer must supplied, \"" + inParam + "\" isn't valid"), 
 	                                   req.getID());
 	                }
                     _context.router().saveConfig(Router.PROP_BANDWIDTH_SHARE_PERCENTAGE, inParam);
@@ -272,8 +273,9 @@ public class NetworkSettingHandler implements RequestHandler {
                 Integer rate;
                 try{
                     rate = Integer.parseInt(inParam);
-                    if (rate < 0)
+                    if (rate < 0 || inParam.length() == 0) {
                         throw new NumberFormatException();
+                    }
                 } catch (NumberFormatException e){
                     return new JSONRPC2Response(
                             new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
@@ -301,7 +303,7 @@ public class NetworkSettingHandler implements RequestHandler {
                 Integer rate;
                 try{
                     rate = Integer.parseInt(inParam);
-                    if (rate < 0)
+                    if (rate < 0 || inParam.length() == 0)
                         throw new NumberFormatException();
                 } catch (NumberFormatException e){
                     return new JSONRPC2Response(
