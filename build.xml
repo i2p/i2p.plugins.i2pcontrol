@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project basedir="." default="all" name="I2PControl">
    
-    <target name="all" depends="clean,plugin" />
+    <target name="all" depends="clean,plugin,release" />
+    
+    <target name="local" depends="clean,plugin">
+		<property name="i2p.plugindir" value="${user.home}/.i2p/plugins/I2PControl" />
+		<delete dir="${i2p.plugindir}"/>
+		<mkdir  dir="${i2p.plugindir}"/>
+		<mkdir  dir="${i2p.plugindir}/lib"/>
+        <copy file="src/build/I2PControl.jar" todir="${i2p.plugindir}/lib" overwrite="true" />
+		<copy todir="${i2p.plugindir}" >  
+            <fileset dir="plugin" includes="**"/>  
+        </copy>
+    </target>
 
     <target name="jar">
         <ant dir="src" target="build" />
@@ -26,19 +37,30 @@
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="version=${release.number}-b${build.number}" />
         </exec>
-        <exec executable="pack200" failonerror="true">
-            <arg value="--no-gzip"/>
-            <arg value="--effort=9"/>
-            <arg value="plugin/lib/I2PControl.jar.pack" />
-            <arg value="src/build/I2PControl.jar" />
-        </exec>
 
+        <!-- make the install xpi2p -->
+        <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
+        <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
+            <arg value="version=${release.number}-b${build.number}" />
+        </exec>
+    </target>
+    
+    <target name="release" depends="plugin">
+      
         <input message="Enter su3 signing key password:" addproperty="release.password.su3" />
         <fail message="You must enter a password." >
             <condition>
                 <equals arg1="${release.password.su3}" arg2=""/>
             </condition>
         </fail>
+        
+        <exec executable="pack200" failonerror="true">
+            <arg value="--no-gzip"/>
+            <arg value="--effort=9"/>
+            <arg value="plugin/lib/I2PControl.jar.pack" />
+            <arg value="src/build/I2PControl.jar" />
+        </exec>
+        
         <!-- this will fail if no su3 keys exist, as it needs the password twice -->
         <exec executable="scripts/makeplugin.sh" inputstring="${release.password.su3}" failonerror="true" >
             <arg value="plugin" />
@@ -47,11 +69,6 @@
         <move file="I2PControl.xpi2p" tofile="I2PControl-update.xpi2p" overwrite="true" />
         <move file="I2PControl.su3" tofile="I2PControl-update.su3" overwrite="true" />
 
-        <!-- make the install xpi2p -->
-        <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
-        <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
-            <arg value="version=${release.number}-b${build.number}" />
-        </exec>
         <exec executable="scripts/makeplugin.sh" inputstring="${release.password.su3}" failonerror="true" >
             <arg value="plugin" />
         </exec>
