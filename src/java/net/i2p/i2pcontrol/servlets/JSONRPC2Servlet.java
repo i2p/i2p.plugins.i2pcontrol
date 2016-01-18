@@ -56,6 +56,7 @@ public class JSONRPC2Servlet extends HttpServlet{
         disp.register(new RouterInfoHandler());
         disp.register(new RouterManagerHandler());
         disp.register(new I2PControlHandler());
+        disp.register(new AdvancedSettingsHandler());
     }
 
     @Override
