@@ -79,7 +79,8 @@ public class I2PControlController{
         I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG);
 
         try {
-            _server = buildServer();
+        	Connector ssl = buildDefaultListenter();
+            _server = buildServer(ssl);
         } catch (IOException e) {
             _log.error("Unable to add listener " + _conf.getConf("i2pcontrol.listen.address", "127.0.0.1")+":"+_conf.getConf("i2pcontrol.listen.port", 7560) + " - " + e.getMessage());
         } catch (ClassNotFoundException e) {
@@ -92,6 +93,19 @@ public class I2PControlController{
             _log.error("Unable to start jetty server: " + e.getMessage());
         }
     }
+    
+
+
+    /**
+     * Builds a new server. Used for changing ports during operation and such.
+     * @return Server - A new server built from current configuration.
+     * @throws UnknownHostException
+     */
+    public static Connector buildDefaultListenter() throws UnknownHostException {
+        SslSocketConnector ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), 
+                                                  _conf.getConf("i2pcontrol.listen.port", 7650));
+        return ssl;
+    }
 
 
     /**
@@ -102,11 +116,8 @@ public class I2PControlController{
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static Server buildServer() throws UnknownHostException, Exception, InstantiationException, IllegalAccessException{
+    public static Server buildServer(Connector ssl) throws UnknownHostException, Exception, InstantiationException, IllegalAccessException{
         Server server = new Server();
-
-        SslSocketConnector ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), 
-                                                  _conf.getConf("i2pcontrol.listen.port", 7650));
         server.addConnector(ssl);
 
         ServletHandler sh = new ServletHandler();
@@ -146,27 +157,6 @@ public class I2PControlController{
         return ssl;
     }
 
-    /**
-     * Add a listener to the server.
-     * @param listener
-     * @throws Exception 
-     */
-    public static void addListener(Connector listener) throws Exception{
-        if (_server != null){
-            listener.start();
-            _server.addConnector(listener);
-        }
-    }
-
-    /**
-     * Remove a listener from the server.
-     * @param listener
-     */
-    public static void removeListener(Connector listener){
-        if (_server != null){
-            _server.removeConnector(listener);
-        }
-    }
 
     /**
      * Add a listener to the server
@@ -177,20 +167,10 @@ public class I2PControlController{
      * @throws Exception 
      */
     public static void replaceListener(Connector listener) throws Exception{
-        if (_server != null){
-            for (Connector currentListener : _server.getConnectors()){
-                if (currentListener.getPort() == listener.getPort()){
-                    _server.removeConnector(currentListener);
-                    try {
-                        currentListener.stop();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            listener.start();
-            _server.addConnector(listener);
+        if (_server != null) {
+        	stopServer();
         }
+        _server = buildServer(listener);
     }
 
     /**
@@ -214,36 +194,9 @@ public class I2PControlController{
             }
         }
     }
-
-    /**
-     * Replaces the current server with a new one. Shuts down the current server after 60 seconds.
-     */
-    public static void setServer(final Server server){
-        (new Thread(){
-            @Override
-            public void run(){
-                try {
-                    Thread.sleep(60*1000);
-                } catch (InterruptedException e1) { }
-                if (_server != null){
-                    try {
-                        _server.stop();
-                        _server = server;
-                    } catch (InterruptedException e) {} catch (Exception e) {
-                        //e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
-    }
-
-
-    private static void stop() {
-        ConfigurationManager.writeConfFile();
-        if (_secMan != null) {
-            _secMan.stopTimedEvents();
-        }
-
+    
+    private static void stopServer()
+    {
         try {
             if (_server != null){
                 _server.stop();
@@ -256,12 +209,21 @@ public class I2PControlController{
         } catch (Exception e) {
             _log.error("Stopping server" + e);
         }
+    }
+
+    private static void stop() {
+        ConfigurationManager.writeConfFile();
+        if (_secMan != null) {
+            _secMan.stopTimedEvents();
+        }
+
+        stopServer();
+        
         // Get and stop all running threads
         ThreadGroup threadgroup = Thread.currentThread().getThreadGroup();
         Thread[] threads = new Thread[threadgroup.activeCount()+3];
         threadgroup.enumerate(threads, true);
         for (Thread thread : threads){
-//            System.out.println("Active thread: " + thread.getName());
             if (thread != null ){//&& thread.isAlive()){
                 thread.interrupt();
             }
@@ -270,12 +232,8 @@ public class I2PControlController{
         for (Thread thread : threads){
             if (thread != null){
                 System.out.println("Active thread: " + thread.getName());
-                //if (thread != null && thread.isAlive()){
-                //    thread.interrupt();
-                //}
             }
         }
-        //Thread.currentThread().getName()
         threadgroup.interrupt();
 
         //Thread.currentThread().getThreadGroup().destroy();
