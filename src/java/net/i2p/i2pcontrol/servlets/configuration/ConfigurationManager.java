@@ -33,9 +33,9 @@ public class ConfigurationManager {
      * Should only be set before getInstance is first called.
      * @param dir
      */
-    public static void setConfDir(String dir){
-        if (!configLocationModified){
-            if (dir.endsWith("/")){
+    public static void setConfDir(String dir) {
+        if (!configLocationModified) {
+            if (dir.endsWith("/")) {
                 configLocation = dir + configLocation;
             } else {
                 configLocation = dir + "/" + configLocation;
@@ -48,7 +48,7 @@ public class ConfigurationManager {
     }
 
     public synchronized static ConfigurationManager getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new ConfigurationManager();
         }
         return instance;
@@ -60,9 +60,9 @@ public class ConfigurationManager {
      * @param settingNames Command line settingNameuments to the application
      */
     public void loadsettingNameuments(String[] settingNames) {
-        for(int i=0; i<settingNames.length; i++) {
+        for (int i = 0; i < settingNames.length; i++) {
             String settingName = settingNames[i];
-            if(settingName.startsWith("--")) {
+            if (settingName.startsWith("--")) {
                 parseConfigStr(settingName.substring(2));
             }
         }
@@ -71,11 +71,11 @@ public class ConfigurationManager {
     /**
      * Reads configuration from file itoopie.conf, every line is parsed as key=value.
      */
-    public static void readConfFile(){
+    public static void readConfFile() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(configLocation));
             String input;
-            while ((input = br.readLine()) != null){
+            while ((input = br.readLine()) != null) {
                 parseConfigStr(input);
             }
             br.close();
@@ -89,20 +89,20 @@ public class ConfigurationManager {
     /**
      * Write configuration into default config file.
      */
-    public static void writeConfFile(){
-        TreeMap<String,String> tree = new TreeMap<String,String>();
-        for (Entry<String,String> e : stringConfigurations.entrySet()){
+    public static void writeConfFile() {
+        TreeMap<String, String> tree = new TreeMap<String, String>();
+        for (Entry<String, String> e : stringConfigurations.entrySet()) {
             tree.put(e.getKey(), e.getValue());
         }
-        for (Entry<String,Integer> e : integerConfigurations.entrySet()){
+        for (Entry<String, Integer> e : integerConfigurations.entrySet()) {
             tree.put(e.getKey(), e.getValue().toString());
         }
-        for (Entry<String,Boolean> e : booleanConfigurations.entrySet()){
+        for (Entry<String, Boolean> e : booleanConfigurations.entrySet()) {
             tree.put(e.getKey(), e.getValue().toString());
         }
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(configLocation));
-            for (Entry<String,String> e : tree.entrySet()){
+            for (Entry<String, String> e : tree.entrySet()) {
                 bw.write(e.getKey() + "=" + e.getValue() + "\r\n");
             }
             bw.close();
@@ -112,26 +112,26 @@ public class ConfigurationManager {
     }
 
     /**
-     * Try to parse the given line as 'key=value', 
-     * where value will (in order) be parsed as integer/boolean/string. 
+     * Try to parse the given line as 'key=value',
+     * where value will (in order) be parsed as integer/boolean/string.
      * @param str
      */
-    public static void parseConfigStr(String str){
+    public static void parseConfigStr(String str) {
         int eqIndex = str.indexOf('=');
-        if (eqIndex != -1){
+        if (eqIndex != -1) {
             String key = str.substring(0, eqIndex).trim().toLowerCase();
-            String value = str.substring(eqIndex+1, str.length()).trim();
+            String value = str.substring(eqIndex + 1, str.length()).trim();
             //Try parse as integer.
             try {
                 int i = Integer.parseInt(value);
                 integerConfigurations.put(key, i);
                 return;
-            } catch (NumberFormatException e){}
+            } catch (NumberFormatException e) {}
             //Check if value is a bool
-            if (value.toLowerCase().equals("true")){
+            if (value.toLowerCase().equals("true")) {
                 booleanConfigurations.put(key, Boolean.TRUE);
                 return;
-            } else if (value.toLowerCase().equals("false")){
+            } else if (value.toLowerCase().equals("false")) {
                 booleanConfigurations.put(key, Boolean.FALSE);
                 return;
             }
@@ -148,7 +148,7 @@ public class ConfigurationManager {
      */
     public boolean getConf(String settingName, boolean defaultValue) {
         Boolean value = booleanConfigurations.get(settingName);
-        if(value != null) {
+        if (value != null) {
             return value;
         } else {
             booleanConfigurations.put(settingName, defaultValue);
@@ -165,7 +165,7 @@ public class ConfigurationManager {
      */
     public int getConf(String settingName, int defaultValue) {
         Integer value = integerConfigurations.get(settingName);
-        if(value != null) {
+        if (value != null) {
             return value;
         } else {
             integerConfigurations.put(settingName, defaultValue);
@@ -181,7 +181,7 @@ public class ConfigurationManager {
      */
     public String getConf(String settingName, String defaultValue) {
         String value = stringConfigurations.get(settingName);
-        if(value != null) {
+        if (value != null) {
             return value;
         } else {
             stringConfigurations.put(settingName, defaultValue);
@@ -194,7 +194,7 @@ public class ConfigurationManager {
      * @param settingName
      * @param nbr
      */
-    public void setConf(String settingName, int nbr){
+    public void setConf(String settingName, int nbr) {
         integerConfigurations.put(settingName, nbr);
     }
 
@@ -203,7 +203,7 @@ public class ConfigurationManager {
      * @param settingName
      * @param string
      */
-    public void setConf(String settingName, String str){
+    public void setConf(String settingName, String str) {
         stringConfigurations.put(settingName, str);
     }
 
@@ -212,7 +212,7 @@ public class ConfigurationManager {
      * @param settingName
      * @param boolean
      */
-    public void setConf(String settingName, boolean bool){
+    public void setConf(String settingName, boolean bool) {
         booleanConfigurations.put(settingName, bool);
     }
 }

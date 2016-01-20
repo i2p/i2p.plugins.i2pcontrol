@@ -20,27 +20,27 @@ import org.json.simple.JSONObject;
  *
  */
 
-/** 
- * Represents a JSON-RPC 2.0 error that occured during the processing of a 
+/**
+ * Represents a JSON-RPC 2.0 error that occured during the processing of a
  * request.
  *
  * <p>The protocol expects error objects to be structured like this:
  *
  * <ul>
  *     <li>{@code code} An integer that indicates the error type.
- *     <li>{@code message} A string providing a short description of the 
+ *     <li>{@code message} A string providing a short description of the
  *         error. The message should be limited to a concise single sentence.
- *     <li>{@code data} Additional information, which may be omitted. Its 
+ *     <li>{@code data} Additional information, which may be omitted. Its
  *         contents is entirely defined by the application.
  * </ul>
- * 
+ *
  * <p>Note that the "Error" word in the class name was put there solely to
- * comply with the parlance of the JSON-RPC spec. This class doesn't inherit 
- * from {@code java.lang.Error}. It's a regular subclass of 
- * {@code java.lang.Exception} and, if thrown, it's to indicate a condition 
+ * comply with the parlance of the JSON-RPC spec. This class doesn't inherit
+ * from {@code java.lang.Error}. It's a regular subclass of
+ * {@code java.lang.Exception} and, if thrown, it's to indicate a condition
  * that a reasonable application might want to catch.
  *
- * <p>This class also includes convenient final static instances for all 
+ * <p>This class also includes convenient final static instances for all
  * standard JSON-RPC 2.0 errors:
  *
  * <ul>
@@ -51,11 +51,11 @@ import org.json.simple.JSONObject;
  *     <li>{@link #INTERNAL_ERROR} Internal error (-32603)
  * </ul>
  *
- * <p>Note that the range -32099..-32000 is reserved for additional server 
+ * <p>Note that the range -32099..-32000 is reserved for additional server
  * errors.
  *
- * <p id="map">The mapping between JSON and Java entities (as defined by the 
- * underlying JSON.simple library): 
+ * <p id="map">The mapping between JSON and Java entities (as defined by the
+ * underlying JSON.simple library):
  * <pre>
  *     true|false  <--->  java.lang.Boolean
  *     number      <--->  java.lang.Number
@@ -65,7 +65,7 @@ import org.json.simple.JSONObject;
  *     null        <--->  null
  * </pre>
  *
- * <p>The JSON-RPC 2.0 specification and user group forum can be found 
+ * <p>The JSON-RPC 2.0 specification and user group forum can be found
  * <a href="http://groups.google.com/group/json-rpc">here</a>.
  *
  * @author <a href="http://dzhuvinov.com">Vladimir Dzhuvinov</a>
@@ -95,23 +95,23 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
 
 
 
-    /** 
-     * Creates a new JSON-RPC 2.0 error with the specified code and 
+    /**
+     * Creates a new JSON-RPC 2.0 error with the specified code and
      * message. The optional data is omitted.
-     * 
+     *
      * @param code    The error code (standard pre-defined or
      *                application-specific).
      * @param message The error message.
      */
-    public JSONRPC2ExtendedError(int code, String message) {        
+    public JSONRPC2ExtendedError(int code, String message) {
         super(code, message);
     }
 
 
-    /** 
+    /**
      * Creates a new JSON-RPC 2.0 error with the specified code,
      * message and data.
-     * 
+     *
      * @param code    The error code (standard pre-defined or
      *                application-specific).
      * @param message The error message.
@@ -123,7 +123,7 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
     }
 
 
-    /** 
+    /**
      * Gets the JSON-RPC 2.0 error code.
      *
      * @return The error code.
@@ -143,7 +143,7 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
     }
 
 
-    /** 
+    /**
      * Gets a JSON representation of the JSON-RPC 2.0 error.
      *
      * @return A JSON object representing this error object.
@@ -159,7 +159,7 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
     }
 
 
-    /** 
+    /**
      * Serialises the error object to a JSON string.
      *
      * @return A JSON-encoded string representing this error object.

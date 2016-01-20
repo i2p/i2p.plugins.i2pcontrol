@@ -62,7 +62,7 @@ public class RouterManagerHandler implements RequestHandler {
         } else {
             // Method name not supported
             return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND,
-                    req.getID());
+                                        req.getID());
         }
     }
 
@@ -73,32 +73,33 @@ public class RouterManagerHandler implements RequestHandler {
 
         if (_context == null) {
             return new JSONRPC2Response(new JSONRPC2Error(
-                    JSONRPC2Error.INTERNAL_ERROR.getCode(),
-                    "RouterContext was not initialized. Query failed"),
-                    req.getID());
+                                            JSONRPC2Error.INTERNAL_ERROR.getCode(),
+                                            "RouterContext was not initialized. Query failed"),
+                                        req.getID());
         }
         HashMap inParams = (HashMap) req.getParams();
         final Map outParams = new HashMap();
 
         if (inParams.containsKey("Shutdown")) {
             outParams.put("Shutdown", null);
-            (new Thread(){
+            (new Thread() {
                 @Override
-                public void run(){
+                public void run() {
                     try {
                         Thread.sleep(SHUTDOWN_WAIT);
                     } catch (InterruptedException e) {}
                     _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_HARD));
-                    _context.router().shutdown(Router.EXIT_HARD);                }
+                    _context.router().shutdown(Router.EXIT_HARD);
+                }
             }).start();
             return new JSONRPC2Response(outParams, req.getID());
         }
 
         if (inParams.containsKey("Restart")) {
             outParams.put("Restart", null);
-            (new Thread(){
+            (new Thread() {
                 @Override
-                public void run(){
+                public void run() {
                     try {
                         Thread.sleep(SHUTDOWN_WAIT);
                     } catch (InterruptedException e) {}
@@ -111,9 +112,9 @@ public class RouterManagerHandler implements RequestHandler {
 
         if (inParams.containsKey("ShutdownGraceful")) {
             outParams.put("ShutdownGraceful", null);
-            (new Thread(){
+            (new Thread() {
                 @Override
-                public void run(){
+                public void run() {
                     try {
                         Thread.sleep(SHUTDOWN_WAIT);
                     } catch (InterruptedException e) {}
@@ -126,23 +127,24 @@ public class RouterManagerHandler implements RequestHandler {
 
         if (inParams.containsKey("RestartGraceful")) {
             outParams.put("RestartGraceful", null);
-            (new Thread(){
+            (new Thread() {
                 @Override
-                public void run(){
+                public void run() {
                     try {
                         Thread.sleep(SHUTDOWN_WAIT);
                     } catch (InterruptedException e) {}
                     _context.addShutdownTask(new UpdateWrapperManagerTask(Router.EXIT_GRACEFUL_RESTART));
-                    _context.router().shutdownGracefully(Router.EXIT_GRACEFUL_RESTART);                }
+                    _context.router().shutdownGracefully(Router.EXIT_GRACEFUL_RESTART);
+                }
             }).start();
             return new JSONRPC2Response(outParams, req.getID());
         }
 
-        if (inParams.containsKey("Reseed")){
+        if (inParams.containsKey("Reseed")) {
             outParams.put("Reseed", null);
-            (new Thread(){
+            (new Thread() {
                 @Override
-                public void run(){
+                public void run() {
                     ReseedChecker reseeder = new ReseedChecker(_context);
                     reseeder.requestReseed();
                 }
@@ -150,11 +152,11 @@ public class RouterManagerHandler implements RequestHandler {
             return new JSONRPC2Response(outParams, req.getID());
         }
 
-        if (inParams.containsKey("FindUpdates")){
-            Thread t = new Thread(){
+        if (inParams.containsKey("FindUpdates")) {
+            Thread t = new Thread() {
                 @Override
-                public void run(){
-                    ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
+                public void run() {
+                    ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager();
                     if (clmgr == null) {
                         outParams.put("FindUpdates", "ClientAppManager is null");
                         return;
@@ -174,12 +176,12 @@ public class RouterManagerHandler implements RequestHandler {
             } catch (InterruptedException e) {}
             return new JSONRPC2Response(outParams, req.getID());
         }
-        
-        if (inParams.containsKey("Update")){
-            Thread t = new Thread(){
+
+        if (inParams.containsKey("Update")) {
+            Thread t = new Thread() {
                 @Override
-                public void run(){
-                    ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager(); 
+                public void run() {
+                    ClientAppManager clmgr = I2PAppContext.getCurrentContext().clientAppManager();
                     if (clmgr == null) {
                         outParams.put("Update", "ClientAppManager is null");
                         return;
@@ -196,7 +198,9 @@ public class RouterManagerHandler implements RequestHandler {
                     }
                     boolean isUpdating = upmgr.isUpdateInProgress(UpdateType.ROUTER_SIGNED);
                     while (isUpdating) {
-                        try { Thread.sleep(100);} catch (Exception e){}
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception e) {}
                         isUpdating = upmgr.isUpdateInProgress(UpdateType.ROUTER_SIGNED);
                     }
                     outParams.put("Update", upmgr.getStatus());
@@ -208,7 +212,7 @@ public class RouterManagerHandler implements RequestHandler {
             } catch (InterruptedException e) {}
             return new JSONRPC2Response(outParams, req.getID());
         }
-        
+
         return new JSONRPC2Response(outParams, req.getID());
     }
 

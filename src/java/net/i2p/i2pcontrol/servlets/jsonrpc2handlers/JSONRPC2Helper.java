@@ -37,32 +37,32 @@ public class JSONRPC2Helper {
      * @param useAuth - If true, will validate authentication token.
      * @return - null if no errors were found. Corresponding JSONRPC2Error if error is found.
      */
-    public static JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req, Boolean useAuth){
+    public static JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req, Boolean useAuth) {
 
         // Error on unnamed parameters
-        if (req.getParamsType() != JSONRPC2ParamsType.OBJECT){
+        if (req.getParamsType() != JSONRPC2ParamsType.OBJECT) {
             return JSONRPC2Error.INVALID_PARAMS;
         }
         HashMap params = (HashMap) req.getParams();
 
         // Validate authentication token.
-        if (useAuth){
+        if (useAuth) {
             JSONRPC2Error err = validateToken(params);
-            if (err != null){
+            if (err != null) {
                 return err;
             }
         }
 
         // If there exist any required arguments.
-        if (requiredArgs != null && requiredArgs.length > 0){
+        if (requiredArgs != null && requiredArgs.length > 0) {
             String missingArgs = "";
-            for (int i = 0; i < requiredArgs.length; i++){
-                if (!params.containsKey(requiredArgs[i])){
+            for (int i = 0; i < requiredArgs.length; i++) {
+                if (!params.containsKey(requiredArgs[i])) {
                     missingArgs = missingArgs.concat(requiredArgs[i] + ",");
                 }
             }
-            if (missingArgs.length() > 0){
-                missingArgs = missingArgs.substring(0, missingArgs.length()-1);
+            if (missingArgs.length() > 0) {
+                missingArgs = missingArgs.substring(0, missingArgs.length() - 1);
                 return new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), "Missing parameter(s): " + missingArgs);
             }
         }
@@ -75,7 +75,7 @@ public class JSONRPC2Helper {
      * @param req - Incoming JSONRPC2 request
      * @return - null if no errors were found. Corresponding JSONRPC2Error if error is found.
      */
-    public static JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req){
+    public static JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req) {
         return validateParams(requiredArgs, req, JSONRPC2Helper.USE_AUTH);
     }
 
@@ -86,18 +86,18 @@ public class JSONRPC2Helper {
      * @param req - Parameters of incoming request
      * @return null if everything is fine, JSONRPC2Error for any corresponding error.
      */
-    private static JSONRPC2Error validateToken(HashMap params){
+    private static JSONRPC2Error validateToken(HashMap params) {
         String tokenID = (String) params.get("Token");
-        if (tokenID == null){
+        if (tokenID == null) {
             return JSONRPC2ExtendedError.NO_TOKEN;
         }
         try {
             SecurityManager.getInstance().verifyToken(tokenID);
-        } catch (InvalidAuthTokenException e){
+        } catch (InvalidAuthTokenException e) {
             return JSONRPC2ExtendedError.INVALID_TOKEN;
-        } catch (ExpiredAuthTokenException e){
+        } catch (ExpiredAuthTokenException e) {
             JSONRPC2Error err = new JSONRPC2ExtendedError(JSONRPC2ExtendedError.TOKEN_EXPIRED.getCode(),
-                    "Provided authentication token expired "+e.getExpirytime()+", will be removed.");
+                    "Provided authentication token expired " + e.getExpirytime() + ", will be removed.");
             return err;
         }
         return null;

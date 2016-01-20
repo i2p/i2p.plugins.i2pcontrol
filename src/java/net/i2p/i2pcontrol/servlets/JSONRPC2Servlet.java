@@ -34,7 +34,7 @@ import java.io.*;
 /**
  * Provide an JSON-RPC 2.0 API for remote controlling of I2P
  */
-public class JSONRPC2Servlet extends HttpServlet{
+public class JSONRPC2Servlet extends HttpServlet {
 
     private static final long serialVersionUID = -45075606818515212L;
     private static final int BUFFER_LENGTH = 2048;
@@ -44,7 +44,7 @@ public class JSONRPC2Servlet extends HttpServlet{
 
 
     @Override
-    public void init(){
+    public void init() {
         _log = I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class);
         readBuffer = new char[BUFFER_LENGTH];
 
@@ -60,7 +60,7 @@ public class JSONRPC2Servlet extends HttpServlet{
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException{
+    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         httpServletResponse.setContentType("text/html");
         PrintWriter out = httpServletResponse.getWriter();
         out.println("Nothing to see here");
@@ -68,7 +68,7 @@ public class JSONRPC2Servlet extends HttpServlet{
     }
 
     @Override
-    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException{    
+    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         String req = getRequest(httpServletRequest.getInputStream());
         httpServletResponse.setContentType("application/json");
         PrintWriter out = httpServletResponse.getWriter();
@@ -95,10 +95,10 @@ public class JSONRPC2Servlet extends HttpServlet{
         }
     }
 
-    private String getRequest(ServletInputStream sis) throws IOException{
+    private String getRequest(ServletInputStream sis) throws IOException {
         Writer writer = new StringWriter();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(sis,"UTF-8"));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(sis, "UTF-8"));
         int n;
         while ((n = reader.read(readBuffer)) != -1) {
             writer.write(readBuffer, 0, n);

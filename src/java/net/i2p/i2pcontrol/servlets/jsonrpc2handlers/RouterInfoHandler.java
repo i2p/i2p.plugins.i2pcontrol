@@ -61,7 +61,7 @@ public class RouterInfoHandler implements RequestHandler {
         } else {
             // Method name not supported
             return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND,
-                    req.getID());
+                                        req.getID());
         }
     }
 
@@ -73,20 +73,20 @@ public class RouterInfoHandler implements RequestHandler {
 
         if (_context == null) {
             return new JSONRPC2Response(new JSONRPC2Error(
-                    JSONRPC2Error.INTERNAL_ERROR.getCode(),
-                    "RouterContext was not initialized. Query failed"),
-                    req.getID());
+                                            JSONRPC2Error.INTERNAL_ERROR.getCode(),
+                                            "RouterContext was not initialized. Query failed"),
+                                        req.getID());
         }
         HashMap inParams = (HashMap) req.getParams();
         Map outParams = new HashMap();
 
         if (inParams.containsKey("i2p.router.version")) {
             try {
-            Class rvClass = Class.forName("net.i2p.router.RouterVersion");
-            java.lang.reflect.Field field = rvClass.getDeclaredField("FULL_VERSION");
-            String fullVersion = (String) field.get(new RouterVersion());
-            outParams.put("i2p.router.version", fullVersion);
-            } catch (Exception e){} // Ignore
+                Class rvClass = Class.forName("net.i2p.router.RouterVersion");
+                java.lang.reflect.Field field = rvClass.getDeclaredField("FULL_VERSION");
+                String fullVersion = (String) field.get(new RouterVersion());
+                outParams.put("i2p.router.version", fullVersion);
+            } catch (Exception e) {} // Ignore
         }
 
         if (inParams.containsKey("i2p.router.uptime")) {
@@ -128,7 +128,7 @@ public class RouterInfoHandler implements RequestHandler {
 
         if (inParams.containsKey("i2p.router.netdb.knownpeers")) {
             // Why max(-1, 0) is used I don't know, it is the implementation used in the router console.
-            outParams.put("i2p.router.netdb.knownpeers", Math.max(_context.netDb().getKnownRouters()-1,0));
+            outParams.put("i2p.router.netdb.knownpeers", Math.max(_context.netDb().getKnownRouters() - 1, 0));
         }
 
         if (inParams.containsKey("i2p.router.netdb.activepeers")) {
@@ -149,7 +149,7 @@ public class RouterInfoHandler implements RequestHandler {
         return new JSONRPC2Response(outParams, req.getID());
     }
 
-    private static enum NETWORK_STATUS{
+    private static enum NETWORK_STATUS {
         OK,
         TESTING,
         FIREWALLED,

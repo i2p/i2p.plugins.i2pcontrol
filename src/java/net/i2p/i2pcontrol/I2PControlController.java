@@ -45,7 +45,7 @@ import java.security.KeyStore;
  *
  * @author hottuna
  */
-public class I2PControlController{
+public class I2PControlController {
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
     private static String _pluginDir = "";
     private static ConfigurationManager _conf;
@@ -57,7 +57,7 @@ public class I2PControlController{
         if (args.length != 3 || (!"-d".equals(args[0])))
             throw new IllegalArgumentException("Usage: PluginController -d $PLUGINDIR [start|stop]");
 
-        if ("start".equals(args[2])){
+        if ("start".equals(args[2])) {
             File pluginDir = new File(args[1]);
             if (!pluginDir.exists())
                 throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
@@ -79,10 +79,10 @@ public class I2PControlController{
         I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG);
 
         try {
-        	Connector ssl = buildDefaultListenter();
+            Connector ssl = buildDefaultListenter();
             _server = buildServer(ssl);
         } catch (IOException e) {
-            _log.error("Unable to add listener " + _conf.getConf("i2pcontrol.listen.address", "127.0.0.1")+":"+_conf.getConf("i2pcontrol.listen.port", 7560) + " - " + e.getMessage());
+            _log.error("Unable to add listener " + _conf.getConf("i2pcontrol.listen.address", "127.0.0.1") + ":" + _conf.getConf("i2pcontrol.listen.port", 7560) + " - " + e.getMessage());
         } catch (ClassNotFoundException e) {
             _log.error("Unable to find class net.i2p.i2pcontrol.JSONRPCServlet: " + e.getMessage());
         } catch (InstantiationException e) {
@@ -93,7 +93,7 @@ public class I2PControlController{
             _log.error("Unable to start jetty server: " + e.getMessage());
         }
     }
-    
+
 
 
     /**
@@ -102,8 +102,8 @@ public class I2PControlController{
      * @throws UnknownHostException
      */
     public static Connector buildDefaultListenter() throws UnknownHostException {
-        SslSocketConnector ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), 
-                                                  _conf.getConf("i2pcontrol.listen.port", 7650));
+        SslSocketConnector ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
+                                 _conf.getConf("i2pcontrol.listen.port", 7650));
         return ssl;
     }
 
@@ -116,7 +116,7 @@ public class I2PControlController{
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static Server buildServer(Connector ssl) throws UnknownHostException, Exception, InstantiationException, IllegalAccessException{
+    public static Server buildServer(Connector ssl) throws UnknownHostException, Exception, InstantiationException, IllegalAccessException {
         Server server = new Server();
         server.addConnector(ssl);
 
@@ -136,9 +136,9 @@ public class I2PControlController{
      * @return - Newly created listener
      * @throws UnknownHostException
      */
-    public static SslSocketConnector buildSslListener(String address, int port) throws UnknownHostException{
+    public static SslSocketConnector buildSslListener(String address, int port) throws UnknownHostException {
         int listeners = 0;
-        if (_server != null){
+        if (_server != null) {
             listeners = _server.getConnectors().length;
         }
 
@@ -160,15 +160,15 @@ public class I2PControlController{
 
     /**
      * Add a listener to the server
-     * If a listener listening to the same port as the provided listener 
+     * If a listener listening to the same port as the provided listener
      * uses already exists within the server, replace the one already used by
      * the server with the provided listener.
      * @param listener
-     * @throws Exception 
+     * @throws Exception
      */
-    public static void replaceListener(Connector listener) throws Exception{
+    public static void replaceListener(Connector listener) throws Exception {
         if (_server != null) {
-        	stopServer();
+            stopServer();
         }
         _server = buildServer(listener);
     }
@@ -177,8 +177,8 @@ public class I2PControlController{
      * Get all listeners of the server.
      * @return
      */
-    public static Connector[] getListeners(){
-        if (_server != null){
+    public static Connector[] getListeners() {
+        if (_server != null) {
             return _server.getConnectors();
         }
         return new Connector[0];
@@ -187,20 +187,20 @@ public class I2PControlController{
     /**
      * Removes all listeners
      */
-    public static void clearListeners(){
-        if (_server != null){
-            for (Connector listen : getListeners()){
+    public static void clearListeners() {
+        if (_server != null) {
+            for (Connector listen : getListeners()) {
                 _server.removeConnector(listen);
             }
         }
     }
-    
+
     private static void stopServer()
     {
         try {
-            if (_server != null){
+            if (_server != null) {
                 _server.stop();
-                for (Connector listener : _server.getConnectors()){
+                for (Connector listener : _server.getConnectors()) {
                     listener.stop();
                 }
                 _server.destroy();
@@ -218,19 +218,19 @@ public class I2PControlController{
         }
 
         stopServer();
-        
+
         // Get and stop all running threads
         ThreadGroup threadgroup = Thread.currentThread().getThreadGroup();
-        Thread[] threads = new Thread[threadgroup.activeCount()+3];
+        Thread[] threads = new Thread[threadgroup.activeCount() + 3];
         threadgroup.enumerate(threads, true);
-        for (Thread thread : threads){
-            if (thread != null ){//&& thread.isAlive()){
+        for (Thread thread : threads) {
+            if (thread != null) {//&& thread.isAlive()){
                 thread.interrupt();
             }
         }
 
-        for (Thread thread : threads){
-            if (thread != null){
+        for (Thread thread : threads) {
+            if (thread != null) {
                 System.out.println("Active thread: " + thread.getName());
             }
         }
@@ -239,7 +239,7 @@ public class I2PControlController{
         //Thread.currentThread().getThreadGroup().destroy();
     }
 
-    public static String getPluginDir(){
+    public static String getPluginDir() {
         return _pluginDir;
     }
 }

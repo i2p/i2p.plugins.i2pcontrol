@@ -31,10 +31,10 @@ import java.util.Map;
 
 public class AuthenticateHandler implements RequestHandler {
 
-    private String[] requiredArgs = {"Password","API"};
+    private String[] requiredArgs = {"Password", "API"};
     // Reports the method names of the handled requests
     public String[] handledRequests() {
-        return new String[]{"Authenticate"};
+        return new String[] {"Authenticate"};
     }
 
     // Processes the requests
@@ -51,7 +51,7 @@ public class AuthenticateHandler implements RequestHandler {
             // Try get an AuthToken
 
             AuthToken token = SecurityManager.getInstance().validatePasswd(pwd);
-            if (token == null){
+            if (token == null) {
                 return new JSONRPC2Response(JSONRPC2ExtendedError.INVALID_PASSWORD, req.getID());
             }
 
@@ -74,23 +74,23 @@ public class AuthenticateHandler implements RequestHandler {
     /**
      * Validate the provided I2PControl API version against the ones supported by I2PControl.
      */
-    private static JSONRPC2Error validateAPIVersion(Object api){
+    private static JSONRPC2Error validateAPIVersion(Object api) {
 
         Integer apiVersion;
         try {
             apiVersion = ((Long) api).intValue();
-        } catch (ClassCastException e){
+        } catch (ClassCastException e) {
             e.printStackTrace();
             return JSONRPC2ExtendedError.UNSPECIFIED_API_VERSION;
         }
 
-        if (!I2PControlVersion.SUPPORTED_API_VERSIONS.contains(apiVersion)){
+        if (!I2PControlVersion.SUPPORTED_API_VERSIONS.contains(apiVersion)) {
             String supportedAPIVersions = "";
-            for (Integer i : I2PControlVersion.SUPPORTED_API_VERSIONS){
-                supportedAPIVersions += ", "+ i;
+            for (Integer i : I2PControlVersion.SUPPORTED_API_VERSIONS) {
+                supportedAPIVersions += ", " + i;
             }
             return new JSONRPC2Error(JSONRPC2ExtendedError.UNSUPPORTED_API_VERSION.getCode(),
-                    "The provided API version \'" + apiVersion + "\' is not supported. The supported versions are" + supportedAPIVersions+".");
+                                     "The provided API version \'" + apiVersion + "\' is not supported. The supported versions are" + supportedAPIVersions + ".");
         }
         return null;
     }

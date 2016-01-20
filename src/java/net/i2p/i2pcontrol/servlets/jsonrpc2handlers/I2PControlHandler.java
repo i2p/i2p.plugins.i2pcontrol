@@ -43,7 +43,7 @@ public class I2PControlHandler implements RequestHandler {
     private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlHandler.class);
     private static final ConfigurationManager _conf = ConfigurationManager.getInstance();
 
-    static{
+    static {
         try {
             _context = RouterManager.getRouterContext();
         } catch (Exception e) {
@@ -53,30 +53,30 @@ public class I2PControlHandler implements RequestHandler {
 
     // Reports the method names of the handled requests
     public String[] handledRequests() {
-        return new String[]{"I2PControl"};
+        return new String[] {"I2PControl"};
     }
 
     // Processes the requests
     public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
         if (req.getMethod().equals("I2PControl")) {
             return process(req);
-        }else {
+        } else {
             // Method name not supported
             return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
         }
     }
 
 
-    private JSONRPC2Response process(JSONRPC2Request req){
+    private JSONRPC2Response process(JSONRPC2Request req) {
         JSONRPC2Error err = JSONRPC2Helper.validateParams(null, req);
         if (err != null)
             return new JSONRPC2Response(err, req.getID());
 
-        if (_context == null){
+        if (_context == null) {
             return new JSONRPC2Response(
-                    new JSONRPC2Error(JSONRPC2Error.INTERNAL_ERROR.getCode(), 
-                            "RouterContext was not initialized. Query failed"), 
-                            req.getID());
+                       new JSONRPC2Error(JSONRPC2Error.INTERNAL_ERROR.getCode(),
+                                         "RouterContext was not initialized. Query failed"),
+                       req.getID());
         }
         HashMap inParams = (HashMap) req.getParams();
         Map outParams = new HashMap();
@@ -85,21 +85,21 @@ public class I2PControlHandler implements RequestHandler {
         boolean settingsSaved = false;
         String inParam;
 
-        if (inParams.containsKey("i2pcontrol.port")){
+        if (inParams.containsKey("i2pcontrol.port")) {
             Integer  oldPort = _conf.getConf("i2pcontrol.listen.port", 7650);
-            if ((inParam = (String) inParams.get("i2pcontrol.port")) != null){
-                if (oldPort == null || !inParam.equals(oldPort.toString())){
+            if ((inParam = (String) inParams.get("i2pcontrol.port")) != null) {
+                if (oldPort == null || !inParam.equals(oldPort.toString())) {
                     Integer newPort;
                     try {
                         newPort = Integer.valueOf(inParam);
-                        if (newPort < 1 || newPort > 65535){
+                        if (newPort < 1 || newPort > 65535) {
                             throw new NumberFormatException();
                         }
-                    } catch (NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         return new JSONRPC2Response(
-                                new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
-                                        "\"i2pcontrol.port\" must be a string representing a number in the range 1-65535. " + inParam + " isn't valid."), 
-                                        req.getID());
+                                   new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(),
+                                                     "\"i2pcontrol.port\" must be a string representing a number in the range 1-65535. " + inParam + " isn't valid."),
+                                   req.getID());
                     }
                     try {
                         SslSocketConnector ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), newPort);
@@ -118,24 +118,24 @@ public class I2PControlHandler implements RequestHandler {
                             SslSocketConnector ssl = I2PControlController.buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"), oldPort);
                             I2PControlController.clearListeners();
                             I2PControlController.replaceListener(ssl);
-                        } catch (Exception e2){
-                            _log.log(Log.CRIT, "Unable to resume server on previous listening port." );
+                        } catch (Exception e2) {
+                            _log.log(Log.CRIT, "Unable to resume server on previous listening port.");
                         }
                         _log.error("Client tried to set listen port to, " + newPort + " which isn't valid.", e);
-                            return new JSONRPC2Response(
-                                    new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
-                                            "\"i2pcontrol.port\" has been set to a port that is already in use, reverting. " +
-                                            inParam + " is an already used port.\n"
-                                                    + "Exception: " + e.toString()),
-                                            req.getID());
+                        return new JSONRPC2Response(
+                                   new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(),
+                                                     "\"i2pcontrol.port\" has been set to a port that is already in use, reverting. " +
+                                                     inParam + " is an already used port.\n"
+                                                     + "Exception: " + e.toString()),
+                                   req.getID());
                     }
                 }
             }
         }
 
-        if(inParams.containsKey("i2pcontrol.password")){
-            if ((inParam = (String) inParams.get("i2pcontrol.password")) != null){
-                if (SecurityManager.getInstance().setPasswd(inParam)){
+        if (inParams.containsKey("i2pcontrol.password")) {
+            if ((inParam = (String) inParams.get("i2pcontrol.password")) != null) {
+                if (SecurityManager.getInstance().setPasswd(inParam)) {
                     outParams.put("i2pcontrol.password", null);
                     settingsSaved = true;
                 }
@@ -143,20 +143,20 @@ public class I2PControlHandler implements RequestHandler {
             }
         }
 
-        if(inParams.containsKey("i2pcontrol.address")){
+        if (inParams.containsKey("i2pcontrol.address")) {
             String oldAddress = _conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
-            if ((inParam = (String) inParams.get("i2pcontrol.address")) != null){
-                if ((oldAddress == null || !inParam.equals(oldAddress.toString()) && 
-                        (inParam.equals("0.0.0.0") || inParam.equals("127.0.0.1")))){
+            if ((inParam = (String) inParams.get("i2pcontrol.address")) != null) {
+                if ((oldAddress == null || !inParam.equals(oldAddress.toString()) &&
+                        (inParam.equals("0.0.0.0") || inParam.equals("127.0.0.1")))) {
                     InetAddress[] newAddress;
 
                     try {
                         newAddress = InetAddress.getAllByName(inParam);
-                    } catch (UnknownHostException e){
+                    } catch (UnknownHostException e) {
                         return new JSONRPC2Response(
-                                new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
-                                        "\"i2pcontrol.address\" must be a string representing a hostname or ipaddress. " + inParam + " isn't valid."), 
-                                        req.getID());
+                                   new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(),
+                                                     "\"i2pcontrol.address\" must be a string representing a hostname or ipaddress. " + inParam + " isn't valid."),
+                                   req.getID());
                     }
                     try {
                         SslSocketConnector ssl = I2PControlController.buildSslListener(inParam, _conf.getConf("i2pcontrol.listen.port", 7650));
@@ -173,13 +173,13 @@ public class I2PControlHandler implements RequestHandler {
                             SslSocketConnector ssl = I2PControlController.buildSslListener(inParam, _conf.getConf("i2pcontrol.listen.port", 7650));
                             I2PControlController.clearListeners();
                             I2PControlController.replaceListener(ssl);
-                        } catch (Exception e2){
-                            _log.log(Log.CRIT, "Unable to resume server on previous listening ip." );
+                        } catch (Exception e2) {
+                            _log.log(Log.CRIT, "Unable to resume server on previous listening ip.");
                         }
                         _log.error("Client tried to set listen address to, " + newAddress.toString() + " which isn't valid.", e);
                         return new JSONRPC2Response(
-                                new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(), 
-                                        "\"i2pcontrol.address\" has been set to an invalid address, reverting. "),    req.getID());
+                                   new JSONRPC2Error(JSONRPC2Error.INVALID_PARAMS.getCode(),
+                                                     "\"i2pcontrol.address\" has been set to an invalid address, reverting. "),    req.getID());
                     }
                 }
             } else {

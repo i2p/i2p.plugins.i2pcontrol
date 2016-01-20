@@ -34,7 +34,7 @@ public class GetRateHandler implements RequestHandler {
     private String[] requiredArgs = {"Stat", "Period"};
     // Reports the method names of the handled requests
     public String[] handledRequests() {
-        return new String[]{"GetRate"};
+        return new String[] {"GetRate"};
     }
 
     // Processes the requests
@@ -47,20 +47,20 @@ public class GetRateHandler implements RequestHandler {
             HashMap inParams = (HashMap) req.getParams();
 
             String input = (String) inParams.get("Stat");
-            if (input == null){
+            if (input == null) {
                 return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
             }
             long period;
-            try{
+            try {
                 period = (Long) inParams.get("Period");
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, req.getID());
             }
 
             RateStat rateStat = I2PAppContext.getGlobalContext().statManager().getRate(input);
 
             // If RateStat or the requested period doesn't already exist, create them.
-            if (rateStat == null || rateStat.getRate(period) == null){
+            if (rateStat == null || rateStat.getRate(period) == null) {
                 long[] tempArr = new long[1];
                 tempArr[0] = period;
                 I2PAppContext.getGlobalContext().statManager().createRequiredRateStat(input, "I2PControl", "I2PControl", tempArr);

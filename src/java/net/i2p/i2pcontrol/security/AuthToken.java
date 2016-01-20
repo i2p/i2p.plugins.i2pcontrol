@@ -11,7 +11,7 @@ public class AuthToken {
     private String id;
     private Date expiry;
 
-    public AuthToken(String password){
+    public AuthToken(String password) {
         _secMan = SecurityManager.getInstance();
         String hash = _secMan.getPasswdHash(password);
         this.id = _secMan.getHash(hash + Calendar.getInstance().getTimeInMillis());
@@ -20,7 +20,7 @@ public class AuthToken {
         this.expiry = expiry.getTime();
     }
 
-    public String getId(){
+    public String getId() {
         return id;
     }
 
@@ -28,23 +28,23 @@ public class AuthToken {
      * Checks whether the AuthToken has expired.
      * @return True if AuthToken hasn't expired. False in any other case.
      */
-    public boolean isValid(){
+    public boolean isValid() {
         return Calendar.getInstance().getTime().before(expiry);
     }
 
-    public String getExpiryTime(){
+    public String getExpiryTime() {
         SimpleDateFormat sdf = new SimpleDateFormat();
         sdf.applyPattern("yyyy-MM-dd HH:mm:ss");
         return sdf.format(expiry);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return id;
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return id.hashCode();
     }
 }

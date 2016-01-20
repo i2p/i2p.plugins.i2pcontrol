@@ -14,7 +14,7 @@ public class EchoHandler implements RequestHandler {
     private String[] requiredArgs = {"Echo"};
     // Reports the method names of the handled requests
     public String[] handledRequests() {
-        return new String[]{"Echo"};
+        return new String[] {"Echo"};
     }
 
     // Processes the requests

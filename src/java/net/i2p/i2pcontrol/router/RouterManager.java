@@ -24,9 +24,9 @@ public class RouterManager {
 
     public static RouterContext getRouterContext() throws Exception {
         // If not running as a plugin from within I2P.
-        if(context.isRouterContext()) {
+        if (context.isRouterContext()) {
             return (RouterContext) context;
-        }else {
+        } else {
             throw new Exception("No RouterContext available!");
         }
     }
