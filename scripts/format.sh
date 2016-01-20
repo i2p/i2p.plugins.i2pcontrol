@@ -15,4 +15,4 @@ find -regex ".*\.\(java\)" -exec \
       --keep-one-line-statements --convert-tabs \
       --indent-preprocessor "{}" \;
       
-  echo "Done!"
+echo "Done!"
