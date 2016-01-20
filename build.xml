@@ -75,6 +75,10 @@
     </target>
 
     <target name="distclean" depends="clean" />
+    
+    <target name="format">
+        <exec executable="scripts/format.sh" failonerror="true" />
+    </target>
 
     <target name="clean" >
         <ant dir="src" target="clean" />
