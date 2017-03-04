@@ -36,7 +36,8 @@
         <mkdir dir="./build/obj" />
         <javac 
             srcdir="./java" 
-            debug="true" deprecation="on" source="1.5" target="1.5" 
+            debug="true" deprecation="on" source="1.7" target="1.7" 
+            includeAntRuntime="false"
             destdir="./build/obj" 
             classpath="${cp}">
             <compilerarg line="${javac.compilerargs}" />
