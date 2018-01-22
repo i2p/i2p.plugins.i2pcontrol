@@ -1,1 +1,13 @@
-http://zzz.i2p/topics/888?page=1#p3440
+http://zzz.i2p/topics/888
+
+https://geti2p.net/spec/proposals/118-i2pcontrol-api-2
+
+http://zzz.i2p/topics/2030
+Prep for bundling into router package
+Review auth requirements and implementation
+Remove static fields
+Consistent style tab/spaces
+Convert I2PControlController to RouterApp
+Remove static ConfigurationManager, SecurityManager, Server
+bcrypt merge or move to PasswordManager
+Which json lib, possibly migrate
