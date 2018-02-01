@@ -45,6 +45,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 
 /**
@@ -73,6 +76,7 @@ public class I2PControlController implements RouterApp {
     private ClientAppState _state = UNINITIALIZED;
     // only for main()
     private static I2PControlController _instance;
+    static final String PROP_ALLOWED_HOSTS = "i2pcontrol.allowedHosts";
 
     public I2PControlController(RouterContext ctx, ClientAppManager mgr, String args[]) {
         _appContext = _context = ctx;
@@ -225,7 +229,29 @@ public class I2PControlController implements RouterApp {
 
         ServletHandler sh = new ServletHandler();
         sh.addServletWithMapping(new ServletHolder(new JSONRPC2Servlet(_context, _secMan)), "/");
-        server.getServer().setHandler(sh);
+        HostCheckHandler hch = new HostCheckHandler(_appContext);
+        Set<String> listenHosts = new HashSet<String>(8);
+        // fix up the allowed hosts set (see HostCheckHandler)
+        // empty set says all are valid
+        String address = _conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
+        if (!(address.equals("0.0.0.0") ||
+              address.equals("::") ||
+              address.equals("0:0:0:0:0:0:0:0"))) {
+            listenHosts.add("localhost");
+            listenHosts.add("127.0.0.1");
+            listenHosts.add("::1");
+            listenHosts.add("0:0:0:0:0:0:0:1");
+            String allowed = _conf.getConf(PROP_ALLOWED_HOSTS, "**unset**");
+            if (!allowed.equals("**unset**")) {
+                StringTokenizer tok = new StringTokenizer(allowed, " ,");
+                while (tok.hasMoreTokens()) {
+                    listenHosts.add(tok.nextToken());
+                }
+            }
+        }
+        hch.setListenHosts(listenHosts);
+        hch.setHandler(sh);
+        server.getServer().setHandler(hch);
 
         return server;
     }

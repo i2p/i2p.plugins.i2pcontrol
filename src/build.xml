@@ -43,7 +43,7 @@
 
     <target name="war" depends="compile" >
         <war destfile="build/jsonrpc.war" webxml="web.xml" >
-            <classes dir="./build/obj" excludes="net/i2p/i2pcontrol/I2PControlController.class" />
+            <classes dir="./build/obj" excludes="net/i2p/i2pcontrol/I2PControlController.class net/i2p/i2pcontrol/HostCheckHandler.class" />
         </war>
     </target>
 
