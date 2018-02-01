@@ -1,9 +1,13 @@
 package net.i2p.i2pcontrol.security;
 
 import net.i2p.crypto.KeyStoreUtil;
-import net.i2p.i2pcontrol.I2PControlController;
-import java.io.*;
-import java.security.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -15,10 +19,14 @@ public class KeyStoreProvider {
     public final static String DEFAULT_CERTIFICATE_ALIAS = "I2PControl CA";
     public static final String DEFAULT_KEYSTORE_NAME = "key.store";
     public static final String DEFAULT_KEYSTORE_PASSWORD = "nut'nfancy";
-    private static KeyStore _keystore = null;
+    private final String _pluginDir;
+    private KeyStore _keystore;
 
+    public KeyStoreProvider(String pluginDir) {
+        _pluginDir = pluginDir;
+    }
 
-    public static void initialize() {
+    public void initialize() {
         KeyStoreUtil.createKeys(new File(getKeyStoreLocation()),
                                 DEFAULT_KEYSTORE_PASSWORD,
                                 DEFAULT_CERTIFICATE_ALIAS,
@@ -30,6 +38,10 @@ public class KeyStoreProvider {
                                 DEFAULT_KEYSTORE_PASSWORD);
     }
 
+    /**
+     *  @param password unused
+     *  @return null on failure
+     */
     public static X509Certificate readCert(KeyStore ks, String certAlias, String password) {
         try {
             X509Certificate cert = (X509Certificate) ks.getCertificate(certAlias);
@@ -51,6 +63,11 @@ public class KeyStoreProvider {
         return null;
     }
 
+    /**
+     *  @param password for the keystore
+     *  @return null on failure
+     */
+/****
     public static X509Certificate readCert(File keyStoreFile, String certAlias, String password) {
         try {
             KeyStore ks = getDefaultKeyStore();
@@ -81,7 +98,13 @@ public class KeyStoreProvider {
         }
         return null;
     }
+****/
 
+    /**
+     *  @param password for the key
+     *  @return null on failure, or throws RuntimeException...
+     */
+/****
     public static PrivateKey readPrivateKey(KeyStore ks, String alias, String password) {
         try {
             // load the key entry from the keystore
@@ -102,7 +125,12 @@ public class KeyStoreProvider {
         }
         return null;
     }
+****/
 
+    /**
+     *  @return null on failure
+     */
+/****
     public static PrivateKey readPrivateKey(String alias, File keyStoreFile, String keyStorePassword, String keyPassword) {
         try {
             KeyStore ks = getDefaultKeyStore();
@@ -120,7 +148,12 @@ public class KeyStoreProvider {
         }
         return null;
     }
+****/
 
+    /**
+     *  @return null on failure
+     */
+/****
     public static KeyStore writeCACertToKeyStore(KeyStore keyStore, String keyPassword, String alias, PrivateKey caPrivKey, X509Certificate caCert) {
         try {
             X509Certificate[] chain = new X509Certificate[1];
@@ -143,8 +176,12 @@ public class KeyStoreProvider {
         }
         return null;
     }
+****/
 
-    public static synchronized KeyStore getDefaultKeyStore() {
+    /**
+     *  @return null on failure
+     */
+    public synchronized KeyStore getDefaultKeyStore() {
         if (_keystore == null) {
             File keyStoreFile = new File(getKeyStoreLocation());
 
@@ -157,7 +194,6 @@ public class KeyStoreProvider {
                 }
 
                 initialize();
-                _keystore = KeyStore.getInstance(KeyStore.getDefaultType());
                 if (keyStoreFile.exists()) {
                     InputStream is = new FileInputStream(keyStoreFile);
                     _keystore.load(is, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
@@ -174,8 +210,8 @@ public class KeyStoreProvider {
         }
     }
 
-    public static String getKeyStoreLocation() {
-        File keyStoreFile = new File(I2PControlController.getPluginDir() + File.separator + DEFAULT_KEYSTORE_NAME);
+    public String getKeyStoreLocation() {
+        File keyStoreFile = new File(_pluginDir, DEFAULT_KEYSTORE_NAME);
         return keyStoreFile.getAbsolutePath();
     }
 }

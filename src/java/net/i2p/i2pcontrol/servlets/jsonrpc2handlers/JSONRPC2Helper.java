@@ -30,6 +30,12 @@ public class JSONRPC2Helper {
     public final static Boolean USE_NO_AUTH = false;
     public final static Boolean USE_AUTH = true;
 
+    private final SecurityManager _secMan;
+
+    public JSONRPC2Helper(SecurityManager secMan) {
+        _secMan = secMan;
+    }
+
     /**
      * Check incoming request for required arguments, to make sure they are valid.
      * @param requiredArgs - Array of names of required arguments. If null don't check for any parameters.
@@ -37,7 +43,7 @@ public class JSONRPC2Helper {
      * @param useAuth - If true, will validate authentication token.
      * @return - null if no errors were found. Corresponding JSONRPC2Error if error is found.
      */
-    public static JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req, Boolean useAuth) {
+    public JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req, Boolean useAuth) {
 
         // Error on unnamed parameters
         if (req.getParamsType() != JSONRPC2ParamsType.OBJECT) {
@@ -75,7 +81,7 @@ public class JSONRPC2Helper {
      * @param req - Incoming JSONRPC2 request
      * @return - null if no errors were found. Corresponding JSONRPC2Error if error is found.
      */
-    public static JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req) {
+    public JSONRPC2Error validateParams(String[] requiredArgs, JSONRPC2Request req) {
         return validateParams(requiredArgs, req, JSONRPC2Helper.USE_AUTH);
     }
 
@@ -86,13 +92,13 @@ public class JSONRPC2Helper {
      * @param req - Parameters of incoming request
      * @return null if everything is fine, JSONRPC2Error for any corresponding error.
      */
-    private static JSONRPC2Error validateToken(HashMap params) {
+    private JSONRPC2Error validateToken(HashMap params) {
         String tokenID = (String) params.get("Token");
         if (tokenID == null) {
             return JSONRPC2ExtendedError.NO_TOKEN;
         }
         try {
-            SecurityManager.getInstance().verifyToken(tokenID);
+            _secMan.verifyToken(tokenID);
         } catch (InvalidAuthTokenException e) {
             return JSONRPC2ExtendedError.INVALID_TOKEN;
         } catch (ExpiredAuthTokenException e) {

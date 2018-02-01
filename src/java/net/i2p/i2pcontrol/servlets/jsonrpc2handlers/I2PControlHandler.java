@@ -5,14 +5,13 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
+
 import net.i2p.I2PAppContext;
 import net.i2p.i2pcontrol.I2PControlController;
-import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.router.RouterContext;
 import net.i2p.util.Log;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -37,19 +36,23 @@ import java.util.Map;
  */
 
 public class I2PControlHandler implements RequestHandler {
+
     private static final int BW_BURST_PCT = 110;
     private static final int BW_BURST_TIME = 20;
-    private static RouterContext _context;
-    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlHandler.class);
-    private static final ConfigurationManager _conf = ConfigurationManager.getInstance();
+    private final RouterContext _context;
+    private final Log _log;
+    //private final ConfigurationManager _conf;
+    private final JSONRPC2Helper _helper;
 
-    static {
-        try {
-            _context = RouterManager.getRouterContext();
-        } catch (Exception e) {
-            _log.error("Unable to initialize RouterContext.", e);
-        }
+    public I2PControlHandler(RouterContext ctx, JSONRPC2Helper helper) {
+        _helper = helper;
+        _context = ctx;
+        if (ctx != null)
+            _log = ctx.logManager().getLog(I2PControlHandler.class);
+        else
+            _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlHandler.class);
     }
+
 
     // Reports the method names of the handled requests
     public String[] handledRequests() {
@@ -59,7 +62,8 @@ public class I2PControlHandler implements RequestHandler {
     // Processes the requests
     public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
         if (req.getMethod().equals("I2PControl")) {
-            return process(req);
+            //return process(req);
+            return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
         } else {
             // Method name not supported
             return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
@@ -67,8 +71,9 @@ public class I2PControlHandler implements RequestHandler {
     }
 
 
+/****
     private JSONRPC2Response process(JSONRPC2Request req) {
-        JSONRPC2Error err = JSONRPC2Helper.validateParams(null, req);
+        JSONRPC2Error err = _helper.validateParams(null, req);
         if (err != null)
             return new JSONRPC2Response(err, req.getID());
 
@@ -191,4 +196,5 @@ public class I2PControlHandler implements RequestHandler {
         outParams.put("RestartNeeded", restartNeeded);
         return new JSONRPC2Response(outParams, req.getID());
     }
+****/
 }

@@ -7,7 +7,6 @@ import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
 import net.i2p.I2PAppContext;
-import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.RouterContext;
 import net.i2p.util.Log;
 
@@ -18,18 +17,20 @@ import java.util.Set;
 
 public class AdvancedSettingsHandler implements RequestHandler {
 
-    private static RouterContext _context;
-    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(AdvancedSettingsHandler.class);
+    private final RouterContext _context;
+    private final Log _log;
+    private final JSONRPC2Helper _helper;
+    private static final String[] requiredArgs = {};
 
-    static {
-        try {
-            _context = RouterManager.getRouterContext();
-        } catch (Exception e) {
-            _log.error("Unable to initialize RouterContext.", e);
-        }
+    public AdvancedSettingsHandler(RouterContext ctx, JSONRPC2Helper helper) {
+        _helper = helper;
+        _context = ctx;
+        if (ctx != null)
+            _log = ctx.logManager().getLog(AdvancedSettingsHandler.class);
+        else
+            _log = I2PAppContext.getGlobalContext().logManager().getLog(AdvancedSettingsHandler.class);
     }
 
-    private String[] requiredArgs = {};
     // Reports the method names of the handled requests
     public String[] handledRequests() {
         return new String[] {"AdvancedSettings"};
@@ -39,9 +40,16 @@ public class AdvancedSettingsHandler implements RequestHandler {
     @SuppressWarnings("unchecked")
     public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
         if (req.getMethod().equals("AdvancedSettings")) {
-            JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req);
+            JSONRPC2Error err = _helper.validateParams(requiredArgs, req);
             if (err != null) {
                 return new JSONRPC2Response(err, req.getID());
+            }
+
+            if (_context == null) {
+                return new JSONRPC2Response(new JSONRPC2Error(
+                                                JSONRPC2Error.INTERNAL_ERROR.getCode(),
+                                                "RouterContext was not initialized. Query failed"),
+                                            req.getID());
             }
 
             @SuppressWarnings("rawtypes")

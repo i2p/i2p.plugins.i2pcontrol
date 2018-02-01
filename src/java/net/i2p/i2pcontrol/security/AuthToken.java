@@ -11,8 +11,8 @@ public class AuthToken {
     private String id;
     private Date expiry;
 
-    public AuthToken(String password) {
-        _secMan = SecurityManager.getInstance();
+    public AuthToken(SecurityManager secMan, String password) {
+        _secMan = secMan;
         String hash = _secMan.getPasswdHash(password);
         this.id = _secMan.getHash(hash + Calendar.getInstance().getTimeInMillis());
         Calendar expiry = Calendar.getInstance();

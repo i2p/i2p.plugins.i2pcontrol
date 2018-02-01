@@ -7,7 +7,6 @@ import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
 import net.i2p.I2PAppContext;
-import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
 import net.i2p.router.transport.FIFOBandwidthRefiller;
@@ -41,15 +40,12 @@ import java.util.Map;
 public class NetworkSettingHandler implements RequestHandler {
     private static final int BW_BURST_PCT = 110;
     private static final int BW_BURST_TIME = 20;
-    private static RouterContext _context;
-    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(NetworkSettingHandler.class);
+    private final JSONRPC2Helper _helper;
+    private final RouterContext _context;
 
-    static {
-        try {
-            _context = RouterManager.getRouterContext();
-        } catch (Exception e) {
-            _log.error("Unable to initialize RouterContext.", e);
-        }
+    public NetworkSettingHandler(RouterContext ctx, JSONRPC2Helper helper) {
+        _helper = helper;
+        _context = ctx;
     }
 
     // Reports the method names of the handled requests
@@ -69,7 +65,7 @@ public class NetworkSettingHandler implements RequestHandler {
 
 
     private JSONRPC2Response process(JSONRPC2Request req) {
-        JSONRPC2Error err = JSONRPC2Helper.validateParams(null, req);
+        JSONRPC2Error err = _helper.validateParams(null, req);
         if (err != null)
             return new JSONRPC2Response(err, req.getID());
 

@@ -31,7 +31,15 @@ import java.util.Map;
 
 public class AuthenticateHandler implements RequestHandler {
 
-    private String[] requiredArgs = {"Password", "API"};
+    private static final String[] requiredArgs = {"Password", "API"};
+    private final JSONRPC2Helper _helper;
+    private final SecurityManager _secMan;
+
+    public AuthenticateHandler(JSONRPC2Helper helper, SecurityManager secMan) {
+        _helper = helper;
+        _secMan = secMan;
+    }
+
     // Reports the method names of the handled requests
     public String[] handledRequests() {
         return new String[] {"Authenticate"};
@@ -40,7 +48,7 @@ public class AuthenticateHandler implements RequestHandler {
     // Processes the requests
     public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
         if (req.getMethod().equals("Authenticate")) {
-            JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req, JSONRPC2Helper.USE_NO_AUTH);
+            JSONRPC2Error err = _helper.validateParams(requiredArgs, req, JSONRPC2Helper.USE_NO_AUTH);
             if (err != null)
                 return new JSONRPC2Response(err, req.getID());
 
@@ -50,7 +58,7 @@ public class AuthenticateHandler implements RequestHandler {
 
             // Try get an AuthToken
 
-            AuthToken token = SecurityManager.getInstance().validatePasswd(pwd);
+            AuthToken token = _secMan.validatePasswd(pwd);
             if (token == null) {
                 return new JSONRPC2Response(JSONRPC2ExtendedError.INVALID_PASSWORD, req.getID());
             }

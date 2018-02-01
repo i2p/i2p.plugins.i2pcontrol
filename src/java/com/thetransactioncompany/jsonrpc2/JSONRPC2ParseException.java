@@ -18,13 +18,13 @@ public class JSONRPC2ParseException extends Exception {
      * Indicates a parse exception caused by a JSON message not conforming
      * to the JSON-RPC 2.0 protocol.
      */
-    public static int PROTOCOL = 0;
+    public static final int PROTOCOL = 0;
 
 
     /**
      * Indicates a parse exception caused by invalid JSON.
      */
-    public static int JSON = 1;
+    public static final int JSON = 1;
 
 
     /**

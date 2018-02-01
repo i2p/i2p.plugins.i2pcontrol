@@ -17,16 +17,29 @@ package net.i2p.i2pcontrol;
  */
 
 import net.i2p.I2PAppContext;
+import net.i2p.app.ClientAppManager;
+import net.i2p.app.ClientAppState;
+import static net.i2p.app.ClientAppState.*;
+import net.i2p.router.RouterContext;
+import net.i2p.router.app.RouterApp;
+import net.i2p.util.I2PSSLSocketFactory;
+import net.i2p.util.Log;
+
 import net.i2p.i2pcontrol.security.KeyStoreProvider;
 import net.i2p.i2pcontrol.security.SecurityManager;
 import net.i2p.i2pcontrol.servlets.JSONRPC2Servlet;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
-import net.i2p.util.Log;
 
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,14 +58,109 @@ import java.security.KeyStore;
  *
  * @author hottuna
  */
-public class I2PControlController {
-    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(I2PControlController.class);
-    private static String _pluginDir = "";
-    private static ConfigurationManager _conf;
-    private static SecurityManager _secMan;
-    private static Server _server;
+public class I2PControlController implements RouterApp {
+    // non-null
+    private final I2PAppContext _appContext;
+    // warning, null in app context
+    private final RouterContext _context;
+    private final ClientAppManager _mgr;
+    private final Log _log;
+    private final String _pluginDir;
+    private final ConfigurationManager _conf;
+    private final KeyStoreProvider _ksp;
+    private final SecurityManager _secMan;
+    private final Server _server;
+    private ClientAppState _state = UNINITIALIZED;
+    // only for main()
+    private static I2PControlController _instance;
+
+    public I2PControlController(RouterContext ctx, ClientAppManager mgr, String args[]) {
+        _appContext = _context = ctx;
+        _mgr = mgr;
+        _log = _appContext.logManager().getLog(I2PControlController.class);
+        File pluginDir = new File(_context.getAppDir(), "plugins/I2PControl");
+        _pluginDir = pluginDir.getAbsolutePath();
+        _conf = new ConfigurationManager(_pluginDir);
+        _ksp = new KeyStoreProvider(_pluginDir);
+        _secMan = new SecurityManager(_ksp, _conf);
+        _server = buildServer();
+        _state = INITIALIZED;
+    }
+
+    /**
+     *  From main()
+     */
+    public I2PControlController(File pluginDir) {
+        _appContext = I2PAppContext.getGlobalContext();
+        if (_appContext instanceof RouterContext)
+            _context = (RouterContext) _appContext;
+        else
+            _context = null;
+        _mgr = null;
+        _log = _appContext.logManager().getLog(I2PControlController.class);
+        _pluginDir = pluginDir.getAbsolutePath();
+        _conf = new ConfigurationManager(_pluginDir);
+        _ksp = new KeyStoreProvider(_pluginDir);
+        _secMan = new SecurityManager(_ksp, _conf);
+        _server = buildServer();
+        _state = INITIALIZED;
+    }
+
+    /////// ClientApp methods
+
+    public synchronized void startup() {
+        changeState(STARTING);
+        try {
+            start(null);
+            changeState(RUNNING);
+        } catch (Exception e) {
+            changeState(START_FAILED, "Failed to start", e);
+            _log.error("Unable to start jetty server", e);
+        }
+    }
+
+    public synchronized void shutdown(String[] args) {
+        if (_state == STOPPED)
+            return;
+        changeState(STOPPING);
+        stop();
+        changeState(STOPPED);
+    }
+
+    public synchronized ClientAppState getState() {
+        return _state;
+    }
+
+    public String getName() {
+        return "I2PControl";
+    }
+
+    public String getDisplayName() {
+        return "I2PControl";
+    }
+
+    /////// end ClientApp methods
+
+    private void changeState(ClientAppState state) {
+        changeState(state, null, null);
+    }
+
+    private synchronized void changeState(ClientAppState state, String msg, Exception e) {
+        _state = state;
+        if (_mgr != null)
+            _mgr.notify(this, state, msg, e);
+        if (_context == null) {
+            if (msg != null)
+                System.out.println(state + ": " + msg);
+            if (e != null)
+                e.printStackTrace();
+        }
+    }
 
 
+    /**
+     *  Deprecated, use constructor
+     */
     public static void main(String args[]) {
         if (args.length != 3 || (!"-d".equals(args[0])))
             throw new IllegalArgumentException("Usage: PluginController -d $PLUGINDIR [start|stop]");
@@ -61,37 +169,33 @@ public class I2PControlController {
             File pluginDir = new File(args[1]);
             if (!pluginDir.exists())
                 throw new IllegalArgumentException("Plugin directory " + pluginDir.getAbsolutePath() + " does not exist");
-            _pluginDir = pluginDir.getAbsolutePath();
-            ConfigurationManager.setConfDir(pluginDir.getAbsolutePath());
-            _conf = ConfigurationManager.getInstance();
-            _secMan = SecurityManager.getInstance();
-            start(args);
-            //stop(); // Delete Me
-
-        } else if ("stop".equals(args[2]))
-            stop();
-        else
+            synchronized(I2PControlController.class) {
+                if (_instance != null)
+                    throw new IllegalStateException();
+                I2PControlController i2pcc = new I2PControlController(pluginDir);
+                try {
+                    i2pcc.startup();
+                    _instance = i2pcc;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else if ("stop".equals(args[2])) {
+            synchronized(I2PControlController.class) {
+                if (_instance != null) {
+                    _instance.shutdown(null);
+                    _instance = null;
+                }
+            }
+        } else {
             throw new IllegalArgumentException("Usage: PluginController -d $PLUGINDIR [start|stop]");
+        }
     }
 
 
-    private static void start(String args[]) {
-        I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG);
-
-        try {
-            Connector ssl = buildDefaultListenter();
-            _server = buildServer(ssl);
-        } catch (IOException e) {
-            _log.error("Unable to add listener " + _conf.getConf("i2pcontrol.listen.address", "127.0.0.1") + ":" + _conf.getConf("i2pcontrol.listen.port", 7560) + " - " + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            _log.error("Unable to find class net.i2p.i2pcontrol.JSONRPCServlet: " + e.getMessage());
-        } catch (InstantiationException e) {
-            _log.error("Unable to instantiate class net.i2p.i2pcontrol.JSONRPCServlet: " + e.getMessage());
-        } catch (IllegalAccessException e) {
-            _log.error("Illegal access: " + e.getMessage());
-        } catch (Exception e) {
-            _log.error("Unable to start jetty server: " + e.getMessage());
-        }
+    private synchronized void start(String args[]) throws Exception {
+        _appContext.logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG);
+        _server.start();
     }
 
 
@@ -99,10 +203,9 @@ public class I2PControlController {
     /**
      * Builds a new server. Used for changing ports during operation and such.
      * @return Server - A new server built from current configuration.
-     * @throws UnknownHostException
      */
-    public static Connector buildDefaultListenter() throws UnknownHostException {
-        SslSocketConnector ssl = buildSslListener(_conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
+    private Connector buildDefaultListener(Server server) {
+        Connector ssl = buildSslListener(server, _conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
                                  _conf.getConf("i2pcontrol.listen.port", 7650));
         return ssl;
     }
@@ -110,20 +213,19 @@ public class I2PControlController {
 
     /**
      * Builds a new server. Used for changing ports during operation and such.
+     *
+     * Does NOT start the server. Must call start() on the returned server.
+     *
      * @return Server - A new server built from current configuration.
-     * @throws UnknownHostException
-     * @throws Exception
-     * @throws InstantiationException
-     * @throws IllegalAccessException
      */
-    public static Server buildServer(Connector ssl) throws UnknownHostException, Exception, InstantiationException, IllegalAccessException {
+    public Server buildServer() {
         Server server = new Server();
+        Connector ssl = buildDefaultListener(server);
         server.addConnector(ssl);
 
         ServletHandler sh = new ServletHandler();
-        sh.addServletWithMapping(net.i2p.i2pcontrol.servlets.JSONRPC2Servlet.class, "/");
+        sh.addServletWithMapping(new ServletHolder(new JSONRPC2Servlet(_context, _secMan)), "/");
         server.getServer().setHandler(sh);
-        server.start();
 
         return server;
     }
@@ -134,24 +236,38 @@ public class I2PControlController {
      * @param address - The address the listener will listen to.
      * @param port - The port the listener will listen to.
      * @return - Newly created listener
-     * @throws UnknownHostException
      */
-    public static SslSocketConnector buildSslListener(String address, int port) throws UnknownHostException {
+    private Connector buildSslListener(Server server, String address, int port) {
         int listeners = 0;
-        if (_server != null) {
-            listeners = _server.getConnectors().length;
+        if (server != null) {
+            listeners = server.getConnectors().length;
         }
 
-        SslSocketConnector ssl = new SslSocketConnector();
-        ssl.setProvider(_secMan.getSecurityProvider());
-        //ssl.setCipherSuites(_secMan.getSupprtedSSLCipherSuites()); Removed in Jetty 5->6 port.
+        // the keystore path and password
+        SslContextFactory sslFactory = new SslContextFactory(_ksp.getKeyStoreLocation());
+        sslFactory.setKeyStorePassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
+        // the X.509 cert password (if not present, verifyKeyStore() returned false)
+        sslFactory.setKeyManagerPassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
+        sslFactory.addExcludeProtocols(I2PSSLSocketFactory.EXCLUDE_PROTOCOLS.toArray(
+                                       new String[I2PSSLSocketFactory.EXCLUDE_PROTOCOLS.size()]));
+        sslFactory.addExcludeCipherSuites(I2PSSLSocketFactory.EXCLUDE_CIPHERS.toArray(
+                                          new String[I2PSSLSocketFactory.EXCLUDE_CIPHERS.size()]));
+
+        HttpConfiguration httpConfig = new HttpConfiguration();
+        httpConfig.setSecureScheme("https");
+        httpConfig.setSecurePort(port);
+        httpConfig.addCustomizer(new SecureRequestCustomizer());
+        // number of acceptors, (default) number of selectors
+        ServerConnector ssl = new ServerConnector(server, 1, 0,
+                                                  new SslConnectionFactory(sslFactory, "http/1.1"),
+                                                  new HttpConnectionFactory(httpConfig));
         ssl.setHost(address);
         ssl.setPort(port);
-        ssl.setWantClientAuth(false); // Don't care about client authentication.
-        ssl.setPassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
-        ssl.setKeyPassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
-        ssl.setKeystoreType(KeyStore.getDefaultType());
-        ssl.setKeystore(KeyStoreProvider.getKeyStoreLocation());
+        ssl.setIdleTimeout(90*1000);  // default 10 sec
+        // all with same name will use the same thread pool
+        //ssll.setName("ConsoleSocket");
+        ssl.setName("I2PControl");
+
         ssl.setName("SSL Listener-" + ++listeners);
 
         return ssl;
@@ -166,36 +282,45 @@ public class I2PControlController {
      * @param listener
      * @throws Exception
      */
-    public static void replaceListener(Connector listener) throws Exception {
+/****
+    public synchronized void replaceListener(Connector listener) throws Exception {
         if (_server != null) {
             stopServer();
         }
         _server = buildServer(listener);
     }
+****/
 
     /**
      * Get all listeners of the server.
      * @return
      */
-    public static Connector[] getListeners() {
+/****
+    public synchronized Connector[] getListeners() {
         if (_server != null) {
             return _server.getConnectors();
         }
         return new Connector[0];
     }
+****/
 
     /**
      * Removes all listeners
      */
-    public static void clearListeners() {
+/****
+    public synchronized void clearListeners() {
         if (_server != null) {
             for (Connector listen : getListeners()) {
                 _server.removeConnector(listen);
             }
         }
     }
+****/
 
-    private static void stopServer()
+    /**
+     * Stop it
+     */
+    private synchronized void stopServer()
     {
         try {
             if (_server != null) {
@@ -204,21 +329,18 @@ public class I2PControlController {
                     listener.stop();
                 }
                 _server.destroy();
-                _server = null;
             }
         } catch (Exception e) {
-            _log.error("Stopping server" + e);
+            _log.error("Stopping server", e);
         }
     }
 
-    private static void stop() {
-        ConfigurationManager.writeConfFile();
-        if (_secMan != null) {
-            _secMan.stopTimedEvents();
-        }
-
+    private synchronized void stop() {
+        _conf.writeConfFile();
+        _secMan.stopTimedEvents();
         stopServer();
 
+/****
         // Get and stop all running threads
         ThreadGroup threadgroup = Thread.currentThread().getThreadGroup();
         Thread[] threads = new Thread[threadgroup.activeCount() + 3];
@@ -237,9 +359,10 @@ public class I2PControlController {
         threadgroup.interrupt();
 
         //Thread.currentThread().getThreadGroup().destroy();
+****/
     }
 
-    public static String getPluginDir() {
+    public String getPluginDir() {
         return _pluginDir;
     }
 }

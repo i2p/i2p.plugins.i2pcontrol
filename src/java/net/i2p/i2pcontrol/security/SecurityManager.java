@@ -35,24 +35,16 @@ import java.util.*;
  * Manage the password storing for I2PControl.
  */
 public class SecurityManager {
-    private final static String SSL_PROVIDER = "SunJSSE";
     private final static String DEFAULT_AUTH_BCRYPT_SALT = "$2a$11$5aOLx2x/8i4fNaitoCSSWu";
     private final static String DEFAULT_AUTH_PASSWORD = "$2a$11$5aOLx2x/8i4fNaitoCSSWuut2wEl3Hupuca8DCT.NXzvH9fq1pBU.";
-    private HashMap<String, AuthToken> authTokens;
-    private Timer timer;
-    private String[] SSL_CIPHER_SUITES;
-    private KeyStore _ks;
-    private Log _log;
-    private static SecurityManager _securityManager;
+    private final HashMap<String, AuthToken> authTokens;
+    private final Timer timer;
+    private final KeyStore _ks;
+    private final Log _log;
+    private final ConfigurationManager _conf;
 
-    public static SecurityManager getInstance() {
-        if (_securityManager == null) {
-            _securityManager = new SecurityManager();
-        }
-        return _securityManager;
-    }
-
-    private SecurityManager() {
+    public SecurityManager(KeyStoreProvider ksp, ConfigurationManager conf) {
+        _conf = conf;
         _log = I2PAppContext.getGlobalContext().logManager().getLog(SecurityManager.class);
         authTokens = new HashMap<String, AuthToken>();
 
@@ -60,23 +52,7 @@ public class SecurityManager {
         // Start running periodic task after 20 minutes, run periodically every 10th minute.
         timer.scheduleAtFixedRate(new Sweeper(), 1000 * 60 * 20, 1000 * 60 * 10);
 
-        // Get supported SSL cipher suites.
-        SocketFactory SSLF = SSLSocketFactory.getDefault();
-        try {
-            SSL_CIPHER_SUITES = ((SSLSocket)SSLF.createSocket()).getSupportedCipherSuites();
-        } catch (Exception e) {
-            _log.log(Log.CRIT, "Unable to create SSLSocket used for fetching supported ssl cipher suites.", e);
-        }
-
-        _ks = KeyStoreProvider.getDefaultKeyStore();
-    }
-
-    public String[] getSupprtedSSLCipherSuites() {
-        return SSL_CIPHER_SUITES;
-    }
-
-    public String getSecurityProvider() {
-        return SSL_PROVIDER;
+        _ks = ksp.getDefaultKeyStore();
     }
 
     public void stopTimedEvents() {
@@ -116,7 +92,7 @@ public class SecurityManager {
      * @return BCrypt hash of salt and input string
      */
     public String getPasswdHash(String pwd) {
-        return BCrypt.hashpw(pwd, ConfigurationManager.getInstance().getConf("auth.salt", DEFAULT_AUTH_BCRYPT_SALT));
+        return BCrypt.hashpw(pwd, _conf.getConf("auth.salt", DEFAULT_AUTH_BCRYPT_SALT));
     }
 
     /**
@@ -138,9 +114,9 @@ public class SecurityManager {
      * @return Returns AuthToken if password is valid. If password is invalid null will be returned.
      */
     public AuthToken validatePasswd(String pwd) {
-        String storedPass = ConfigurationManager.getInstance().getConf("auth.password", DEFAULT_AUTH_PASSWORD);
+        String storedPass = _conf.getConf("auth.password", DEFAULT_AUTH_PASSWORD);
         if (getPasswdHash(pwd).equals(storedPass)) {
-            AuthToken token = new AuthToken(pwd);
+            AuthToken token = new AuthToken(this, pwd);
             synchronized (authTokens) {
                 authTokens.put(token.getId(), token);
             }
@@ -157,10 +133,10 @@ public class SecurityManager {
      */
     public boolean setPasswd(String newPasswd) {
         String newHash = getPasswdHash(newPasswd);
-        String oldHash = ConfigurationManager.getInstance().getConf("auth.password", DEFAULT_AUTH_PASSWORD);
+        String oldHash = _conf.getConf("auth.password", DEFAULT_AUTH_PASSWORD);
 
         if (!newHash.equals(oldHash)) {
-            ConfigurationManager.getInstance().setConf("auth.password", newHash);
+            _conf.setConf("auth.password", newHash);
             synchronized (authTokens) {
                 authTokens.clear();
             }

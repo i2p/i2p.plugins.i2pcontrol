@@ -5,9 +5,9 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import com.thetransactioncompany.jsonrpc2.server.MessageContext;
 import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
+
 import net.i2p.I2PAppContext;
 import net.i2p.data.router.RouterAddress;
-import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.CommSystemFacade;
 import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
@@ -15,7 +15,6 @@ import net.i2p.router.RouterVersion;
 import net.i2p.router.networkdb.kademlia.FloodfillNetworkDatabaseFacade;
 import net.i2p.router.transport.TransportUtil;
 import net.i2p.router.transport.ntcp.NTCPTransport;
-import net.i2p.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,16 +37,14 @@ import java.util.Map;
  */
 
 public class RouterInfoHandler implements RequestHandler {
-    private static RouterContext _context;
-    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(RouterInfoHandler.class);
+    private final JSONRPC2Helper _helper;
+    private final RouterContext _context;
 
-    static {
-        try {
-            _context = RouterManager.getRouterContext();
-        } catch (Exception e) {
-            _log.error("Unable to initialize RouterContext.", e);
-        }
+    public RouterInfoHandler(RouterContext ctx, JSONRPC2Helper helper) {
+        _helper = helper;
+        _context = ctx;
     }
+
 
     // Reports the method names of the handled requests
     public String[] handledRequests() {
@@ -67,7 +64,7 @@ public class RouterInfoHandler implements RequestHandler {
 
     @SuppressWarnings("unchecked")
     private JSONRPC2Response process(JSONRPC2Request req) {
-        JSONRPC2Error err = JSONRPC2Helper.validateParams(null, req);
+        JSONRPC2Error err = _helper.validateParams(null, req);
         if (err != null)
             return new JSONRPC2Response(err, req.getID());
 

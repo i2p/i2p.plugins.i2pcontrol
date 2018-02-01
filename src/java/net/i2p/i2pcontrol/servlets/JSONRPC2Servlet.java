@@ -18,17 +18,27 @@ package net.i2p.i2pcontrol.servlets;
 
 import com.thetransactioncompany.jsonrpc2.*;
 import com.thetransactioncompany.jsonrpc2.server.Dispatcher;
+
 import net.i2p.I2PAppContext;
+import net.i2p.router.RouterContext;
+import net.i2p.util.Log;
+
 import net.i2p.i2pcontrol.I2PControlVersion;
 import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.*;
-import net.i2p.util.Log;
+import net.i2p.i2pcontrol.security.SecurityManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 
 
 /**
@@ -38,25 +48,33 @@ public class JSONRPC2Servlet extends HttpServlet {
 
     private static final long serialVersionUID = -45075606818515212L;
     private static final int BUFFER_LENGTH = 2048;
-    private static Dispatcher disp;
-    private static char[] readBuffer;
-    private static Log _log;
+    private Dispatcher disp;
+    private Log _log;
+    private final SecurityManager _secMan;
+    private final JSONRPC2Helper _helper;
+    private final RouterContext _context;
 
+    public JSONRPC2Servlet(RouterContext ctx, SecurityManager secMan) {
+        _context = ctx;
+        _secMan = secMan;
+        _helper = new JSONRPC2Helper(_secMan);
+        if (ctx != null)
+            _log = ctx.logManager().getLog(JSONRPC2Servlet.class);
+        else
+            _log = I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class);
+    }
 
     @Override
     public void init() {
-        _log = I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class);
-        readBuffer = new char[BUFFER_LENGTH];
-
         disp = new Dispatcher();
-        disp.register(new EchoHandler());
-        disp.register(new GetRateHandler());
-        disp.register(new AuthenticateHandler());
-        disp.register(new NetworkSettingHandler());
-        disp.register(new RouterInfoHandler());
-        disp.register(new RouterManagerHandler());
-        disp.register(new I2PControlHandler());
-        disp.register(new AdvancedSettingsHandler());
+        disp.register(new EchoHandler(_helper));
+        disp.register(new GetRateHandler(_helper));
+        disp.register(new AuthenticateHandler(_helper, _secMan));
+        disp.register(new NetworkSettingHandler(_context, _helper));
+        disp.register(new RouterInfoHandler(_context, _helper));
+        disp.register(new RouterManagerHandler(_context, _helper));
+        disp.register(new I2PControlHandler(_context, _helper));
+        disp.register(new AdvancedSettingsHandler(_context, _helper));
     }
 
     @Override
@@ -80,12 +98,15 @@ public class JSONRPC2Servlet extends HttpServlet {
             if (msg instanceof JSONRPC2Request) {
                 jsonResp = disp.dispatch((JSONRPC2Request)msg, null);
                 jsonResp.toJSON().put("API", I2PControlVersion.API_VERSION);
-                _log.debug("Request: " + msg);
-                _log.debug("Response: " + jsonResp);
+                if (_log.shouldDebug()) {
+                    _log.debug("Request: " + msg);
+                    _log.debug("Response: " + jsonResp);
+                }
             }
             else if (msg instanceof JSONRPC2Notification) {
                 disp.dispatch((JSONRPC2Notification)msg, null);
-                _log.debug("Notification: " + msg);
+                if (_log.shouldDebug())
+                    _log.debug("Notification: " + msg);
             }
 
             out.println(jsonResp);
@@ -99,6 +120,7 @@ public class JSONRPC2Servlet extends HttpServlet {
         Writer writer = new StringWriter();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(sis, "UTF-8"));
+        char[] readBuffer = new char[BUFFER_LENGTH];
         int n;
         while ((n = reader.read(readBuffer)) != -1) {
             writer.write(readBuffer, 0, n);

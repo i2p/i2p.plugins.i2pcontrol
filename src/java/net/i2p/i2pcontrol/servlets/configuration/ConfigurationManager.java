@@ -2,8 +2,15 @@ package net.i2p.i2pcontrol.servlets.configuration;
 
 import net.i2p.I2PAppContext;
 import net.i2p.util.Log;
+import net.i2p.util.SecureFileOutputStream;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,42 +23,28 @@ import java.util.TreeMap;
  *
  */
 public class ConfigurationManager {
-    private static String configLocation = "I2PControl.conf";
-    private static boolean configLocationModified = false;
-    private static final Log _log = I2PAppContext.getGlobalContext().logManager().getLog(ConfigurationManager.class);
+    private final String CONFIG_FILE = "I2PControl.conf";
+    private final String configLocation;
+    private final Log _log;
 
-    private static ConfigurationManager instance;
+    private ConfigurationManager instance;
     //Configurations with a String as value
-    private static Map<String, String> stringConfigurations = new HashMap<String, String>();
+    private final Map<String, String> stringConfigurations = new HashMap<String, String>();
     //Configurations with a Boolean as value
-    private static Map<String, Boolean> booleanConfigurations = new HashMap<String, Boolean>();
+    private final Map<String, Boolean> booleanConfigurations = new HashMap<String, Boolean>();
     //Configurations with an Integer as value
-    private static Map<String, Integer> integerConfigurations = new HashMap<String, Integer>();
+    private final Map<String, Integer> integerConfigurations = new HashMap<String, Integer>();
 
 
-    /**
-     * Should only be set before getInstance is first called.
-     * @param dir
-     */
-    public static void setConfDir(String dir) {
-        if (!configLocationModified) {
-            if (dir.endsWith("/")) {
-                configLocation = dir + configLocation;
-            } else {
-                configLocation = dir + "/" + configLocation;
-            }
+
+    public ConfigurationManager(String dir) {
+        _log = I2PAppContext.getGlobalContext().logManager().getLog(ConfigurationManager.class);
+        if (dir.endsWith("/")) {
+            configLocation = dir + CONFIG_FILE;
+        } else {
+            configLocation = dir + "/" + CONFIG_FILE;
         }
-    }
-
-    private ConfigurationManager() {
         readConfFile();
-    }
-
-    public synchronized static ConfigurationManager getInstance() {
-        if (instance == null) {
-            instance = new ConfigurationManager();
-        }
-        return instance;
     }
 
     /**
@@ -71,7 +64,7 @@ public class ConfigurationManager {
     /**
      * Reads configuration from file itoopie.conf, every line is parsed as key=value.
      */
-    public static void readConfFile() {
+    public void readConfFile() {
         try {
             BufferedReader br = new BufferedReader(new FileReader(configLocation));
             String input;
@@ -89,7 +82,7 @@ public class ConfigurationManager {
     /**
      * Write configuration into default config file.
      */
-    public static void writeConfFile() {
+    public void writeConfFile() {
         TreeMap<String, String> tree = new TreeMap<String, String>();
         for (Entry<String, String> e : stringConfigurations.entrySet()) {
             tree.put(e.getKey(), e.getValue());
@@ -101,7 +94,7 @@ public class ConfigurationManager {
             tree.put(e.getKey(), e.getValue().toString());
         }
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(configLocation));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new SecureFileOutputStream(configLocation)));
             for (Entry<String, String> e : tree.entrySet()) {
                 bw.write(e.getKey() + "=" + e.getValue() + "\r\n");
             }
@@ -116,7 +109,7 @@ public class ConfigurationManager {
      * where value will (in order) be parsed as integer/boolean/string.
      * @param str
      */
-    public static void parseConfigStr(String str) {
+    public void parseConfigStr(String str) {
         int eqIndex = str.indexOf('=');
         if (eqIndex != -1) {
             String key = str.substring(0, eqIndex).trim().toLowerCase();

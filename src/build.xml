@@ -3,24 +3,15 @@
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
     <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
-	<property name="wrapperlib" value="${i2pbase}/installer/lib/wrapper/all"/>
+    <property name="wrapperlib" value="${i2pbase}/installer/lib/wrapper/all"/>
 
     <path id="cp">
         <pathelement path="${java.class.path}" />
         <pathelement location="${i2plib}/i2p.jar" />
         <pathelement location="${i2plib}/router.jar" />
-        <pathelement location="${i2plib}/i2ptunnel.jar" />
         <pathelement location="${i2plib}/org.mortbay.jetty.jar" />
         <pathelement location="${i2plib}/javax.servlet.jar" />
-        <pathelement location="${ant.home}/lib/ant.jar"/>
-        <pathelement location="${jettylib}/jetty-http.jar" />
-        <pathelement location="${jettylib}/jetty-server.jar"/>
         <pathelement location="${jettylib}/jetty-servlet.jar" />
-        <pathelement location="${jettylib}/jetty-servlets.jar" />
-        <pathelement location="${jettylib}/jetty-util.jar" />
-        <pathelement location="${jettylib}/jasper-compiler.jar" />
-        <pathelement location="${jettylib}/jasper-runtime.jar" />
-        <pathelement location="${jettylib}/commons-logging.jar" />
         <pathelement location="${wrapperlib}/wrapper.jar" />
     </path>
 
@@ -41,7 +32,7 @@
             destdir="./build/obj" 
             classpath="${cp}">
             <compilerarg line="${javac.compilerargs}" />
-			<classpath refid="cp"/>
+            <classpath refid="cp"/>
         </javac>
     </target>
 

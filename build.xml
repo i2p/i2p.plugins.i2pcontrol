@@ -4,12 +4,12 @@
     <target name="all" depends="clean,plugin,release" />
     
     <target name="local" depends="clean,plugin">
-		<property name="i2p.plugindir" value="${user.home}/.i2p/plugins/I2PControl" />
-		<delete dir="${i2p.plugindir}"/>
-		<mkdir  dir="${i2p.plugindir}"/>
-		<mkdir  dir="${i2p.plugindir}/lib"/>
+        <property name="i2p.plugindir" value="${user.home}/.i2p/plugins/I2PControl" />
+        <delete dir="${i2p.plugindir}"/>
+        <mkdir  dir="${i2p.plugindir}"/>
+        <mkdir  dir="${i2p.plugindir}/lib"/>
         <copy file="src/build/I2PControl.jar" todir="${i2p.plugindir}/lib" overwrite="true" />
-		<copy todir="${i2p.plugindir}" >  
+        <copy todir="${i2p.plugindir}" >  
             <fileset dir="plugin" includes="**"/>  
         </copy>
     </target>
@@ -24,10 +24,7 @@
         <property name="release.number" value="0.11" />
 
         <!-- make the update xpi2p -->
-		<mkdir dir="plugin/lib"/>
-        <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
-        <copy file="README.txt" todir="plugin/" overwrite="true" />
-        <copy file="scripts/clients.config" todir="plugin/" overwrite="true" />
+        <mkdir dir="plugin/lib"/>
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
         
         <exec executable="pack200" failonerror="true">
@@ -46,14 +43,17 @@
         </exec>
 
         <!-- make the install xpi2p -->
+        <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
+        <copy file="README.txt" todir="plugin/" overwrite="true" />
+        <copy file="scripts/clients.config" todir="plugin/" overwrite="true" />
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
+        <copy file="scripts/i2pcontrol.py" todir="plugin/" overwrite="true" />
         <exec executable="echo" osfamily="unix" failonerror="true" output="plugin/plugin.config" append="true">
             <arg value="version=${release.number}-b${build.number}" />
         </exec>
     </target>
     
     <target name="release" depends="plugin">
-      
         <input message="Enter su3 signing key password:" addproperty="release.password.su3" />
         <fail message="You must enter a password." >
             <condition>
@@ -84,7 +84,7 @@
         <ant dir="src" target="clean" />
         <delete file="plugin/clients.config" />
         <delete file="plugin/plugin.config" />
-		<delete file="plugin/console/webapp.config" />
+        <delete file="plugin/console/webapp.config" />
         <delete file="plugin/lib/I2PControl.jar.pack" />
         <delete file="plugin/console/webapps/I2PControl.war.pack" />
         <delete file="plugin/LICENSE.txt" />

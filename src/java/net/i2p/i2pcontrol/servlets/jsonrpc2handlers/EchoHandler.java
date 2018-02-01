@@ -11,7 +11,13 @@ import java.util.Map;
 
 public class EchoHandler implements RequestHandler {
 
-    private String[] requiredArgs = {"Echo"};
+    private static final String[] requiredArgs = {"Echo"};
+    private final JSONRPC2Helper _helper;
+
+    public EchoHandler(JSONRPC2Helper helper) {
+        _helper = helper;
+    }
+
     // Reports the method names of the handled requests
     public String[] handledRequests() {
         return new String[] {"Echo"};
@@ -20,7 +26,7 @@ public class EchoHandler implements RequestHandler {
     // Processes the requests
     public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
         if (req.getMethod().equals("Echo")) {
-            JSONRPC2Error err = JSONRPC2Helper.validateParams(requiredArgs, req);
+            JSONRPC2Error err = _helper.validateParams(requiredArgs, req);
             if (err != null)
                 return new JSONRPC2Response(err, req.getID());
 
