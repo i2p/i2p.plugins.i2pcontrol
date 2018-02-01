@@ -24,8 +24,10 @@ import net.i2p.router.RouterContext;
 import net.i2p.util.Log;
 
 import net.i2p.i2pcontrol.I2PControlVersion;
-import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.*;
+import net.i2p.i2pcontrol.security.KeyStoreProvider;
 import net.i2p.i2pcontrol.security.SecurityManager;
+import net.i2p.i2pcontrol.servlets.jsonrpc2handlers.*;
+import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -34,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -54,6 +57,28 @@ public class JSONRPC2Servlet extends HttpServlet {
     private final JSONRPC2Helper _helper;
     private final RouterContext _context;
 
+    /**
+     *  Webapp
+     */
+    public JSONRPC2Servlet() {
+        I2PAppContext ctx = I2PAppContext.getGlobalContext();
+        if (!ctx.isRouterContext())
+            throw new IllegalStateException();
+        _context = (RouterContext) ctx;
+        File appDir = ctx.getAppDir();
+        String app = appDir.getAbsolutePath();
+        ConfigurationManager conf = new ConfigurationManager(app);
+        // we don't really need a keystore
+        File ksDir = new File(ctx.getConfigDir(), "keystore");
+        KeyStoreProvider ksp = new KeyStoreProvider(ksDir.getAbsolutePath());
+        _secMan = new SecurityManager(ksp, conf);
+        _helper = new JSONRPC2Helper(_secMan);
+        _log = ctx.logManager().getLog(JSONRPC2Servlet.class);
+    }
+
+    /**
+     *  Plugin
+     */
     public JSONRPC2Servlet(RouterContext ctx, SecurityManager secMan) {
         _context = ctx;
         _secMan = secMan;
@@ -79,9 +104,9 @@ public class JSONRPC2Servlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
-        httpServletResponse.setContentType("text/html");
+        httpServletResponse.setContentType("text/plain");
         PrintWriter out = httpServletResponse.getWriter();
-        out.println("Nothing to see here");
+        out.println("I2PControl RPC Service: Running");
         out.close();
     }
 

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project basedir="." default="all" name="I2PControl">
+
+    <!-- Include property files so that values can be easily overridden.
+         Users should create an override.properties file to make changes.
+     -->
+    <property file="override.properties"/>
    
     <target name="all" depends="clean,plugin,release" />
     
@@ -16,6 +21,11 @@
 
     <target name="jar">
         <ant dir="src" target="build" />
+    </target>
+
+    <target name="war" depends="clean" >
+        <ant dir="src" target="war" />
+        <copy file="src/build/jsonrpc.war" todir="." />
     </target>
 
     <target name="plugin" depends="jar"> 
@@ -93,6 +103,7 @@
         <delete file="I2PControl-update.xpi2p" />
         <delete file="I2PControl.su3" />
         <delete file="I2PControl-update.su3" />
+        <delete file="jsonrpc.war" />
     </target>
 
 </project>

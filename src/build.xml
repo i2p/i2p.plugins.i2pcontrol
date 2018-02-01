@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="all" name="I2PControl">
+<project basedir="." default="all" name="source">
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
     <property name="jettylib" value="${i2pbase}/apps/jetty/jettylib"/>
@@ -22,7 +22,7 @@
 
     <property name="javac.compilerargs" value="" />
 
-    <target name="compile">
+    <target name="compile" depends="builddep" >
         <mkdir dir="./build" />
         <mkdir dir="./build/obj" />
         <javac 
@@ -36,14 +36,17 @@
         </javac>
     </target>
 
-    <target name="jar" depends="builddep, compile">
+    <target name="jar" depends="compile">
         <jar destfile="build/I2PControl.jar" basedir="./build/obj" includes="**/*.class" >
         </jar>
     </target>    
 
-    <target name="precompilejsp" depends="compile" >
+    <target name="war" depends="compile" >
+        <war destfile="build/jsonrpc.war" webxml="web.xml" >
+            <classes dir="./build/obj" excludes="net/i2p/i2pcontrol/I2PControlController.class" />
+        </war>
     </target>
-    
+
     <target name="clean">
         <delete dir="./build" />
     </target>

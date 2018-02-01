@@ -8,7 +8,6 @@ import com.thetransactioncompany.jsonrpc2.server.RequestHandler;
 
 import net.i2p.I2PAppContext;
 import net.i2p.app.ClientAppManager;
-import net.i2p.i2pcontrol.router.RouterManager;
 import net.i2p.router.Router;
 import net.i2p.router.RouterContext;
 import net.i2p.router.networkdb.reseed.ReseedChecker;
