@@ -42,10 +42,12 @@ public class SecurityManager {
     private final KeyStore _ks;
     private final Log _log;
     private final ConfigurationManager _conf;
+    private final I2PAppContext _context;
 
-    public SecurityManager(KeyStoreProvider ksp, ConfigurationManager conf) {
+    public SecurityManager(I2PAppContext ctx, KeyStoreProvider ksp, ConfigurationManager conf) {
+        _context = ctx;
         _conf = conf;
-        _log = I2PAppContext.getGlobalContext().logManager().getLog(SecurityManager.class);
+        _log = ctx.logManager().getLog(SecurityManager.class);
         authTokens = new HashMap<String, AuthToken>();
 
         timer = new Timer("SecurityManager Timer Sweeper ");
@@ -101,7 +103,7 @@ public class SecurityManager {
      * @return
      */
     public String getHash(String string) {
-        SHA256Generator hashGen = new SHA256Generator(I2PAppContext.getGlobalContext());
+        SHA256Generator hashGen = _context.sha();
         byte[] bytes = string.getBytes();
         bytes = hashGen.calculateHash(bytes).toByteArray();
         return Base64.encode(bytes);

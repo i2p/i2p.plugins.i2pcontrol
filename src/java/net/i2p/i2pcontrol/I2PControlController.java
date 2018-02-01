@@ -82,7 +82,7 @@ public class I2PControlController implements RouterApp {
         _pluginDir = pluginDir.getAbsolutePath();
         _conf = new ConfigurationManager(_pluginDir);
         _ksp = new KeyStoreProvider(_pluginDir);
-        _secMan = new SecurityManager(_ksp, _conf);
+        _secMan = new SecurityManager(_appContext, _ksp, _conf);
         _server = buildServer();
         _state = INITIALIZED;
     }
@@ -101,7 +101,7 @@ public class I2PControlController implements RouterApp {
         _pluginDir = pluginDir.getAbsolutePath();
         _conf = new ConfigurationManager(_pluginDir);
         _ksp = new KeyStoreProvider(_pluginDir);
-        _secMan = new SecurityManager(_ksp, _conf);
+        _secMan = new SecurityManager(_appContext, _ksp, _conf);
         _server = buildServer();
         _state = INITIALIZED;
     }
