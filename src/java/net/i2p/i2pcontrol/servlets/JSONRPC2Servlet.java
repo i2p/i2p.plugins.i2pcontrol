@@ -106,7 +106,7 @@ public class JSONRPC2Servlet extends HttpServlet {
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         httpServletResponse.setContentType("text/plain");
         PrintWriter out = httpServletResponse.getWriter();
-        out.println("I2PControl RPC Service: Running");
+        out.println("I2PControl RPC Service version " + I2PControlVersion.VERSION + " : Running");
         out.close();
     }
 
