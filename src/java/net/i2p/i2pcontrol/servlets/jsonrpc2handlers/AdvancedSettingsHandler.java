@@ -53,7 +53,7 @@ public class AdvancedSettingsHandler implements RequestHandler {
             }
 
             @SuppressWarnings("rawtypes")
-            HashMap inParams = (HashMap) req.getParams();
+            Map<String, Object> inParams = req.getNamedParams();
             Map outParams = new HashMap();
 
             if (inParams.containsKey("setAll")) {

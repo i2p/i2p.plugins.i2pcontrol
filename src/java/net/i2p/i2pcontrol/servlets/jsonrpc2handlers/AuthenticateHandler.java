@@ -52,7 +52,7 @@ public class AuthenticateHandler implements RequestHandler {
             if (err != null)
                 return new JSONRPC2Response(err, req.getID());
 
-            HashMap inParams = (HashMap) req.getParams();
+            Map<String, Object> inParams = req.getNamedParams();
 
             String pwd = (String) inParams.get("Password");
 

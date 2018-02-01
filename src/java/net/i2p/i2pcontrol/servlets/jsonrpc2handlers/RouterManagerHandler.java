@@ -76,7 +76,7 @@ public class RouterManagerHandler implements RequestHandler {
                                             "RouterContext was not initialized. Query failed"),
                                         req.getID());
         }
-        HashMap inParams = (HashMap) req.getParams();
+        Map<String, Object> inParams = req.getNamedParams();
         final Map outParams = new HashMap();
 
         if (inParams.containsKey("Shutdown")) {

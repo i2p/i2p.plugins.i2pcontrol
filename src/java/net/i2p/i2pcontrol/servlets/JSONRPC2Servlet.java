@@ -121,15 +121,15 @@ public class JSONRPC2Servlet extends HttpServlet {
             msg = JSONRPC2Message.parse(req);
 
             if (msg instanceof JSONRPC2Request) {
-                jsonResp = disp.dispatch((JSONRPC2Request)msg, null);
-                jsonResp.toJSON().put("API", I2PControlVersion.API_VERSION);
+                jsonResp = disp.process((JSONRPC2Request)msg, null);
+                jsonResp.toJSONObject().put("API", I2PControlVersion.API_VERSION);
                 if (_log.shouldDebug()) {
                     _log.debug("Request: " + msg);
                     _log.debug("Response: " + jsonResp);
                 }
             }
             else if (msg instanceof JSONRPC2Notification) {
-                disp.dispatch((JSONRPC2Notification)msg, null);
+                disp.process((JSONRPC2Notification)msg, null);
                 if (_log.shouldDebug())
                     _log.debug("Notification: " + msg);
             }

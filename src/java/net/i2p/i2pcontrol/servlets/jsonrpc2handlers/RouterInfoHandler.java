@@ -74,7 +74,7 @@ public class RouterInfoHandler implements RequestHandler {
                                             "RouterContext was not initialized. Query failed"),
                                         req.getID());
         }
-        HashMap inParams = (HashMap) req.getParams();
+        Map<String, Object> inParams = req.getNamedParams();
         Map outParams = new HashMap();
 
         if (inParams.containsKey("i2p.router.version")) {

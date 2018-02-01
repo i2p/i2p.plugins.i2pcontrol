@@ -1,7 +1,7 @@
 package net.i2p.i2pcontrol.servlets.jsonrpc2handlers;
 
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
-import org.json.simple.JSONObject;
+import net.minidev.json.JSONObject;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)
@@ -120,51 +120,5 @@ public class JSONRPC2ExtendedError extends JSONRPC2Error {
      */
     public JSONRPC2ExtendedError(int code, String message, Object data) {
         super(code, message, data);
-    }
-
-
-    /**
-     * Gets the JSON-RPC 2.0 error code.
-     *
-     * @return The error code.
-     */
-    public int getCode() {
-        return code;
-    }
-
-
-    /**
-     * Gets the JSON-RPC 2.0 error data.
-     *
-     * @return The error data, {@code null} if none was specified.
-     */
-    public Object getData() {
-        return data;
-    }
-
-
-    /**
-     * Gets a JSON representation of the JSON-RPC 2.0 error.
-     *
-     * @return A JSON object representing this error object.
-     */
-    public JSONObject toJSON() {
-        JSONObject out = new JSONObject();
-
-        out.put("code", code);
-        out.put("message", super.getMessage());
-        if (data != null)
-            out.put("data", data);
-        return out;
-    }
-
-
-    /**
-     * Serialises the error object to a JSON string.
-     *
-     * @return A JSON-encoded string representing this error object.
-     */
-    public String toString() {
-        return toJSON().toString();
     }
 }

@@ -30,7 +30,7 @@ public class EchoHandler implements RequestHandler {
             if (err != null)
                 return new JSONRPC2Response(err, req.getID());
 
-            HashMap inParams = (HashMap) req.getParams();
+            Map<String, Object> inParams = req.getNamedParams();
             String echo = (String) inParams.get("Echo");
             Map outParams = new HashMap();
             outParams.put("Result", echo);

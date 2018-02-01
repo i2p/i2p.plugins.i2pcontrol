@@ -50,7 +50,7 @@ public class GetRateHandler implements RequestHandler {
             if (err != null)
                 return new JSONRPC2Response(err, req.getID());
 
-            HashMap inParams = (HashMap) req.getParams();
+            Map<String, Object> inParams = req.getNamedParams();
 
             String input = (String) inParams.get("Stat");
             if (input == null) {

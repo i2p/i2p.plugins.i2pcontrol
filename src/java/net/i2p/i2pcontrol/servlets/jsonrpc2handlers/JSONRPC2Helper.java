@@ -7,7 +7,7 @@ import net.i2p.i2pcontrol.security.ExpiredAuthTokenException;
 import net.i2p.i2pcontrol.security.InvalidAuthTokenException;
 import net.i2p.i2pcontrol.security.SecurityManager;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /*
  *  Copyright 2011 hottuna (dev@robertfoss.se)
@@ -49,7 +49,7 @@ public class JSONRPC2Helper {
         if (req.getParamsType() != JSONRPC2ParamsType.OBJECT) {
             return JSONRPC2Error.INVALID_PARAMS;
         }
-        HashMap params = (HashMap) req.getParams();
+        Map<String, Object> params = req.getNamedParams();
 
         // Validate authentication token.
         if (useAuth) {
@@ -92,7 +92,7 @@ public class JSONRPC2Helper {
      * @param req - Parameters of incoming request
      * @return null if everything is fine, JSONRPC2Error for any corresponding error.
      */
-    private JSONRPC2Error validateToken(HashMap params) {
+    private JSONRPC2Error validateToken(Map<String, Object> params) {
         String tokenID = (String) params.get("Token");
         if (tokenID == null) {
             return JSONRPC2ExtendedError.NO_TOKEN;
