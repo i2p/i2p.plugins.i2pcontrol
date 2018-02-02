@@ -68,6 +68,7 @@
 
         <!-- make the install xpi2p -->
         <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
+        <copy file="LICENSE-jBCrypt.txt" todir="plugin/" overwrite="true" />
         <copy file="README.txt" todir="plugin/" overwrite="true" />
         <copy file="scripts/clients.config" todir="plugin/" overwrite="true" />
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
@@ -96,6 +97,7 @@
         <delete file="plugin/lib/I2PControl.jar.pack" />
         <delete file="plugin/console/webapps/I2PControl.war.pack" />
         <delete file="plugin/LICENSE.txt" />
+        <delete file="plugin/LICENSE-jBCrypt.txt" />
         <delete file="plugin/README.txt" />
         <delete file="plugin/i2pcontrol.py" />
         <delete file="I2PControl.xpi2p" />

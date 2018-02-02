@@ -23,7 +23,8 @@ import net.i2p.data.DataHelper;
 import net.i2p.util.Log;
 import net.i2p.util.SimpleTimer2;
 
-import net.i2p.i2pcontrol.security.jbcrypt.BCrypt;
+import org.mindrot.jbcrypt.BCrypt;
+
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 
 import javax.net.SocketFactory;
