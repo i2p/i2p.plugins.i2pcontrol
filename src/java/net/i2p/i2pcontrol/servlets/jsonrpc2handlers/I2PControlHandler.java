@@ -42,10 +42,12 @@ public class I2PControlHandler implements RequestHandler {
     private final RouterContext _context;
     private final Log _log;
     //private final ConfigurationManager _conf;
+    private final SecurityManager _secMan;
     private final JSONRPC2Helper _helper;
 
-    public I2PControlHandler(RouterContext ctx, JSONRPC2Helper helper) {
+    public I2PControlHandler(RouterContext ctx, JSONRPC2Helper helper, SecurityManager secMan) {
         _helper = helper;
+        _secMan = secMan;
         _context = ctx;
         if (ctx != null)
             _log = ctx.logManager().getLog(I2PControlHandler.class);
@@ -62,8 +64,7 @@ public class I2PControlHandler implements RequestHandler {
     // Processes the requests
     public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
         if (req.getMethod().equals("I2PControl")) {
-            //return process(req);
-            return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            return process(req);
         } else {
             // Method name not supported
             return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
@@ -71,18 +72,19 @@ public class I2PControlHandler implements RequestHandler {
     }
 
 
-/****
     private JSONRPC2Response process(JSONRPC2Request req) {
         JSONRPC2Error err = _helper.validateParams(null, req);
         if (err != null)
             return new JSONRPC2Response(err, req.getID());
 
+/**** only if we enable host/port changes
         if (_context == null) {
             return new JSONRPC2Response(
                        new JSONRPC2Error(JSONRPC2Error.INTERNAL_ERROR.getCode(),
                                          "RouterContext was not initialized. Query failed"),
                        req.getID());
         }
+****/
         Map<String, Object> inParams = req.getNamedParams();
         Map outParams = new HashMap();
 
@@ -90,6 +92,7 @@ public class I2PControlHandler implements RequestHandler {
         boolean settingsSaved = false;
         String inParam;
 
+/****
         if (inParams.containsKey("i2pcontrol.port")) {
             Integer  oldPort = _conf.getConf("i2pcontrol.listen.port", 7650);
             if ((inParam = (String) inParams.get("i2pcontrol.port")) != null) {
@@ -136,18 +139,20 @@ public class I2PControlHandler implements RequestHandler {
                     }
                 }
             }
+            outParams.put("RestartNeeded", restartNeeded);
         }
+****/
 
         if (inParams.containsKey("i2pcontrol.password")) {
             if ((inParam = (String) inParams.get("i2pcontrol.password")) != null) {
-                if (SecurityManager.getInstance().setPasswd(inParam)) {
+                if (_secMan.setPasswd(inParam)) {
                     outParams.put("i2pcontrol.password", null);
                     settingsSaved = true;
                 }
-                ConfigurationManager.writeConfFile();
             }
         }
 
+/****
         if (inParams.containsKey("i2pcontrol.address")) {
             String oldAddress = _conf.getConf("i2pcontrol.listen.address", "127.0.0.1");
             if ((inParam = (String) inParams.get("i2pcontrol.address")) != null) {
@@ -190,11 +195,11 @@ public class I2PControlHandler implements RequestHandler {
             } else {
                 outParams.put("i2pcontrol.address", oldAddress);
             }
+            outParams.put("RestartNeeded", restartNeeded);
         }
+****/
 
         outParams.put("SettingsSaved", settingsSaved);
-        outParams.put("RestartNeeded", restartNeeded);
         return new JSONRPC2Response(outParams, req.getID());
     }
-****/
 }

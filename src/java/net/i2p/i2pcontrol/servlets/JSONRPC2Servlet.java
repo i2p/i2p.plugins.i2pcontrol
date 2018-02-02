@@ -105,7 +105,7 @@ public class JSONRPC2Servlet extends HttpServlet {
         disp.register(new NetworkSettingHandler(_context, _helper));
         disp.register(new RouterInfoHandler(_context, _helper));
         disp.register(new RouterManagerHandler(_context, _helper));
-        disp.register(new I2PControlHandler(_context, _helper));
+        disp.register(new I2PControlHandler(_context, _helper, _secMan));
         disp.register(new AdvancedSettingsHandler(_context, _helper));
     }
 

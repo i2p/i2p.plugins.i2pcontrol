@@ -6,7 +6,7 @@ import java.util.Date;
 
 
 public class AuthToken {
-    private static final int VALIDITY_TIME = 1; // Measured in days
+    static final int VALIDITY_TIME = 1; // Measured in days
     private final SecurityManager _secMan;
     private final String id;
     private final Date expiry;

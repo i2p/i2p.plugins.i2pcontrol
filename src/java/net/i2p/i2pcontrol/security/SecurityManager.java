@@ -20,9 +20,11 @@ import net.i2p.I2PAppContext;
 import net.i2p.crypto.SHA256Generator;
 import net.i2p.data.Base64;
 import net.i2p.data.DataHelper;
+import net.i2p.util.Log;
+import net.i2p.util.SimpleTimer2;
+
 import net.i2p.i2pcontrol.security.jbcrypt.BCrypt;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
-import net.i2p.util.Log;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -30,7 +32,8 @@ import javax.net.ssl.SSLSocketFactory;
 import java.security.KeyStore;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Manage the password storing for I2PControl.
@@ -38,7 +41,7 @@ import java.util.*;
 public class SecurityManager {
     private final static String DEFAULT_AUTH_PASSWORD = "itoopie";
     private final HashMap<String, AuthToken> authTokens;
-    private final Timer timer;
+    private final SimpleTimer2.TimedEvent timer;
     private final KeyStore _ks;
     private final Log _log;
     private final ConfigurationManager _conf;
@@ -50,15 +53,16 @@ public class SecurityManager {
         _log = ctx.logManager().getLog(SecurityManager.class);
         authTokens = new HashMap<String, AuthToken>();
 
-        timer = new Timer("SecurityManager Timer Sweeper ");
-        // Start running periodic task after 20 minutes, run periodically every 10th minute.
-        timer.scheduleAtFixedRate(new Sweeper(), 1000 * 60 * 20, 1000 * 60 * 10);
+        timer = new Sweeper();
 
         _ks = ksp.getDefaultKeyStore();
     }
 
     public void stopTimedEvents() {
         timer.cancel();
+        synchronized (authTokens) {
+            authTokens.clear();
+        }
     }
 
     /**
@@ -188,17 +192,16 @@ public class SecurityManager {
      * @throws ExpiredAuthTokenException
      */
     public void verifyToken(String tokenID) throws InvalidAuthTokenException, ExpiredAuthTokenException {
-        AuthToken token = authTokens.get(tokenID);
-        if (token == null) {
-            throw new InvalidAuthTokenException("AuthToken with ID: " + tokenID + " couldn't be found.");
-        } else if (!token.isValid()) {
-            synchronized (authTokens) {
-                authTokens.remove(token.getId());
+        synchronized (authTokens) {
+            AuthToken token = authTokens.get(tokenID);
+            if (token == null)
+                throw new InvalidAuthTokenException("AuthToken with ID: " + tokenID + " couldn't be found.");
+            if (!token.isValid()) {
+                authTokens.remove(tokenID);
+                throw new ExpiredAuthTokenException("AuthToken with ID: " + tokenID + " expired " + token.getExpiryTime(), token.getExpiryTime());
             }
-            throw new ExpiredAuthTokenException("AuthToken with ID: " + tokenID + " expired " + token.getExpiryTime(), token.getExpiryTime());
-        } else {
-            return; // Everything is fine. :)
         }
+        // Everything is fine. :)
     }
 
     /**
@@ -206,23 +209,23 @@ public class SecurityManager {
      * @author hottuna
      *
      */
-    private class Sweeper extends TimerTask {
-        @Override
-        public void run() {
+    private class Sweeper extends SimpleTimer2.TimedEvent {
+        // Start running periodic task after 1 day, run periodically every 30 minutes.
+        public Sweeper() {
+            super(_context.simpleTimer2(), AuthToken.VALIDITY_TIME * 24*60*60*1000L);
+        }
+
+        public void timeReached() {
             _log.debug("Starting cleanup job..");
-            ArrayList<String> arr = new ArrayList<String>();
-            for (Map.Entry<String, AuthToken> e : authTokens.entrySet()) {
-                AuthToken token = e.getValue();
-                if (!token.isValid()) {
-                    arr.add(e.getKey());
-                }
-            }
             synchronized (authTokens) {
-                for (String s : arr) {
-                    authTokens.remove(s);
+                for (Iterator<AuthToken> iter = authTokens.values().iterator(); iter.hasNext(); ) {
+                    AuthToken token = iter.next();
+                    if (!token.isValid())
+                        iter.remove();
                 }
             }
             _log.debug("Cleanup job done.");
+            schedule(30*60*1000L);
         }
     }
 }
