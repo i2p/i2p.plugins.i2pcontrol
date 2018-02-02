@@ -19,6 +19,7 @@ package net.i2p.i2pcontrol.security;
 import net.i2p.I2PAppContext;
 import net.i2p.crypto.SHA256Generator;
 import net.i2p.data.Base64;
+import net.i2p.data.DataHelper;
 import net.i2p.i2pcontrol.security.jbcrypt.BCrypt;
 import net.i2p.i2pcontrol.servlets.configuration.ConfigurationManager;
 import net.i2p.util.Log;
@@ -35,8 +36,7 @@ import java.util.*;
  * Manage the password storing for I2PControl.
  */
 public class SecurityManager {
-    private final static String DEFAULT_AUTH_BCRYPT_SALT = "$2a$11$5aOLx2x/8i4fNaitoCSSWu";
-    private final static String DEFAULT_AUTH_PASSWORD = "$2a$11$5aOLx2x/8i4fNaitoCSSWuut2wEl3Hupuca8DCT.NXzvH9fq1pBU.";
+    private final static String DEFAULT_AUTH_PASSWORD = "itoopie";
     private final HashMap<String, AuthToken> authTokens;
     private final Timer timer;
     private final KeyStore _ks;
@@ -65,18 +65,21 @@ public class SecurityManager {
      * Return the X509Certificate of the server as a Base64 encoded string.
      * @return base64 encode of X509Certificate
      */
+/****  unused and incorrectly uses I2P Base64. Switch to CertUtil.exportCert() if needed.
     public String getBase64Cert() {
         X509Certificate caCert = KeyStoreProvider.readCert(_ks,
                                  KeyStoreProvider.DEFAULT_CERTIFICATE_ALIAS,
                                  KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
         return getBase64FromCert(caCert);
     }
+****/
 
     /**
      * Return the X509Certificate as a base64 encoded string.
      * @param cert
      * @return base64 encode of X509Certificate
      */
+/****  unused and incorrectly uses I2P Base64. Switch to CertUtil.exportCert() if needed.
     private static String getBase64FromCert(X509Certificate cert) {
         try {
             return Base64.encode(cert.getEncoded());
@@ -85,6 +88,7 @@ public class SecurityManager {
         }
         return null;
     }
+****/
 
 
 
@@ -94,7 +98,34 @@ public class SecurityManager {
      * @return BCrypt hash of salt and input string
      */
     public String getPasswdHash(String pwd) {
-        return BCrypt.hashpw(pwd, _conf.getConf("auth.salt", DEFAULT_AUTH_BCRYPT_SALT));
+        String salt;
+        synchronized(_conf) {
+            salt = _conf.getConf("auth.salt", "");
+            if (salt.equals("")) {
+                salt = BCrypt.gensalt(10, _context.random());
+                _conf.setConf("auth.salt", salt);
+                _conf.writeConfFile();
+            }
+        }
+        return BCrypt.hashpw(pwd, salt);
+    }
+
+    /**
+     * Get saved password hash. Stores if not previously set.
+     * @return BCrypt hash of salt and password
+     * @since 0.12
+     */
+    private String getSavedPasswdHash() {
+        String pw;
+        synchronized(_conf) {
+            pw = _conf.getConf("auth.password", "");
+            if (pw.equals("")) {
+                pw = getPasswdHash(DEFAULT_AUTH_PASSWORD);
+                _conf.setConf("auth.password", pw);
+                _conf.writeConfFile();
+            }
+        }
+        return pw;
     }
 
     /**
@@ -116,8 +147,10 @@ public class SecurityManager {
      * @return Returns AuthToken if password is valid. If password is invalid null will be returned.
      */
     public AuthToken validatePasswd(String pwd) {
-        String storedPass = _conf.getConf("auth.password", DEFAULT_AUTH_PASSWORD);
-        if (getPasswdHash(pwd).equals(storedPass)) {
+        String storedPass = getSavedPasswdHash();
+        byte[] p1 = DataHelper.getASCII(getPasswdHash(pwd));
+        byte[] p2 = DataHelper.getASCII(storedPass);
+        if (p1.length == p2.length && DataHelper.eqCT(p1, 0, p2, 0, p1.length)) {
             AuthToken token = new AuthToken(this, pwd);
             synchronized (authTokens) {
                 authTokens.put(token.getId(), token);
@@ -135,10 +168,11 @@ public class SecurityManager {
      */
     public boolean setPasswd(String newPasswd) {
         String newHash = getPasswdHash(newPasswd);
-        String oldHash = _conf.getConf("auth.password", DEFAULT_AUTH_PASSWORD);
+        String oldHash = getSavedPasswdHash();
 
         if (!newHash.equals(oldHash)) {
             _conf.setConf("auth.password", newHash);
+            _conf.writeConfFile();
             synchronized (authTokens) {
                 authTokens.clear();
             }

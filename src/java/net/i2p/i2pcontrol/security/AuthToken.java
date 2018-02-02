@@ -7,9 +7,9 @@ import java.util.Date;
 
 public class AuthToken {
     private static final int VALIDITY_TIME = 1; // Measured in days
-    private SecurityManager _secMan;
-    private String id;
-    private Date expiry;
+    private final SecurityManager _secMan;
+    private final String id;
+    private final Date expiry;
 
     public AuthToken(SecurityManager secMan, String password) {
         _secMan = secMan;
