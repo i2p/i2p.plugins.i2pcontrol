@@ -76,7 +76,7 @@ public class I2PControlController implements RouterApp {
     private ClientAppState _state = UNINITIALIZED;
     // only for main()
     private static I2PControlController _instance;
-    static final String PROP_ALLOWED_HOSTS = "i2pcontrol.allowedHosts";
+    static final String PROP_ALLOWED_HOSTS = "i2pcontrol.allowedhosts";
 
     public I2PControlController(RouterContext ctx, ClientAppManager mgr, String args[]) {
         _appContext = _context = ctx;
@@ -241,8 +241,8 @@ public class I2PControlController implements RouterApp {
             listenHosts.add("127.0.0.1");
             listenHosts.add("::1");
             listenHosts.add("0:0:0:0:0:0:0:1");
-            String allowed = _conf.getConf(PROP_ALLOWED_HOSTS, "**unset**");
-            if (!allowed.equals("**unset**")) {
+            String allowed = _conf.getConf(PROP_ALLOWED_HOSTS, "");
+            if (!allowed.equals("")) {
                 StringTokenizer tok = new StringTokenizer(allowed, " ,");
                 while (tok.hasMoreTokens()) {
                     listenHosts.add(tok.nextToken());
@@ -253,6 +253,7 @@ public class I2PControlController implements RouterApp {
         hch.setHandler(sh);
         server.getServer().setHandler(hch);
 
+        _conf.writeConfFile();
         return server;
     }
 

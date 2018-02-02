@@ -54,8 +54,10 @@ public class JSONRPC2Servlet extends HttpServlet {
     private Dispatcher disp;
     private Log _log;
     private final SecurityManager _secMan;
+    private final ConfigurationManager _conf;
     private final JSONRPC2Helper _helper;
     private final RouterContext _context;
+    private final boolean _isWebapp;
 
     /**
      *  Webapp
@@ -67,13 +69,15 @@ public class JSONRPC2Servlet extends HttpServlet {
         _context = (RouterContext) ctx;
         File appDir = ctx.getAppDir();
         String app = appDir.getAbsolutePath();
-        ConfigurationManager conf = new ConfigurationManager(app);
+        _conf = new ConfigurationManager(app);
         // we don't really need a keystore
         File ksDir = new File(ctx.getConfigDir(), "keystore");
         KeyStoreProvider ksp = new KeyStoreProvider(ksDir.getAbsolutePath());
-        _secMan = new SecurityManager(ctx, ksp, conf);
+        _secMan = new SecurityManager(ctx, ksp, _conf);
         _helper = new JSONRPC2Helper(_secMan);
         _log = ctx.logManager().getLog(JSONRPC2Servlet.class);
+        _conf.writeConfFile();
+        _isWebapp = true;
     }
 
     /**
@@ -87,10 +91,13 @@ public class JSONRPC2Servlet extends HttpServlet {
             _log = ctx.logManager().getLog(JSONRPC2Servlet.class);
         else
             _log = I2PAppContext.getGlobalContext().logManager().getLog(JSONRPC2Servlet.class);
+        _conf = null;
+        _isWebapp = false;
     }
 
     @Override
-    public void init() {
+    public void init() throws ServletException {
+        super.init();
         disp = new Dispatcher();
         disp.register(new EchoHandler(_helper));
         disp.register(new GetRateHandler(_helper));
@@ -100,6 +107,15 @@ public class JSONRPC2Servlet extends HttpServlet {
         disp.register(new RouterManagerHandler(_context, _helper));
         disp.register(new I2PControlHandler(_context, _helper));
         disp.register(new AdvancedSettingsHandler(_context, _helper));
+    }
+
+    @Override
+    public void destroy() {
+        if (_isWebapp) {
+            _secMan.stopTimedEvents();
+            _conf.writeConfFile();
+        }
+        super.destroy();
     }
 
     @Override

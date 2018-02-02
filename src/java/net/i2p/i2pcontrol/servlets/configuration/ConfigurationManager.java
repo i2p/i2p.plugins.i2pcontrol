@@ -1,20 +1,17 @@
 package net.i2p.i2pcontrol.servlets.configuration;
 
 import net.i2p.I2PAppContext;
+import net.i2p.data.DataHelper;
 import net.i2p.util.Log;
-import net.i2p.util.SecureFileOutputStream;
+import net.i2p.util.OrderedProperties;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
+import java.util.Properties;
 
 /**
  * Manage the configuration of I2PControl.
@@ -26,8 +23,8 @@ public class ConfigurationManager {
     private final String CONFIG_FILE = "I2PControl.conf";
     private final String configLocation;
     private final Log _log;
+    private boolean _changed;
 
-    private ConfigurationManager instance;
     //Configurations with a String as value
     private final Map<String, String> stringConfigurations = new HashMap<String, String>();
     //Configurations with a Boolean as value
@@ -48,11 +45,12 @@ public class ConfigurationManager {
     }
 
     /**
-     * Collects settingNameuments of the form --word, --word=otherword and -blah
+     * Collects arguments of the form --word, --word=otherword and -blah
      * to determine user parameters.
-     * @param settingNames Command line settingNameuments to the application
+     * @param settingNames Command line arguments to the application
      */
-    public void loadsettingNameuments(String[] settingNames) {
+/****
+    public void loadArguments(String[] settingNames) {
         for (int i = 0; i < settingNames.length; i++) {
             String settingName = settingNames[i];
             if (settingName.startsWith("--")) {
@@ -60,33 +58,35 @@ public class ConfigurationManager {
             }
         }
     }
+****/
 
     /**
      * Reads configuration from file itoopie.conf, every line is parsed as key=value.
      */
-    public void readConfFile() {
+    public synchronized void readConfFile() {
         try {
-            BufferedReader br = new BufferedReader(new FileReader(configLocation));
-            String input;
-            while ((input = br.readLine()) != null) {
-                parseConfigStr(input);
-            }
-            br.close();
+            Properties input = new Properties();
+            // true: map to lower case
+            DataHelper.loadProps(input, new File(configLocation), true);
+            parseConfigStr(input);
+            _changed = false;
         } catch (FileNotFoundException e) {
-            _log.info("Unable to find config file, " + configLocation);
+            if (_log.shouldInfo())
+                _log.info("Unable to find config file, " + configLocation);
         } catch (IOException e) {
-            _log.error("Unable to read from config file, " + configLocation);
+            _log.error("Unable to read from config file, " + configLocation, e);
         }
     }
 
     /**
      * Write configuration into default config file.
+     * As of 0.12, doesn't actually write unless something changed.
      */
-    public void writeConfFile() {
-        TreeMap<String, String> tree = new TreeMap<String, String>();
-        for (Entry<String, String> e : stringConfigurations.entrySet()) {
-            tree.put(e.getKey(), e.getValue());
-        }
+    public synchronized void writeConfFile() {
+        if (!_changed)
+            return;
+        Properties tree = new OrderedProperties();
+        tree.putAll(stringConfigurations);
         for (Entry<String, Integer> e : integerConfigurations.entrySet()) {
             tree.put(e.getKey(), e.getValue().toString());
         }
@@ -94,39 +94,35 @@ public class ConfigurationManager {
             tree.put(e.getKey(), e.getValue().toString());
         }
         try {
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new SecureFileOutputStream(configLocation)));
-            for (Entry<String, String> e : tree.entrySet()) {
-                bw.write(e.getKey() + "=" + e.getValue() + "\r\n");
-            }
-            bw.close();
+            DataHelper.storeProps(tree, new File(configLocation));
+            _changed = false;
         } catch (IOException e1) {
             _log.error("Couldn't open file, " + configLocation + " for writing config.");
         }
     }
 
     /**
-     * Try to parse the given line as 'key=value',
+     * Try to parse the input as 'key=value',
      * where value will (in order) be parsed as integer/boolean/string.
      * @param str
      */
-    public void parseConfigStr(String str) {
-        int eqIndex = str.indexOf('=');
-        if (eqIndex != -1) {
-            String key = str.substring(0, eqIndex).trim().toLowerCase();
-            String value = str.substring(eqIndex + 1, str.length()).trim();
+    private void parseConfigStr(Properties input) {
+        for (Entry<Object, Object> entry : input.entrySet()) {
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
             //Try parse as integer.
             try {
                 int i = Integer.parseInt(value);
                 integerConfigurations.put(key, i);
-                return;
+                continue;
             } catch (NumberFormatException e) {}
             //Check if value is a bool
             if (value.toLowerCase().equals("true")) {
                 booleanConfigurations.put(key, Boolean.TRUE);
-                return;
+                continue;
             } else if (value.toLowerCase().equals("false")) {
                 booleanConfigurations.put(key, Boolean.FALSE);
-                return;
+                continue;
             }
             stringConfigurations.put(key, value);
         }
@@ -139,12 +135,13 @@ public class ConfigurationManager {
      * @param defaultValue If the configuration is not found, we use a default value.
      * @return The value of a configuration: true if found, defaultValue if not found.
      */
-    public boolean getConf(String settingName, boolean defaultValue) {
+    public synchronized boolean getConf(String settingName, boolean defaultValue) {
         Boolean value = booleanConfigurations.get(settingName);
         if (value != null) {
             return value;
         } else {
             booleanConfigurations.put(settingName, defaultValue);
+            _changed = true;
             return defaultValue;
         }
     }
@@ -156,12 +153,13 @@ public class ConfigurationManager {
      * @param defaultValue If the configuration is not found, we use a default value.
      * @return The value of a configuration: true if found, defaultValue if not found.
      */
-    public int getConf(String settingName, int defaultValue) {
+    public synchronized int getConf(String settingName, int defaultValue) {
         Integer value = integerConfigurations.get(settingName);
         if (value != null) {
             return value;
         } else {
             integerConfigurations.put(settingName, defaultValue);
+            _changed = true;
             return defaultValue;
         }
     }
@@ -172,12 +170,13 @@ public class ConfigurationManager {
      * @param defaultValue If the configuration is not found, we use a default value.
      * @return The value of the configuration, or the defaultValue.
      */
-    public String getConf(String settingName, String defaultValue) {
+    public synchronized String getConf(String settingName, String defaultValue) {
         String value = stringConfigurations.get(settingName);
         if (value != null) {
             return value;
         } else {
             stringConfigurations.put(settingName, defaultValue);
+            _changed = true;
             return defaultValue;
         }
     }
@@ -187,8 +186,9 @@ public class ConfigurationManager {
      * @param settingName
      * @param nbr
      */
-    public void setConf(String settingName, int nbr) {
+    public synchronized void setConf(String settingName, int nbr) {
         integerConfigurations.put(settingName, nbr);
+        _changed = true;
     }
 
     /**
@@ -196,8 +196,9 @@ public class ConfigurationManager {
      * @param settingName
      * @param string
      */
-    public void setConf(String settingName, String str) {
+    public synchronized void setConf(String settingName, String str) {
         stringConfigurations.put(settingName, str);
+        _changed = true;
     }
 
     /**
@@ -205,7 +206,8 @@ public class ConfigurationManager {
      * @param settingName
      * @param boolean
      */
-    public void setConf(String settingName, boolean bool) {
+    public synchronized void setConf(String settingName, boolean bool) {
         booleanConfigurations.put(settingName, bool);
+        _changed = true;
     }
 }
