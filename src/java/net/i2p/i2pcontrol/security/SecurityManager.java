@@ -48,6 +48,9 @@ public class SecurityManager {
     private final ConfigurationManager _conf;
     private final I2PAppContext _context;
 
+    /**
+     *  @param ksp may be null (if webapp)
+     */
     public SecurityManager(I2PAppContext ctx, KeyStoreProvider ksp, ConfigurationManager conf) {
         _context = ctx;
         _conf = conf;
@@ -56,7 +59,7 @@ public class SecurityManager {
 
         timer = new Sweeper();
 
-        _ks = ksp.getDefaultKeyStore();
+        _ks = ksp != null ? ksp.getDefaultKeyStore() : null;
     }
 
     public void stopTimedEvents() {

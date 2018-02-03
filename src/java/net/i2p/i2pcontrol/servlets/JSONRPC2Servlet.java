@@ -70,9 +70,11 @@ public class JSONRPC2Servlet extends HttpServlet {
         File appDir = ctx.getAppDir();
         _conf = new ConfigurationManager(ctx, appDir, false);
         // we don't really need a keystore
-        File ksDir = new File(ctx.getConfigDir(), "keystore");
-        KeyStoreProvider ksp = new KeyStoreProvider(ksDir.getAbsolutePath());
-        _secMan = new SecurityManager(ctx, ksp, _conf);
+        //File ksDir = new File(ctx.getConfigDir(), "keystore");
+        //ksDir.mkDir();
+        //KeyStoreProvider ksp = new KeyStoreProvider(ksDir.getAbsolutePath());
+        //_secMan = new SecurityManager(ctx, ksp, _conf);
+        _secMan = new SecurityManager(ctx, null, _conf);
         _helper = new JSONRPC2Helper(_secMan);
         _log = ctx.logManager().getLog(JSONRPC2Servlet.class);
         _conf.writeConfFile();
