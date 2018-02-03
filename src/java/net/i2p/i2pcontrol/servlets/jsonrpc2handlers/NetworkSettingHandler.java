@@ -76,7 +76,7 @@ public class NetworkSettingHandler implements RequestHandler {
                        req.getID());
         }
         Map<String, Object> inParams = req.getNamedParams();
-        Map outParams = new HashMap();
+        Map<String, Object> outParams = new HashMap<String, Object>(4);
 
         boolean restartNeeded = false;
         boolean settingsSaved = false;

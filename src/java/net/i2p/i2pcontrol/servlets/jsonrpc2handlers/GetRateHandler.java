@@ -74,7 +74,7 @@ public class GetRateHandler implements RequestHandler {
             }
             if (rateStat.getRate(period) == null)
                 return new JSONRPC2Response(JSONRPC2Error.INTERNAL_ERROR, req.getID());
-            Map outParams = new HashMap();
+            Map<String, Object> outParams = new HashMap<String, Object>(4);
             Rate rate = rateStat.getRate(period);
             rate.coalesce();
             outParams.put("Result", rate.getAverageValue());
