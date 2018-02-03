@@ -84,7 +84,7 @@ public class I2PControlController implements RouterApp {
         _log = _appContext.logManager().getLog(I2PControlController.class);
         File pluginDir = new File(_context.getAppDir(), "plugins/I2PControl");
         _pluginDir = pluginDir.getAbsolutePath();
-        _conf = new ConfigurationManager(_pluginDir);
+        _conf = new ConfigurationManager(_appContext, pluginDir, true);
         _ksp = new KeyStoreProvider(_pluginDir);
         _secMan = new SecurityManager(_appContext, _ksp, _conf);
         _server = buildServer();
@@ -103,7 +103,7 @@ public class I2PControlController implements RouterApp {
         _mgr = null;
         _log = _appContext.logManager().getLog(I2PControlController.class);
         _pluginDir = pluginDir.getAbsolutePath();
-        _conf = new ConfigurationManager(_pluginDir);
+        _conf = new ConfigurationManager(_appContext, pluginDir, true);
         _ksp = new KeyStoreProvider(_pluginDir);
         _secMan = new SecurityManager(_appContext, _ksp, _conf);
         _server = buildServer();

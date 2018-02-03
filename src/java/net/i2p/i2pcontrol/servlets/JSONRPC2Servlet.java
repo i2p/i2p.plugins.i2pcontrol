@@ -68,8 +68,7 @@ public class JSONRPC2Servlet extends HttpServlet {
             throw new IllegalStateException();
         _context = (RouterContext) ctx;
         File appDir = ctx.getAppDir();
-        String app = appDir.getAbsolutePath();
-        _conf = new ConfigurationManager(app);
+        _conf = new ConfigurationManager(ctx, appDir, false);
         // we don't really need a keystore
         File ksDir = new File(ctx.getConfigDir(), "keystore");
         KeyStoreProvider ksp = new KeyStoreProvider(ksDir.getAbsolutePath());

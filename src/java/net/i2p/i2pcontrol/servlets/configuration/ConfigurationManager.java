@@ -21,7 +21,8 @@ import java.util.Properties;
  */
 public class ConfigurationManager {
     private final String CONFIG_FILE = "I2PControl.conf";
-    private final String configLocation;
+    private final String WEBAPP_CONFIG_FILE = "i2pcontrol.config";
+    private final File configLocation;
     private final Log _log;
     private boolean _changed;
 
@@ -34,12 +35,12 @@ public class ConfigurationManager {
 
 
 
-    public ConfigurationManager(String dir) {
-        _log = I2PAppContext.getGlobalContext().logManager().getLog(ConfigurationManager.class);
-        if (dir.endsWith("/")) {
-            configLocation = dir + CONFIG_FILE;
+    public ConfigurationManager(I2PAppContext ctx, File dir, boolean isPlugin) {
+        _log = ctx.logManager().getLog(ConfigurationManager.class);
+        if (isPlugin) {
+            configLocation = new File(dir, CONFIG_FILE);
         } else {
-            configLocation = dir + "/" + CONFIG_FILE;
+            configLocation = new File(dir, WEBAPP_CONFIG_FILE);
         }
         readConfFile();
     }
@@ -61,13 +62,13 @@ public class ConfigurationManager {
 ****/
 
     /**
-     * Reads configuration from file itoopie.conf, every line is parsed as key=value.
+     * Reads configuration from file, every line is parsed as key=value.
      */
     public synchronized void readConfFile() {
         try {
             Properties input = new Properties();
             // true: map to lower case
-            DataHelper.loadProps(input, new File(configLocation), true);
+            DataHelper.loadProps(input, configLocation, true);
             parseConfigStr(input);
             _changed = false;
         } catch (FileNotFoundException e) {
@@ -94,7 +95,7 @@ public class ConfigurationManager {
             tree.put(e.getKey(), e.getValue().toString());
         }
         try {
-            DataHelper.storeProps(tree, new File(configLocation));
+            DataHelper.storeProps(tree, configLocation);
             _changed = false;
         } catch (IOException e1) {
             _log.error("Couldn't open file, " + configLocation + " for writing config.");
