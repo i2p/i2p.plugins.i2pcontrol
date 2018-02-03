@@ -24,6 +24,7 @@ import net.i2p.router.RouterContext;
 import net.i2p.router.app.RouterApp;
 import net.i2p.util.I2PSSLSocketFactory;
 import net.i2p.util.Log;
+import net.i2p.util.PortMapper;
 
 import net.i2p.i2pcontrol.security.KeyStoreProvider;
 import net.i2p.i2pcontrol.security.SecurityManager;
@@ -77,6 +78,7 @@ public class I2PControlController implements RouterApp {
     // only for main()
     private static I2PControlController _instance;
     static final String PROP_ALLOWED_HOSTS = "i2pcontrol.allowedhosts";
+    private static final String SVC_HTTPS_I2PCONTROL = "https_i2pcontrol";
 
     public I2PControlController(RouterContext ctx, ClientAppManager mgr, String args[]) {
         _appContext = _context = ctx;
@@ -200,6 +202,9 @@ public class I2PControlController implements RouterApp {
     private synchronized void start(String args[]) throws Exception {
         _appContext.logManager().getLog(JSONRPC2Servlet.class).setMinimumPriority(Log.DEBUG);
         _server.start();
+        _context.portMapper().register(SVC_HTTPS_I2PCONTROL,
+                                       _conf.getConf("i2pcontrol.listen.address", "127.0.0.1"),
+                                       _conf.getConf("i2pcontrol.listen.port", 7650));
     }
 
 
@@ -351,6 +356,7 @@ public class I2PControlController implements RouterApp {
     {
         try {
             if (_server != null) {
+                _appContext.portMapper().unregister(SVC_HTTPS_I2PCONTROL);
                 _server.stop();
                 for (Connector listener : _server.getConnectors()) {
                     listener.stop();

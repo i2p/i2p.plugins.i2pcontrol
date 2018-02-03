@@ -22,6 +22,7 @@ import com.thetransactioncompany.jsonrpc2.server.Dispatcher;
 import net.i2p.I2PAppContext;
 import net.i2p.router.RouterContext;
 import net.i2p.util.Log;
+import net.i2p.util.PortMapper;
 
 import net.i2p.i2pcontrol.I2PControlVersion;
 import net.i2p.i2pcontrol.security.KeyStoreProvider;
@@ -51,6 +52,8 @@ public class JSONRPC2Servlet extends HttpServlet {
 
     private static final long serialVersionUID = -45075606818515212L;
     private static final int BUFFER_LENGTH = 2048;
+    private static final String SVC_HTTP_I2PCONTROL = "http_i2pcontrol";
+    private static final String SVC_HTTPS_I2PCONTROL = "https_i2pcontrol";
     private Dispatcher disp;
     private Log _log;
     private final SecurityManager _secMan;
@@ -58,6 +61,7 @@ public class JSONRPC2Servlet extends HttpServlet {
     private final JSONRPC2Helper _helper;
     private final RouterContext _context;
     private final boolean _isWebapp;
+    private boolean _isHTTP, _isHTTPS;
 
     /**
      *  Webapp
@@ -108,11 +112,31 @@ public class JSONRPC2Servlet extends HttpServlet {
         disp.register(new RouterManagerHandler(_context, _helper));
         disp.register(new I2PControlHandler(_context, _helper, _secMan));
         disp.register(new AdvancedSettingsHandler(_context, _helper));
+        if (_isWebapp) {
+            PortMapper pm = _context.portMapper();
+            int port = pm.getPort(PortMapper.SVC_CONSOLE);
+            if (port > 0) {
+                String host = pm.getHost(PortMapper.SVC_CONSOLE, "127.0.0.1");
+                pm.register(SVC_HTTP_I2PCONTROL, host, port);
+                _isHTTP = true;
+            }
+            port = pm.getPort(PortMapper.SVC_HTTPS_CONSOLE);
+            if (port > 0) {
+                String host = pm.getHost(PortMapper.SVC_HTTPS_CONSOLE, "127.0.0.1");
+                pm.register(SVC_HTTPS_I2PCONTROL, host, port);
+                _isHTTPS = true;
+            }
+        }
     }
 
     @Override
     public void destroy() {
         if (_isWebapp) {
+            PortMapper pm = _context.portMapper();
+            if (_isHTTP)
+                pm.unregister(SVC_HTTP_I2PCONTROL);
+            if (_isHTTPS)
+                pm.unregister(SVC_HTTPS_I2PCONTROL);
             _secMan.stopTimedEvents();
             _conf.writeConfFile();
         }
