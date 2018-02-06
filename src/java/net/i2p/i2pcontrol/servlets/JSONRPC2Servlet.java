@@ -167,13 +167,31 @@ public class JSONRPC2Servlet extends HttpServlet {
     }
 
     /** @since 0.12 */
-    private void doPasswordChange(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    private void doPasswordChange(HttpServletRequest req, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         httpServletResponse.setContentType("text/html");
         PrintWriter out = httpServletResponse.getWriter();
-        if (true) {
-            out.println("<p>API Password not changed");
-        } else {	
-            out.println("<p>API Password changed");
+        String pw = req.getParameter("password");
+        if (pw == null)
+            pw = _secMan.DEFAULT_AUTH_PASSWORD;
+        else
+            pw = pw.trim();
+        String pw2 = req.getParameter("password2");
+        String pw3 = req.getParameter("password3");
+        if (pw2 == null || pw3 == null) {
+            out.println("<p>Enter new password twice!");
+        } else {
+            pw2 = pw2.trim();
+            pw3 = pw3.trim();
+            if (!pw2.equals(pw3)) {
+                out.println("<p>New passwords don't match!");
+            } else if (pw2.length() <= 0) {
+                out.println("<p>Enter new password twice!");
+            } else if (_secMan.isValid(pw)) {
+                _secMan.setPasswd(pw2);
+                out.println("<p>API Password changed");
+            } else {	
+                out.println("<p>Incorrect old password, not changed");
+            }
         }
         out.println("<p><a href=\"password\">Change API Password</a>");
     }
