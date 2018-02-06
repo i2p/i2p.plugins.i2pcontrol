@@ -45,6 +45,11 @@ public class ConfigurationManager {
         readConfFile();
     }
 
+    /** @since 0.12 */
+    public File getConfFile() {
+        return configLocation;
+    }
+
     /**
      * Collects arguments of the form --word, --word=otherword and -blah
      * to determine user parameters.

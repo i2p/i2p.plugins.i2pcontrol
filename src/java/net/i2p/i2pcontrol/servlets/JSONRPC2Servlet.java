@@ -145,14 +145,45 @@ public class JSONRPC2Servlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
-        httpServletResponse.setContentType("text/plain");
+        httpServletResponse.setContentType("text/html");
         PrintWriter out = httpServletResponse.getWriter();
-        out.println("I2PControl RPC Service version " + I2PControlVersion.VERSION + " : Running");
+        out.println("<p>I2PControl RPC Service version " + I2PControlVersion.VERSION + " : Running");
+	if ("/password".equals(httpServletRequest.getServletPath())) {
+            out.println("<form method=\"POST\" action=\"password\">");
+            if (_secMan.isDefaultPasswordValid()) {
+                out.println("<p>The current API password is the default, \"" + _secMan.DEFAULT_AUTH_PASSWORD + "\". You should change it.");
+            } else {	
+                out.println("<p>Current API password:<input name=\"password\" type=\"password\">");
+            }
+            out.println("<p>New API password (twice):<input name=\"password2\" type=\"password\">" +
+                        "<input name=\"password3\" type=\"password\">" +
+                        "<input name=\"save\" type=\"submit\" value=\"Change API Password\">" +
+                        "<p>If you forget the API password, stop i2pcontrol, delete the file <tt>" + _conf.getConfFile() +
+                        "</tt>, and restart i2pcontrol.");
+        } else {	
+            out.println("<p><a href=\"password\">Change API Password</a>");
+        }
         out.close();
+    }
+
+    /** @since 0.12 */
+    private void doPasswordChange(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        httpServletResponse.setContentType("text/html");
+        PrintWriter out = httpServletResponse.getWriter();
+        if (true) {
+            out.println("<p>API Password not changed");
+        } else {	
+            out.println("<p>API Password changed");
+        }
+        out.println("<p><a href=\"password\">Change API Password</a>");
     }
 
     @Override
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+	if ("/password".equals(httpServletRequest.getServletPath())) {
+            doPasswordChange(httpServletRequest, httpServletResponse);
+            return;
+        }
         String req = getRequest(httpServletRequest.getInputStream());
         httpServletResponse.setContentType("application/json");
         PrintWriter out = httpServletResponse.getWriter();

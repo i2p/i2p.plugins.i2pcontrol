@@ -40,7 +40,7 @@ import java.util.Iterator;
  * Manage the password storing for I2PControl.
  */
 public class SecurityManager {
-    private final static String DEFAULT_AUTH_PASSWORD = "itoopie";
+    public final static String DEFAULT_AUTH_PASSWORD = "itoopie";
     private final HashMap<String, AuthToken> authTokens;
     private final SimpleTimer2.TimedEvent timer;
     private final KeyStore _ks;
@@ -148,17 +148,34 @@ public class SecurityManager {
         return Base64.encode(bytes);
     }
 
+    /**
+     * Is this password correct?
+     * @return true if password is valid.
+     * @since 0.12
+     */
+    public boolean isValid(String pwd) {
+        String storedPass = getSavedPasswdHash();
+        byte[] p1 = DataHelper.getASCII(getPasswdHash(pwd));
+        byte[] p2 = DataHelper.getASCII(storedPass);
+        return p1.length == p2.length && DataHelper.eqCT(p1, 0, p2, 0, p1.length);
+    }
+
+    /**
+     * Is this password correct?
+     * @return true if password is valid.
+     * @since 0.12
+     */
+    public boolean isDefaultPasswordValid() {
+        return isValid(DEFAULT_AUTH_PASSWORD);
+    }
 
     /**
      * Add a Authentication Token if the provided password is valid.
      * The token will be valid for one day.
-     * @return Returns AuthToken if password is valid. If password is invalid null will be returned.
+     * @return AuthToken if password is valid. If password is invalid null will be returned.
      */
     public AuthToken validatePasswd(String pwd) {
-        String storedPass = getSavedPasswdHash();
-        byte[] p1 = DataHelper.getASCII(getPasswdHash(pwd));
-        byte[] p2 = DataHelper.getASCII(storedPass);
-        if (p1.length == p2.length && DataHelper.eqCT(p1, 0, p2, 0, p1.length)) {
+        if (isValid(pwd)) {
             AuthToken token = new AuthToken(this, pwd);
             synchronized (authTokens) {
                 authTokens.put(token.getId(), token);
