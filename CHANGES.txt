@@ -1,0 +1,62 @@
+Version 0.12.0 2018-02-07 zzz
+ * Fixes for Jetty 9 / I2P 0.9.30
+ * Convert to RouterApp interface
+ * Register with PortMapper
+ * HTML password change form
+ * Update SSL cert parameters
+ * Convert Timer to SimpleTimer2
+ * Remove hardcoded salt; generate if necessary
+ * Constant-time password hash comparison
+ * Update jBCrypt to version 0.4 2015-01-30
+ * Update jsonrpc2 libs: Base 1.38.1; Server 1.11; Mini 2015-10-23
+ * Update makeplugin.sh
+ * Add DNS rebinding protection
+ * Implement destroy() for servlet
+ * Don't stop all running threads on shutdown
+ * Set restrictive permissions on configuration file
+ * Disable changing host/port via RPC
+ * Use I2P libs for setting supported ciphers and for configuration file
+ * Change maintainer, signer, and update URLs
+ * Smaller update file
+ * i2pcontrol.py enhancements and options
+ * Bundle i2pcontrol.py test script
+ * Add support for building and running as a console webapp
+ * Remove all static references
+ * Various code cleanups
+
+Version 0.11 2016-01-18 hottuna
+ * Implemented AdvancedSettings RPC method.
+ * Fix 2 bugs.
+
+Version 0.1.0
+ * Fix 2 bugs.
+
+Version 0.0.9
+ * Add support for I2P 0.9.16.
+
+Version 0.0.8
+ * Add support for Java 8.
+
+Version 0.0.7
+ * Add support for I2P v0.9.8 and greater.
+
+Version 0.0.6
+ * Migrated to jetty7. Reflected changes in the API.
+
+Version 0.0.5
+ * I2PControl has been updated to reflect changes in the  reseed API of I2P.
+
+Version 0.0.4
+ * I2PControl has been ported to Jetty6 as I2P is no longer including Jetty5. Shouldn't affect end users.
+
+Version 0.0.3
+ * Switched signature file of I2PControl. Meaning that updates have to be made from scratch.
+
+Version 0.0.2
+ * Support for monitoring netdb status and initiating a reseed if needed.</tt><br>
+  * Added support for changing which IP addresses I2PControl accepts. 127.0.0.1 is default, 0.0.0.0 is an option.</tt><br>
+ * Improved looks by realigning components and adding gradients to panels.
+
+Version 0.0.1
+ * Added graphs.
+ * Added support for changing the port of I2PControl.
