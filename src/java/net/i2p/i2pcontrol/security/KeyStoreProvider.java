@@ -15,10 +15,11 @@ public class KeyStoreProvider {
     public static final String DEFAULT_CERTIFICATE_ALGORITHM_STRING = "RSA";
     public static final int DEFAULT_CERTIFICATE_KEY_LENGTH = 4096;
     public static final int DEFAULT_CERTIFICATE_VALIDITY = 365 * 10;
-    public final static String DEFAULT_CERTIFICATE_DOMAIN = "net.i2p.i2pcontrol";
+    public final static String DEFAULT_CERTIFICATE_DOMAIN = "localhost";
     public final static String DEFAULT_CERTIFICATE_ALIAS = "I2PControl CA";
-    public static final String DEFAULT_KEYSTORE_NAME = "key.store";
-    public static final String DEFAULT_KEYSTORE_PASSWORD = "nut'nfancy";
+    public static final String DEFAULT_KEYSTORE_NAME = "i2pcontrol.ks";
+    public static final String DEFAULT_KEYSTORE_PASSWORD = KeyStoreUtil.DEFAULT_KEYSTORE_PASSWORD;
+    public static final String DEFAULT_CERTIFICATE_PASSWORD = "nut'nfancy";
     private final String _pluginDir;
     private KeyStore _keystore;
 
@@ -35,7 +36,7 @@ public class KeyStoreProvider {
                                 DEFAULT_CERTIFICATE_VALIDITY,
                                 DEFAULT_CERTIFICATE_ALGORITHM_STRING,
                                 DEFAULT_CERTIFICATE_KEY_LENGTH,
-                                DEFAULT_KEYSTORE_PASSWORD);
+                                DEFAULT_CERTIFICATE_PASSWORD);
     }
 
     /**

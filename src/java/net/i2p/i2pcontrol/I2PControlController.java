@@ -52,11 +52,10 @@ import java.util.StringTokenizer;
 
 
 /**
- * This handles the starting and stopping of an eepsite tunnel and jetty
+ * This handles the starting and stopping of Jetty
  * from a single static class so it can be called via clients.config.
  *
- * This makes installation of a new eepsite a turnkey operation -
- * the user is not required to configure a new tunnel in i2ptunnel manually.
+ * This makes installation of a new eepsite a turnkey operation.
  *
  * Usage: I2PControlController -d $PLUGIN [start|stop]
  *
@@ -80,6 +79,9 @@ public class I2PControlController implements RouterApp {
     static final String PROP_ALLOWED_HOSTS = "i2pcontrol.allowedhosts";
     private static final String SVC_HTTPS_I2PCONTROL = "https_i2pcontrol";
 
+    /**
+     *  RouterApp (new way)
+     */
     public I2PControlController(RouterContext ctx, ClientAppManager mgr, String args[]) {
         _appContext = _context = ctx;
         _mgr = mgr;
@@ -94,7 +96,7 @@ public class I2PControlController implements RouterApp {
     }
 
     /**
-     *  From main()
+     *  From main() (old way)
      */
     public I2PControlController(File pluginDir) {
         _appContext = I2PAppContext.getGlobalContext();
@@ -122,6 +124,7 @@ public class I2PControlController implements RouterApp {
         } catch (Exception e) {
             changeState(START_FAILED, "Failed to start", e);
             _log.error("Unable to start jetty server", e);
+            stop();
         }
     }
 
@@ -279,7 +282,7 @@ public class I2PControlController implements RouterApp {
         SslContextFactory sslFactory = new SslContextFactory(_ksp.getKeyStoreLocation());
         sslFactory.setKeyStorePassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
         // the X.509 cert password (if not present, verifyKeyStore() returned false)
-        sslFactory.setKeyManagerPassword(KeyStoreProvider.DEFAULT_KEYSTORE_PASSWORD);
+        sslFactory.setKeyManagerPassword(KeyStoreProvider.DEFAULT_CERTIFICATE_PASSWORD);
         sslFactory.addExcludeProtocols(I2PSSLSocketFactory.EXCLUDE_PROTOCOLS.toArray(
                                        new String[I2PSSLSocketFactory.EXCLUDE_PROTOCOLS.size()]));
         sslFactory.addExcludeCipherSuites(I2PSSLSocketFactory.EXCLUDE_CIPHERS.toArray(
@@ -297,7 +300,6 @@ public class I2PControlController implements RouterApp {
         ssl.setPort(port);
         ssl.setIdleTimeout(90*1000);  // default 10 sec
         // all with same name will use the same thread pool
-        //ssll.setName("ConsoleSocket");
         ssl.setName("I2PControl");
 
         ssl.setName("SSL Listener-" + ++listeners);

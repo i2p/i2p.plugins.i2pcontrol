@@ -31,7 +31,8 @@
     <target name="plugin" depends="jar"> 
         <!-- get version number -->
         <buildnumber file="scripts/build.number" />
-        <property name="release.number" value="0.11" />
+        <!-- change in I2PControlVersion.java also! -->
+        <property name="release.number" value="0.12.0" />
 
         <!-- make the update xpi2p -->
         <mkdir dir="plugin/lib"/>
