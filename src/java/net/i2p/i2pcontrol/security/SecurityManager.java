@@ -139,7 +139,7 @@ public class SecurityManager {
     /**
      * Hash input one time with SHA-256, return Base64 encdoded string.
      * @param string
-     * @return
+     * @return Base64 encoded string
      */
     public String getHash(String string) {
         SHA256Generator hashGen = _context.sha();

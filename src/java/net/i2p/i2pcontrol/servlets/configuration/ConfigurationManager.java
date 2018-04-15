@@ -200,7 +200,7 @@ public class ConfigurationManager {
     /**
      * Set a specific string setting
      * @param settingName
-     * @param string
+     * @param str
      */
     public synchronized void setConf(String settingName, String str) {
         stringConfigurations.put(settingName, str);
@@ -210,7 +210,7 @@ public class ConfigurationManager {
     /**
      * Set a specific boolean setting
      * @param settingName
-     * @param boolean
+     * @param bool
      */
     public synchronized void setConf(String settingName, boolean bool) {
         booleanConfigurations.put(settingName, bool);
