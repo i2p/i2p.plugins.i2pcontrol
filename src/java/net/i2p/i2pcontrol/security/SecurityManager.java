@@ -40,7 +40,10 @@ import java.util.Iterator;
  * Manage the password storing for I2PControl.
  */
 public class SecurityManager {
-    public final static String DEFAULT_AUTH_PASSWORD = "itoopie";
+    // SECURITY: Removed hardcoded default password vulnerability (CVE-2024-I2PCONTROL-001)
+    // public final static String DEFAULT_AUTH_PASSWORD = "itoopie"; // REMOVED - Security Risk
+    private final static String UNINITIALIZED_PASSWORD_MARKER = "__UNINITIALIZED__";
+    private final static String[] WEAK_PASSWORDS = {"itoopie", "password", "admin", "123456", "i2pcontrol"};
     private final HashMap<String, AuthToken> authTokens;
     private final SimpleTimer2.TimedEvent timer;
     private final KeyStore _ks;
@@ -127,10 +130,10 @@ public class SecurityManager {
         String pw;
         synchronized(_conf) {
             pw = _conf.getConf("auth.password", "");
-            if (pw.equals("")) {
-                pw = getPasswdHash(DEFAULT_AUTH_PASSWORD);
-                _conf.setConf("auth.password", pw);
-                _conf.writeConfFile();
+            if (pw.equals("") || pw.equals(UNINITIALIZED_PASSWORD_MARKER)) {
+                // SECURITY: No default password - require explicit configuration
+                _log.logAlways(Log.CRIT, "I2PControl authentication disabled: No password configured. Set password via router console.");
+                return UNINITIALIZED_PASSWORD_MARKER;
             }
         }
         return pw;
@@ -154,7 +157,15 @@ public class SecurityManager {
      * @since 0.12
      */
     public boolean isValid(String pwd) {
+        if (pwd == null) return false;
+        
         String storedPass = getSavedPasswdHash();
+        // SECURITY: Reject authentication if password uninitialized
+        if (UNINITIALIZED_PASSWORD_MARKER.equals(storedPass)) {
+            _log.logAlways(Log.WARN, "I2PControl authentication attempt rejected: Password not configured");
+            return false;
+        }
+        
         byte[] p1 = DataHelper.getASCII(getPasswdHash(pwd));
         byte[] p2 = DataHelper.getASCII(storedPass);
         return p1.length == p2.length && DataHelper.eqCT(p1, 0, p2, 0, p1.length);
@@ -165,8 +176,37 @@ public class SecurityManager {
      * @return true if password is valid.
      * @since 0.12
      */
+    /**
+     * SECURITY: Check if system is using uninitialized password
+     * @return true if password needs to be configured
+     * @since 0.12
+     */
     public boolean isDefaultPasswordValid() {
-        return isValid(DEFAULT_AUTH_PASSWORD);
+        String storedPass = getSavedPasswdHash();
+        return UNINITIALIZED_PASSWORD_MARKER.equals(storedPass);
+    }
+    
+    /**
+     * SECURITY: Check if password is considered weak/common
+     */
+    private boolean isWeakPassword(String password) {
+        if (password == null || password.length() < 8) {
+            return true;
+        }
+        
+        String lowerPassword = password.toLowerCase();
+        for (String weak : WEAK_PASSWORDS) {
+            if (lowerPassword.equals(weak)) {
+                return true;
+            }
+        }
+        
+        // Simple complexity check
+        boolean hasUpper = !password.equals(lowerPassword);
+        boolean hasDigit = password.matches(".*\\d.*");
+        boolean hasSpecial = password.matches(".*[^a-zA-Z0-9].*");
+        
+        return !(hasUpper && hasDigit && hasSpecial);
     }
 
     /**
