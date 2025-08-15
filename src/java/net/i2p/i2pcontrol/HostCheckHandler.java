@@ -12,7 +12,8 @@ import net.i2p.I2PAppContext;
 import net.i2p.data.DataHelper;
 import net.i2p.util.Log;
 
-import org.apache.http.conn.util.InetAddressUtils;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
@@ -100,10 +101,24 @@ public class HostCheckHandler extends HandlerWrapper
         if (_listenHosts.contains(host))
             return true;
         // allow all IP addresses
-        if (InetAddressUtils.isIPv4Address(host) || InetAddressUtils.isIPv6Address(host))
+        if (isValidIPAddress(host))
             return true;
         //System.out.println(host + " not found in " + s);
         return false;
+    }
+
+    /**
+     * Check if a string is a valid IPv4 or IPv6 address
+     * @param ip the string to check
+     * @return true if valid IP address, false otherwise
+     */
+    private static boolean isValidIPAddress(String ip) {
+        try {
+            InetAddress.getByName(ip);
+            return true;
+        } catch (UnknownHostException e) {
+            return false;
+        }
     }
 
     /**
