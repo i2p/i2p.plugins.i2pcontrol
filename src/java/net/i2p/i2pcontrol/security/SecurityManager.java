@@ -273,7 +273,7 @@ public class SecurityManager {
     private class Sweeper extends SimpleTimer2.TimedEvent {
         // Start running periodic task after 1 day, run periodically every 30 minutes.
         public Sweeper() {
-            super(_context.simpleTimer2(), AuthToken.VALIDITY_TIME * 24*60*60*1000L);
+            super(_context.simpleTimer2(), AuthToken.VALIDITY_TIME_HOURS * 60*60*1000L);
         }
 
         public void timeReached() {
